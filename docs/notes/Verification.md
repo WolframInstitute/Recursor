@@ -88,6 +88,10 @@ Lean project assets and the MIT license. The archive audit compares packaged
 kernel code, assets and stylesheets byte-for-byte with the checkout and
 rejects message/code cells and runtime caches.
 
+The installed archive passed interpreter, lambda-evaluation, parser and asset
+checks. Restoring its PacletPage build in a clean checkout and running a
+publication dry run preserved the archive's SHA-256 exactly.
+
 Workflow validation covers YAML, actionlint, both supported ShellCheck
 versions, all 23 shell blocks and embedded Python. Fifteen release fixtures
 check provenance and release ordering; eight archive fixtures check the
