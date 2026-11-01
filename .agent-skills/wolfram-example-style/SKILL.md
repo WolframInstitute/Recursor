@@ -31,8 +31,10 @@ unnecessary options". It takes priority over older local styling advice.
   presentation wrappers invented only to shorten example inputs. For small
   tables, data and column headings usually suffice.
 - Fix an oversized figure through useful orientation, a smaller scientific
-  example, or a reasonable default in the actual visualization implementation.
-  Do not scatter sizing rules through examples. Re-render to verify the result.
+  example, or the appropriate built-in visualization. Kernel defaults follow
+  [wolfram-kernel-options](../wolfram-kernel-options/SKILL.md): use Automatic
+  sizing and native presentation defaults. Do not scatter sizing rules through
+  examples or hide them in function bodies. Re-render to verify the result.
 - Walkthrough notebooks use Input cells, never Code-style cells, and may have
   Section/Subsection headings and real computed outputs. Prose belongs in the
   Markdown companion. Preserve numerical data separately from display forms.

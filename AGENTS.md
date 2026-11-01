@@ -12,6 +12,10 @@ specific argument patterns, local helpers, no trailing top-level semicolons,
 and Failure values for computations that start but cannot finish. Wrong-shape
 arguments remain unevaluated; predicates return booleans.
 
+Follow [the kernel-options skill](.agent-skills/wolfram-kernel-options/SKILL.md)
+for function defaults and option forwarding. Use native visualization defaults,
+Automatic image sizing, and consistent SetOptions behavior.
+
 Change the grammar, binding rules, interpreter, compiler, generators and
 documentation together. Test strictness and divergence when changing the
 compiler or simplifier. A timeout does not prove nontermination.

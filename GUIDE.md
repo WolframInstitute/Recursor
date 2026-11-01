@@ -6,6 +6,11 @@ specific patterns and structured failures. Syntax nodes retain their original
 compact spellings. Wrong-type function inputs stay unevaluated; predicates
 are boolean. Evaluation limits do not decide termination.
 
+Kernel function defaults and option forwarding follow
+[wolfram-kernel-options](.agent-skills/wolfram-kernel-options/SKILL.md).
+Use native presentation defaults and Automatic image sizing; explicit options
+and SetOptions must work consistently.
+
 Documentation follows the local .agent-skills playbooks and Ruliology conventions. Markdown is authoritative; PacletPage generates notebooks.
 Use Symbol, Guide and TechNote templates, real Usage signatures, headerless
 option tables, and reciprocal related-page links. Context names need doubled
