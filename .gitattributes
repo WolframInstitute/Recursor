@@ -1,0 +1,2 @@
+# Keep Wolfram's native notebook formatting.
+*.nb -whitespace
