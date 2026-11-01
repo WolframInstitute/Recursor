@@ -8,6 +8,7 @@ Description: A universal natural-number language for program synthesis and evolu
 ContributedBy: Wolfram Institute
 Keywords: [computability, program synthesis, genetic programming, lambda calculus]
 MainGuide: Documentation/English/Guides/Recursor.nb
+License: MIT
 WolframVersion: 15.0+
 Categories: [Core Language & Structure]
 ---

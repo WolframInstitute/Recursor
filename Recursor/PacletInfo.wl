@@ -60,6 +60,6 @@ PacletObject[<|
 		{"FrontEnd", "Root" -> "FrontEnd"},
 		{"Documentation", "Root" -> "Documentation", "Language" -> "English"},
 		{"Tests", "Root" -> "Tests", "Method" -> "Experimental-v1"},
-		{"Asset", "Root" -> "Assets", "Assets" -> {{"NotebookCompatibility", "NotebookCompatibility.wl"}, {"Lean", "Lean"}}}
+		{"Asset", "Root" -> "Assets", "Assets" -> {{"NotebookCompatibility", "NotebookCompatibility.wl"}, {"Lean", "Lean"}, {"License", "LICENSE"}}}
 	}
 |>]
