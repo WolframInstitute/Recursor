@@ -8,13 +8,13 @@ VerificationTest[
 
 VerificationTest[
 	Block[{WolframInstitute`Recursor`PackageScope`mathlibInformation = (<|"Status" -> "Not installed"|> &)},
-		WolframInstitute`Recursor`PackageScope`checkRecursorProofs[]["Tag"]
+		CheckRecursorProofs[]["Tag"]
 	], "MathlibSetupRequired", TestID -> "proof-check-does-not-install-missing-mathlib"
 ]
 
 VerificationTest[
 	Block[{WolframInstitute`Recursor`PackageScope`mathlibInformation = (<|"Status" -> "Ready", "Toolchain" -> "wrong", "Revision" -> "wrong"|> &)},
-		WolframInstitute`Recursor`PackageScope`checkRecursorProofs[]["Tag"]
+		CheckRecursorProofs[]["Tag"]
 	], "MathlibVersionMismatch", TestID -> "proof-check-rejects-unpinned-runtime"
 ]
 
@@ -29,4 +29,15 @@ VerificationTest[
 			DeleteDirectory[directory, DeleteContents -> True]
 		]
 	], {True, False, True}, TestID -> "proof-workspace-shares-local-mathlib"
+]
+
+VerificationTest[
+	Module[{before = GetEnvironment[], environment, executables, separator},
+		executables = <|"Lake" -> FileNameJoin[{$TemporaryDirectory, "lean", "bin", "lake"}],
+			"Git" -> FileNameJoin[{$TemporaryDirectory, "git", "bin", "git"}]|>;
+		separator = If[$OperatingSystem === "Windows", ";", ":"];
+		environment = WolframInstitute`Recursor`Libraries`Proofs`Private`proofProcessEnvironment[executables];
+		{Take[StringSplit[environment["PATH"], separator], 2] === (DirectoryName /@ Values[executables]),
+			environment["MATHLIB_NO_CACHE_ON_UPDATE"], GetEnvironment[] === before}
+	], {True, "1", True}, TestID -> "proof-build-uses-managed-tools-without-changing-environment"
 ]

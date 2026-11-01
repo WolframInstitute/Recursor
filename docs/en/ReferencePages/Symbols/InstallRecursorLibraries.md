@@ -5,7 +5,7 @@ Context: WolframInstitute`Recursor`
 Paclet: WolframInstitute/Recursor
 URI: WolframInstitute/Recursor/ref/InstallRecursorLibraries
 RelatedGuides: [Recursor]
-SeeAlso: [RecursorLibraries]
+SeeAlso: [CheckRecursorProofs, RecursorLibraries, SetupRecursor]
 RelatedTutorials: [FormalVerification, VisualizingLambdaCompilation]
 ---
 
@@ -15,15 +15,16 @@ RelatedTutorials: [FormalVerification, VisualizingLambdaCompilation]
 
 ## Details & Options
 
+- In a desktop notebook, use [SetupRecursor]() to review and install libraries individually.
 - Supported names are "Lambda", "LeanLink" and "MathlibLink".
-- Results are an association indexed by library name. Successful paclet installations return PacletObject; the MathlibLink setup returns its PacletObject after checking the shared mathlib installation. Failures include a setup link and diagnostic details.
+- Results are an association indexed by library name. Successful paclet installations return PacletObject; the MathlibLink setup returns its PacletObject after checking the shared mathlib installation. Failures include diagnostic details and, when setup is required, a setup link.
 - Ready installations are kept. Duplicate names are processed once. Unknown names and invalid argument shapes remain unevaluated without starting an installation.
 - Lambda supplies lambda-calculus diagrams. LeanLink supplies the native Lean bridge. MathlibLink supplies the pinned mathematical library and a bridge to its declarations.
 - MathlibLink performs explicit runtime setup. It installs the pinned Lean toolchain without changing the global default and prepares the full mathlib library.
 - Setup downloads can be substantial. Runtime details are returned by RecursorLibraries["MathlibLink"].
-- Installed but unusable paclets report LibrarySetupRequired. Restart the kernel after updating a loaded paclet.
+- An installed paclet that cannot load reports LibrarySetupRequired. Restart the kernel after updating a loaded paclet. Run InstallRecursorLibraries[{"MathlibLink"}] again to resume incomplete mathlib runtime setup.
 - Before the first MathlibLink release, its paclet is installed from the local Mathematics/MathlibLink/dist archive. Set MATHLIBLINK_PACLET to use another local archive.
-- Run make check-proofs from the Recursor repository to build its formalization against the shared mathlib installation.
+- Run [CheckRecursorProofs]() to build and check the formalization against the shared mathlib installation. The terminal equivalent is make check-proofs.
 - No library is installed automatically when loading Recursor or checking library status.
 
 ## Basic Examples

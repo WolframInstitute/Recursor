@@ -142,7 +142,14 @@ Install the proof libraries explicitly when needed:
 InstallRecursorLibraries[{"LeanLink", "MathlibLink"}]
 ```
 
-Run `make check-proofs` from the repository. This uses the pinned Lean 4.35.0
+Run the complete packaged proof audit:
+
+```wl
+#| eval: false
+CheckRecursorProofs[]
+```
+
+The equivalent terminal command is `make check-proofs`. This uses the pinned Lean 4.35.0
 and mathlib v4.35.0 sources, builds the proof modules, checks their axiom
 closure, and asks the kernel to replay them. The proof workspace shares the
 mathlib installation managed by MathlibLink. Online mathlib documentation may

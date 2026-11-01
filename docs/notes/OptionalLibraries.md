@@ -1,8 +1,10 @@
 # External libraries
 
-InstallRecursorLibraries offers Lambda, LeanLink and MathlibLink. Its small
-registry and readiness checks follow PureMath's OptionalLibraries.wl. Loading
-Recursor and checking library status never download or install software.
+SetupRecursor opens the desktop library installer, following PureMathSetup's
+per-library workflow. InstallRecursorLibraries provides the script interface.
+Both offer Lambda, LeanLink and MathlibLink. The shared registry and readiness
+checks follow PureMath's OptionalLibraries.wl. Loading Recursor and checking
+library status never download or install software.
 
 Lambda provides lambda-calculus diagrams. LeanLink provides the native proof
 bridge. MathlibLink manages the pinned mathlib installation and gives generic
@@ -32,8 +34,8 @@ tracks a newer development version; the installed source revision is authoritati
 
 ## Checking the Recursor proofs
 
-Run `make check-proofs` after installing MathlibLink. The existing check.wls
-script copies the packaged Lean sources into
+Run `CheckRecursorProofs[]` after installing MathlibLink, or use
+`make check-proofs` from the repository. The check copies the packaged Lean sources into
 `$UserBaseDirectory/ApplicationData/Recursor/Lean/4.35.0`, creates a local Lake
 project that requires MathlibLink's mathlib directory, and builds it. There is
 no second mathlib checkout or cache download.

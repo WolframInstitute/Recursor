@@ -51,7 +51,13 @@ and return `Failure` when a limit is reached.
 
 ## External libraries
 
-Install proof tools or lambda visualizations as needed:
+Open the library installer:
+
+```wl
+SetupRecursor[]
+```
+
+For scripts, install the selected libraries directly:
 
 ```wl
 InstallRecursorLibraries[{"LeanLink", "MathlibLink", "Lambda"}]
@@ -59,6 +65,8 @@ InstallRecursorLibraries[{"LeanLink", "MathlibLink", "Lambda"}]
 
 Use `RecursorLibraries[]` to check their status. See
 [external libraries](docs/notes/OptionalLibraries.md) for setup details.
+
+Run `CheckRecursorProofs[]` to build and check the packaged Lean proofs.
 
 ## Documentation
 

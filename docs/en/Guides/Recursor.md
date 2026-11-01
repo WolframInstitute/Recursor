@@ -52,7 +52,9 @@ Programs have explicit lexical binding and compile to closed lambda terms.
 - `RecursorEvolutionPlot` compare fitness over generations
 - `RecursorGenealogyGraph` inspect recorded parent-child relationships
 
-### External libraries
+### External libraries and proofs
 
+- `SetupRecursor` open the library installer
 - `RecursorLibraries` inspect external libraries and their status
 - `InstallRecursorLibraries` install LeanLink, mathlib or Lambda
+- `CheckRecursorProofs` build and check the packaged Lean proofs

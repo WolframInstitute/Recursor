@@ -1,4 +1,6 @@
-PackageScoped[checkRecursorProofs]
+PackageExported[{CheckRecursorProofs}]
+
+CheckRecursorProofs::usage = "CheckRecursorProofs[] builds the packaged Lean proofs, checks their axiom dependencies and replays their modules in Lean's kernel."
 
 $leanToolchain = "leanprover/lean4:v4.35.0"
 $mathlibRevision = "56a005855ea17e0b0958f73ec801ae140b0a1679"
@@ -11,16 +13,25 @@ $proofTheorems = "RecursorProofs." <> # & /@ Flatten[Values[$proofModules]]
 proofFailure[tag_, message_, data_ : <||>] := Failure[tag, Join[<|"MessageTemplate" -> message|>, data]]
 
 lakeExecutable[] := SelectFirst[
-	Join[FileNames["lake" <> If[$OperatingSystem === "Windows", ".exe", ""], StringSplit[Environment["PATH"], If[$OperatingSystem === "Windows", ";", ":"]]],
-		{FileNameJoin[{$HomeDirectory, ".elan", "bin", "lake" <> If[$OperatingSystem === "Windows", ".exe", ""]}]}],
+	Join[FileNames["lake" <> If[$OperatingSystem === "Windows", ".exe", ""], StringSplit[Replace[Environment["PATH"], Except[_String] -> ""], If[$OperatingSystem === "Windows", ";", ":"]]],
+		{FileNameJoin[{Replace[Environment["ELAN_HOME"], Except[_String] -> FileNameJoin[{$HomeDirectory, ".elan"}]], "bin", "lake" <> If[$OperatingSystem === "Windows", ".exe", ""]}]}],
 	StringQ[#] && FileExistsQ[#] &, Missing["NotFound", "lake"]
 ]
 
 tomlString[value_String] := "\"" <> StringReplace[value, {"\\" -> "\\\\", "\"" -> "\\\"", "\n" -> "\\n", "\r" -> "\\r", "\t" -> "\\t"}] <> "\""
 
-proofCommand[arguments_List, directory_String] := Quiet[Check[
+proofProcessEnvironment[executables_Association] := With[{
+	environment = Association[GetEnvironment[]],
+	directories = DeleteDuplicates[DirectoryName /@ Cases[Values[executables], _String]],
+	separator = If[$OperatingSystem === "Windows", ";", ":"]
+}, Join[environment, <|
+	"PATH" -> StringRiffle[Join[directories, DeleteCases[{Lookup[environment, "PATH", ""]}, ""]], separator],
+	"MATHLIB_NO_CACHE_ON_UPDATE" -> "1"
+|>]]
+
+proofCommand[arguments_List, directory_String, executables_Association] := Quiet[Check[
 	RunProcess[arguments, All, ProcessDirectory -> directory,
-		ProcessEnvironment -> Join[Association[GetEnvironment[]], <|"MATHLIB_NO_CACHE_ON_UPDATE" -> "1"|>]],
+		ProcessEnvironment -> proofProcessEnvironment[executables]],
 	$Failed
 ]]
 
@@ -63,21 +74,23 @@ proofAudit[directory_String, mathlib_String] := Module[{environment, names, axio
 	<|"Directory" -> directory, "Theorems" -> $proofTheorems, "Axioms" -> axioms, "KernelChecks" -> checks|>
 ]
 
-checkRecursorProofs[] := Module[{info = mathlibInformation[], lake, directory, log, result},
+CheckRecursorProofs[] := Module[{info = mathlibInformation[], executables, lake, directory, log, result},
 	If[! AssociationQ[info] || Lookup[info, "Status", None] =!= "Ready",
 		Return[proofFailure["MathlibSetupRequired", "Run InstallRecursorLibraries[{\"MathlibLink\"}] before checking the proofs."]]
 	];
 	If[Lookup[info, "Toolchain", None] =!= $leanToolchain || Lookup[info, "Revision", None] =!= $mathlibRevision,
 		Return[proofFailure["MathlibVersionMismatch", "The proof project requires the pinned Lean and mathlib versions.", <|"Installation" -> info|>]]
 	];
-	lake = lakeExecutable[];
+	executables = Lookup[info, "Executables", <||>];
+	lake = Lookup[executables, "Lake", None];
+	If[! StringQ[lake] || ! FileExistsQ[lake], lake = lakeExecutable[]];
 	If[! StringQ[lake], Return[proofFailure["LakeNotFound", "Lake could not be found. Check the elan installation."]]];
 	directory = proofWorkspace[info["MathlibDirectory"]];
 	log = OpenWrite[FileNameJoin[{directory, "verification.log"}]];
 	WithCleanup[
 		Do[
 			WriteString[log, StringRiffle[command, " "] <> "\n"];
-			result = proofCommand[command, directory];
+			result = proofCommand[command, directory, executables];
 			If[AssociationQ[result], WriteString[log, result["StandardOutput"], result["StandardError"], "\n"]];
 			If[! AssociationQ[result] || result["ExitCode"] =!= 0,
 				Return[proofFailure["ProofBuildFailed", "The Lean proof build failed. See verification.log in the proof directory.", <|"Directory" -> directory, "Command" -> command, "Process" -> result|>]]

@@ -24,6 +24,47 @@ The source checkout can be registered with PacletDirectoryLoad. An installed
 archive needs only a Needs call for the WolframInstitute Recursor context.
 No NotebookDirectory lookup or FromRichard dependency remains in the DSL.
 
+## Install external libraries
+
+The walkthrough begins with the desktop library installer:
+
+```wl
+#| eval: false
+SetupRecursor[]
+```
+
+Choose Lambda for lambda-term visuals and LeanLink and MathlibLink for proof
+checking and access to mathlib. Finish installation before running the
+corresponding sections. Inspect the resulting status with `RecursorLibraries[]`.
+
+In a script, request the libraries directly:
+
+```wl
+#| eval: false
+InstallRecursorLibraries[{"LeanLink", "MathlibLink", "Lambda"}]
+```
+
+Ready installations are reused. Before the first MathlibLink release, its
+archive must be built in the sibling Mathematics/MathlibLink project, or its
+path supplied through MATHLIBLINK_PACLET. See the external-library reference
+pages for setup details.
+
+## Compute and check proofs
+
+The walkthrough includes generic mathlib calls, a totient plot and a theorem
+checked through `ProveMathlib`. It also runs Recursor's complete proof audit:
+
+```wl
+#| eval: false
+CheckRecursorProofs[]
+```
+
+The audit builds the packaged sources, checks twelve theorem declarations and
+replays the two Lean modules. The following notebook cells inspect the compiler
+simulation, lexical closure and universality statements. These concern the
+formal denotational language; the Wolfram interpreter and lambda compiler
+remain tested implementations.
+
 ## Entry points
 
 | Notebook function | Paclet API |

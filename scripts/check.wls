@@ -9,7 +9,7 @@ PacletDirectoryLoad[paclet];
 loaded = Check[Needs[context]; True, False];
 If[! loaded || ! MemberQ[$Packages, context], Print["The paclet did not load cleanly."]; Exit[1]];
 If[MemberQ[Rest[$ScriptCommandLine], "proofs"],
-	result = Symbol[context <> "PackageScope`checkRecursorProofs"][];
+	result = Symbol[context <> "CheckRecursorProofs"][];
 	If[! AssociationQ[result], Print[InputForm[result]]; Exit[1]];
 	Print[Length[result["Theorems"]], " theorems checked; ", Length[result["KernelChecks"]], " modules replayed by Lean."];
 	Print["Proof project: ", result["Directory"]];

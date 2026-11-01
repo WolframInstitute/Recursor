@@ -5,7 +5,7 @@ Context: WolframInstitute`Recursor`
 Paclet: WolframInstitute/Recursor
 URI: WolframInstitute/Recursor/ref/RecursorLibraries
 RelatedGuides: [Recursor]
-SeeAlso: [InstallRecursorLibraries]
+SeeAlso: [CheckRecursorProofs, InstallRecursorLibraries, SetupRecursor]
 RelatedTutorials: [FormalVerification, VisualizingLambdaCompilation]
 ---
 
@@ -18,7 +18,7 @@ RelatedTutorials: [FormalVerification, VisualizingLambdaCompilation]
 ## Details & Options
 
 - The library names are "Lambda", "LeanLink" and "MathlibLink".
-- Status is "Ready", "Not installed", "Update available" or "Needs setup".
+- Status is "Ready", "Not installed", "Update available", "Needs setup" or "Unsupported".
 - Checking status never installs a library. LeanLink readiness includes compiling a small proof against its local native runtime.
 - Each entry includes a description and a link to its upstream project. Paclet entries include the installed and minimum versions. MathlibLink includes its pinned revision, Lean toolchain and local mathlib directory when installed.
 - Loading a library during a check does not add its context to the caller's context path.
@@ -35,7 +35,7 @@ Keys[RecursorLibraries[]]
 Inspect the installed lambda library:
 
 ```wl
-RecursorLibraries["Lambda"]
+KeyTake[RecursorLibraries["Lambda"], {"Paclet", "Version", "Status"}]
 ```
 
 ## Scope
@@ -43,7 +43,7 @@ RecursorLibraries["Lambda"]
 Inspect the mathlib documentation link:
 
 ```wl
-RecursorLibraries["MathlibLink"]["URL"]
+RecursorLibraries["MathlibLink"]["SetupLinks"]["mathlib documentation"]
 ```
 
 ## Applications
