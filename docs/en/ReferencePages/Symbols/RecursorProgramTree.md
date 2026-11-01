@@ -17,9 +17,9 @@ RelatedTutorials: [ArithmeticPatterns]
 
 ## Details & Options
 
-- The default plot fits in 480 by 360 points with a fixed aspect ratio, including one- and two-node trees.
-
-- Accepts Graph options. Constants and variable atoms are leaves. Repeated subexpressions have separate vertices.
+- Accepts TreeGraph options and inherits its presentation defaults, including `ImageSize -> Automatic`.
+- `VertexLabels -> Automatic` labels vertices with syntax constructors, constants and variable names. Use `VertexLabels -> None` to omit them.
+- Constants and variable atoms are leaves. Repeated subexpressions have separate vertices.
 
 ## Basic Examples
 

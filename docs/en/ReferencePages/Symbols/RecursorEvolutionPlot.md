@@ -17,10 +17,10 @@ RelatedTutorials: [ArithmeticPatterns]
 
 ## Details & Options
 
-- The default plot fits in 520 by 340 points.
-
-- result is a EvolveRecursor result. Accepts ListLinePlot options.
-- Generation zero is the initial population.
+- result is an EvolveRecursor result.
+- Accepts ListLinePlot options and inherits its presentation defaults, including `ImageSize -> Automatic`.
+- The default axis labels are "Generation" and "Exact matches".
+- `DataRange -> Automatic` runs from generation zero, the initial population, to the recorded final generation.
 
 ## Basic Examples
 

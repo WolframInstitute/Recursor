@@ -17,10 +17,10 @@ RelatedTutorials: [ArithmeticPatterns]
 
 ## Details & Options
 
-- The default plot fits in 520 by 360 points.
-
+- Accepts Graph options and inherits its presentation defaults, including `ImageSize -> Automatic`.
+- `VertexLabels -> "Name"` displays program identifiers by default.
 - Includes initial programs, offspring and proposed candidates.
-- Both parents of a crossover can appear. Accepts Graph options.
+- Both parents of a crossover can appear.
 
 ## Basic Examples
 
