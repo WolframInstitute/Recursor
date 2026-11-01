@@ -65,16 +65,19 @@ Define the one-step program:
 parityStep = Ifz[Rem[Var,Const[2]],Half[Var],Succ[Mul[Const[3],Var]]]
 ```
 
-Compute three bounded trajectories and display their numbers of recorded states:
+Compute three bounded trajectories and compare them on a logarithmic vertical
+scale:
 
 ```wl
-Length /@ (trajectories = Table[NestWhileList[EvaluateRecursor[parityStep,#] &,start,#>1 &,1,120],{start,{7,19,27}}])
+ListLogPlot[trajectories = Table[NestWhileList[EvaluateRecursor[parityStep, #] &, start, # > 1 &, 1, 120], {start, {7, 19, 27}}], Joined -> True, PlotLegends -> {"7", "19", "27"}, AxesLabel -> {"Recorded state", "Value"}, PlotRange -> All]
 ```
 
-Compare the trajectories on a logarithmic vertical scale:
+Draw the first eight updates from seven and nineteen as a shared graph.
+Merging equal values shows where their trajectories meet; this bounded
+prefix does not include their eventual arrival at one:
 
 ```wl
-ListLogPlot[trajectories, Joined->True, PlotLegends->{"7","19","27"}, AxesLabel->{"Recorded state","Value"}, PlotRange->All]
+Graph[DeleteDuplicates[Catenate[DirectedEdge @@@ Partition[Take[#, UpTo[9]], 2, 1] & /@ Take[trajectories, 2]]], VertexLabels -> "Name", GraphLayout -> {"LayeredDigraphEmbedding", "Orientation" -> Left}]
 ```
 
 Compare the number of updates recorded before stopping or reaching the bound:

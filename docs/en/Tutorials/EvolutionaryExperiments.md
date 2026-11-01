@@ -25,10 +25,10 @@ Fix the mutation seed:
 SeedRandom[2026]
 ```
 
-Construct twenty successive mutations and display their syntax sizes:
+Construct twenty successive mutations and draw the final program:
 
 ```wl
-RecursorNodeCount /@ (mutants = NestList[MutateRecursor[#,2,"IncludeWhile"->False,"MaxNodes"->30] &,Mul[Var,Var],20])
+RecursorProgramTree[Last[mutants = NestList[MutateRecursor[#, 2, "IncludeWhile" -> False, "MaxNodes" -> 30] &, Mul[Var, Var], 20]]]
 ```
 
 Plot syntax size along the mutation trajectory:
@@ -51,10 +51,10 @@ bounded grammar. Fitness is the number of exact matches on inputs 0 through
 4. Per-input evaluation is limited to 2000 visits, one second and 64 MiB.
 StopOnSolve is disabled so every fitness trajectory spans the same window.
 
-Compute the six runs, using seeds 101 through 106:
+Compute the six runs, using seeds 101 through 106, and compare final best scores:
 
 ```wl
-Grid[Prepend[MapIndexed[{100 + First[#2], #1["Program"], #1["Fitness"], #1["Generations"]} &, (runs = Table[EvolveRecursor[Table[{n,n^2},{n,0,4}], "PopulationSize"->12,"MaxGenerations"->8,"MaxNodes"->30, "InitialDepth"->2,"MutationDepth"->2,"IncludeWhile"->False, "MaxSteps"->2000,"TimeLimit"->1,"StopOnSolve"->False,"RandomSeed"->seed ],{seed,101,106}])], {"Seed", "Best program", "Matches", "Generations"}]]
+BarChart[Lookup[runs = Table[EvolveRecursor[Table[{n, n^2}, {n, 0, 4}], "PopulationSize" -> 12, "MaxGenerations" -> 8, "MaxNodes" -> 30, "InitialDepth" -> 2, "MutationDepth" -> 2, "IncludeWhile" -> False, "MaxSteps" -> 2000, "TimeLimit" -> 1, "StopOnSolve" -> False, "RandomSeed" -> seed], {seed, 101, 106}], "Fitness"], ChartLabels -> Range[101, 106], AxesLabel -> {"Seed", "Exact matches"}]
 ```
 
 Compare best fitness on a shared scale:
@@ -63,10 +63,11 @@ Compare best fitness on a shared scale:
 ListLinePlot[Lookup[runs,"FitnessHistory"], DataRange->{0,8}, PlotRange->{0,5}, PlotLegends->Range[101,106], AxesLabel->{"Generation","Exact matches"}]
 ```
 
-Compare final best scores:
+Equal scores need not mean equal programs. Inspect the best syntax tree from
+each run:
 
 ```wl
-BarChart[Lookup[runs,"Fitness"],ChartLabels->Range[101,106], AxesLabel->{"Seed","Exact matches"}]
+GraphicsGrid[Partition[MapIndexed[RecursorProgramTree[#1["Program"], PlotLabel -> Row[{"Seed ", 100 + First[#2]}]] &, runs], 3]]
 ```
 
 ## Beyond the training range

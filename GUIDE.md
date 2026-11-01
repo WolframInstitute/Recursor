@@ -25,6 +25,9 @@ Applications should primarily show computed scientific visuals. A curve,
 array, graph or comparison must explain the computation. Label axes and color
 keys, keep scales comparable and avoid decorative charts. Use built-in plots
 or the paclet's graph functions, with small reproducible inputs.
+In tutorials, prefer syntax trees, dependency graphs, trajectories and plots
+to tables of computed values. Keep a table when exact entries or a mapping
+are the point, such as binding rules or API migration names.
 
 Run every example. A successful Markdown conversion alone does not verify
 its output. Read back the notebook outputs and render every figure. With a

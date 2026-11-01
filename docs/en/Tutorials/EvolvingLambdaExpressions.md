@@ -1,30 +1,27 @@
 ---
 Template: TechNote
-Name: ProgramsForAI
-Title: A Small Program Language for AI
+Name: EvolvingLambdaExpressions
+Title: Evolving Lambda Expressions
 Description: Compare candidate programs, inspect scope and compile to lambda expressions
 Context: WolframInstitute`Recursor`
 Paclet: WolframInstitute/Recursor
-URI: WolframInstitute/Recursor/tutorial/ProgramsForAI
-Keywords: [program synthesis, artificial intelligence, lambda calculus]
+URI: WolframInstitute/Recursor/tutorial/EvolvingLambdaExpressions
+Keywords: [program synthesis, program evolution, lambda calculus]
 RelatedGuides: [Recursor, Compilation, Evolution, Language]
 RelatedTutorials: [FormalVerification, EvolvingPrograms, VisualizingLambdaCompilation]
 ---
 
-## Programs as explicit proposals
+## Programs as explicit candidates
 
-A compact DSL gives an AI a small language for proposing and transforming
-programs. Each proposal has a finite syntax tree, explicit binding rules and
-a specified execution model. The same representation can be parsed, tested,
-mutated and compiled. This makes experiments easier to reproduce and their
-assumptions easier to state.
+A compact DSL provides a structured search space for evolving programs that
+compile to lambda expressions. Each candidate has a finite syntax tree,
+explicit binding rules and a specified execution model. The same
+representation can be parsed, tested, mutated and compiled. This makes
+experiments easier to reproduce and their assumptions easier to state.
 
-The experiment here compares three hand-written proposals for successor.
-It demonstrates the interface an AI can use; it does not measure an AI model.
-Research systems such as [DreamCoder](https://arxiv.org/abs/2006.08381) also use
-program languages and learned abstractions to organize program search.
-Recursor supplies a small language and experimental tools, rather than a
-claim that universality alone improves learning.
+The experiment compares three candidate successor programs before mutation
+or crossover. It shows how finite fitness samples, lexical scope and lambda
+compilation shape an evolutionary search.
 
 Parse three proposals:
 
@@ -60,10 +57,10 @@ All three fit this sample. Evaluate the same proposals through input nine:
 ListLinePlot[Table[EvaluateRecursor[p, n], {p, Values[candidates]}, {n, 0, 9}], DataRange -> {0, 9}, PlotLegends -> Keys[candidates], AxesLabel -> {"Input", "Output"}]
 ```
 
-The guarded program returns zero after the training range. An AI workflow
-needs holdout experiments, explicit specifications or proofs in addition to
-training fit. Even agreement on a much larger finite sample would not prove
-that two arbitrary programs are equivalent.
+The guarded program returns zero after the training range. An evolutionary
+search needs holdout experiments, explicit specifications or proofs in
+addition to training fit. Even agreement on a much larger finite sample would
+not prove that two arbitrary programs are equivalent.
 
 ## Scope is part of the proposal
 
@@ -75,16 +72,11 @@ Inspect the factorial program and its binding sites:
 factorial = RecursorExamples["Factorial"]
 ```
 
-Draw its syntax tree:
+Highlight the syntax positions where Acc is in scope. Only the step subtree
+is highlighted; the count and initial value lie outside this binding:
 
 ```wl
-RecursorProgramTree[factorial]
-```
-
-Inspect the available bindings at each position:
-
-```wl
-Grid[Prepend[({#["Path"], #["Expression"], #["Bindings"]} & /@ RecursorSites[factorial]), {"Path", "Expression", "Bindings"}]]
+HighlightGraph[RecursorProgramTree[factorial], MapIndexed[If[MemberQ[#1["Bindings"], Acc], First[#2], Nothing] &, RecursorSites[factorial]]]
 ```
 
 The generator, mutation and crossover functions use these binding rules.
@@ -111,10 +103,11 @@ Inspect the compiled successor term:
 LambdaTree[CompileRecursor[candidates["Successor"]]]
 ```
 
-Compare the direct and lambda evaluators on six inputs:
+Compare the direct and lambda evaluators on inputs zero through five.
+Agreement places each point on the diagonal:
 
 ```wl
-Grid[Prepend[Table[{n, EvaluateRecursor[candidates["Successor"], n], EvaluateRecursor[candidates["Successor"], n, Method -> "Lambda"]}, {n, 0, 5}], {"Input", "Direct", "Lambda"}]]
+ListPlot[Table[{EvaluateRecursor[candidates["Successor"], n], EvaluateRecursor[candidates["Successor"], n, Method -> "Lambda"]}, {n, 0, 5}], AxesLabel -> {"Direct result", "Lambda result"}]
 ```
 
 This comparison is a regression check. A compiler-correctness theorem must

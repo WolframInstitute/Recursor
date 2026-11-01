@@ -41,6 +41,13 @@ computations on inputs zero through fourteen:
 ListLinePlot[{Table[EvaluateRecursor[RecursorExamples["Fibonacci"],n],{n,0,14}],Fibonacci[Range[0,14]]}, DataRange->{0,14}, PlotLegends->{"Recursor","Fibonacci"}, AxesLabel->{"Input","Value"}]
 ```
 
+Draw the history dependencies for indices zero through eight. An edge points
+from a stored index to a later index that reads it:
+
+```wl
+Graph[Flatten[Table[{DirectedEdge[n - 1, n], DirectedEdge[n - 2, n]}, {n, 2, 8}]], VertexLabels -> "Name", GraphLayout -> {"LayeredDigraphEmbedding", "Orientation" -> Left}]
+```
+
 The population-count recurrence looks up the halved index and adds its parity.
 The binary digits make the input structure visible. Show all six-bit inputs:
 
@@ -52,6 +59,13 @@ Compare the corresponding counts of one-digits:
 
 ```wl
 ListLinePlot[{Table[EvaluateRecursor[RecursorExamples["PopulationCount"],n],{n,0,63}],DigitCount[Range[0,63],2,1]}, DataRange->{0,63}, PlotLegends->{"Recursor","DigitCount"}, AxesLabel->{"Input","One-digits"}, PlotRange->All]
+```
+
+The halving lookup organizes inputs into a tree. Draw the history dependency
+for each input from one through fifteen:
+
+```wl
+TreeGraph[Table[DirectedEdge[EvaluateRecursor[Half[Var], n], n], {n, 1, 15}], GraphRoot -> 0, VertexLabels -> "Name"]
 ```
 
 ## Residues and finite orbits
@@ -68,6 +82,14 @@ now specifies how many updates to apply to the initial value one:
 
 ```wl
 ListStepPlot[Table[EvaluateRecursor[Iter[Var,Const[1],Rem[Mul[Const[2],Acc],Const[7]]],n],{n,0,24}], DataRange->{0,24}, AxesLabel->{"Updates","Residue"}, PlotRange->{0,7}]
+```
+
+Draw every possible one-step transition modulo seven. The trajectory above
+visits the cycle containing one; zero is a fixed point, and the other nonzero
+residues form a second cycle:
+
+```wl
+Graph[Table[DirectedEdge[n, EvaluateRecursor[Rem[Mul[Const[2], Var], Const[7]], n]], {n, 0, 6}], VertexLabels -> "Name"]
 ```
 
 ## Size and behavior

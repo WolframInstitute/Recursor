@@ -24,6 +24,13 @@ Check syntax and lexical closure:
 RecursorProgramQ /@ {Mul[Var, Var], Acc, Const[-1], Add[Var]}
 ```
 
+Draw a closed expression. The leaves are inputs and constants; internal nodes
+specify operations:
+
+```wl
+RecursorProgramTree[Add[Mul[Var, Var], Const[1]]]
+```
+
 ## Arithmetic and branching
 
 Pred and Monus stop at zero. Half is division by two rounded down. Rem[a,b]
@@ -44,10 +51,11 @@ Iter[count,base,step] evaluates count and then base, even for count zero.
 Each of count steps binds Acc to the preceding value. Rec additionally binds
 Idx to 0 through count-1.
 
-Compute factorials with primitive recursion:
+Compute factorials with primitive recursion and show their growth on a
+logarithmic vertical scale:
 
 ```wl
-Table[EvaluateRecursor[Rec[Var, Const[1], Mul[Succ[Idx], Acc]], n], {n, 0, 6}]
+ListLogPlot[Table[EvaluateRecursor[Rec[Var, Const[1], Mul[Succ[Idx], Acc]], n], {n, 0, 8}], DataRange -> {0, 8}, AxesLabel -> {"Input", "Factorial"}]
 ```
 
 CoRec[count,step] computes every index from 0 through count, inclusive.
@@ -57,7 +65,7 @@ current or future index. Every intermediate step is evaluated.
 Compute Fibonacci numbers from earlier values:
 
 ```wl
-Table[EvaluateRecursor[RecursorExamples["Fibonacci"], n], {n, 0, 10}]
+ListLinePlot[Table[EvaluateRecursor[RecursorExamples["Fibonacci"], n], {n, 0, 10}], DataRange -> {0, 10}, AxesLabel -> {"Input", "Fibonacci"}]
 ```
 
 ## Lexical scope
@@ -71,9 +79,12 @@ The nearest enclosing binder wins. Other outer bindings remain visible.
 | CoRec | step | Idx, CGet |
 | WhileLoop | condition, step | Acc |
 
-CoRec does not bind Acc, despite a conflicting statement in the notebook's
-original prompt cheat sheet. Its interpreter and compiler inherited an outer
-accumulator; Recursor retains that behavior.
+CoRec does not bind Acc. It inherits an outer accumulator. In this tree, the
+Acc leaf refers to the enclosing Iter even though it occurs inside CoRec:
+
+```wl
+RecursorProgramTree[Iter[Const[1], Const[9], CoRec[Const[2], Acc]]]
+```
 
 Read an outer accumulator through a course-of-values recursion:
 
@@ -93,6 +104,13 @@ Count down from one hundred to zero:
 
 ```wl
 EvaluateRecursor[WhileLoop[Var, Acc, Pred[Acc]], 100]
+```
+
+Follow six predecessor updates from six. Each directed edge is one accumulator
+update, and the loop stops at the zero vertex:
+
+```wl
+Graph[DirectedEdge @@@ Partition[NestList[EvaluateRecursor[Pred[Var], #] &, 6, 6], 2, 1], VertexLabels -> "Name"]
 ```
 
 ## Operational limits

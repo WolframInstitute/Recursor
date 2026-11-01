@@ -8,7 +8,7 @@ Paclet: WolframInstitute/Recursor
 URI: WolframInstitute/Recursor/tutorial/FormalVerification
 Keywords: [formal verification, Lean, computability, mathlib]
 RelatedGuides: [Recursor, Compilation, Evaluation]
-RelatedTutorials: [UniversalComputation, HaltingAndBudgets, ProgramsForAI]
+RelatedTutorials: [UniversalComputation, HaltingAndBudgets, EvolvingLambdaExpressions]
 ---
 
 ## A theorem has a specified model
@@ -65,10 +65,11 @@ coreProofs["RecursorProofs.computes_iff_observed"]["TypeForm"]
 
 Other core results establish soundness of completed observations, stability
 under larger budgets, determinism, and the address/payload laws for packed
-natural-number machine states. Inspect their axiom dependencies:
+natural-number machine states. Draw an edge from each theorem to each of its
+axiom dependencies:
 
 ```wl
-Grid[Prepend[Table[{name, coreProofs["RecursorProofs." <> name]["Axioms"]}, {name, {"run_sound", "run_stable", "computes_deterministic", "countdown_correct", "pack_address", "pack_payload"}}], {"Theorem", "Axioms"}]]
+Graph[Flatten[Table[DirectedEdge[name, #] & /@ coreProofs["RecursorProofs." <> name]["Axioms"], {name, {"run_sound", "run_stable", "computes_deterministic", "countdown_correct", "pack_address", "pack_payload"}}]], VertexLabels -> "Name", GraphLayout -> {"LayeredDigraphEmbedding", "Orientation" -> Left}]
 ```
 
 The allowed dependencies are Lean's standard propext, Classical.choice and

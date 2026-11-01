@@ -26,10 +26,10 @@ Supply explicit input-output pairs. Each candidate/input evaluation gets its
 own finite budget. This example starts with a correct seed and stops at
 generation zero:
 
-Run a seeded search:
+Run a seeded search and draw its best program:
 
 ```wl
-EvolveRecursor[{{0, 0}, {1, 1}, {2, 4}, {3, 9}}, "PopulationSize" -> 8, "InitialPopulation" -> {Mul[Var, Var]}, "RandomSeed" -> 42 ]["Solved"]
+RecursorProgramTree[EvolveRecursor[{{0, 0}, {1, 1}, {2, 4}, {3, 9}}, "PopulationSize" -> 8, "InitialPopulation" -> {Mul[Var, Var]}, "RandomSeed" -> 42]["Program"]]
 ```
 
 Solved means agreement on these training data, not a proof of equivalence or
@@ -41,10 +41,19 @@ Individuals record program, score, size, generation, ID and parent IDs. Both
 crossover parents are retained. Elites keep their original IDs; new offspring
 get new IDs. Population size stays fixed.
 
-Plot the best fitness at each generation:
+Start from Var and test square values at zero, one and two. Use five
+individuals and three generations to keep the ancestry readable. Plot best
+fitness against the three possible exact matches:
 
 ```wl
-RecursorEvolutionPlot[EvolveRecursor[{{0, 7}, {1, 8}, {2, 9}}, "PopulationSize" -> 8, "MaxGenerations" -> 4, "RandomSeed" -> 12 ]]
+RecursorEvolutionPlot[search = EvolveRecursor[{{0, 0}, {1, 1}, {2, 4}}, "PopulationSize" -> 5, "InitialPopulation" -> {Var}, "EliteCount" -> 1, "MaxGenerations" -> 3, "IncludeWhile" -> False, "StopOnSolve" -> False, "RandomSeed" -> 12], PlotRange -> {0, 3}]
+```
+
+Follow the recorded parent-child relationships. Vertex labels identify
+individuals, including distinct individuals with identical source programs:
+
+```wl
+RecursorGenealogyGraph[search]
 ```
 
 ## External proposals
@@ -52,8 +61,8 @@ RecursorEvolutionPlot[EvolveRecursor[{{0, 7}, {1, 8}, {2, 9}}, "PopulationSize" 
 A callback receives the current best program, training pairs and requested
 proposal count. It returns source strings or program expressions. Strings are
 parsed without evaluation, and every proposal is checked for closure and
-size. The callback may use an LLM if the caller configures one; the paclet
-itself contacts no service by default.
+size. The caller supplies the callback; the paclet contacts no external
+service by default.
 
 Supply a deterministic local proposal:
 
@@ -67,8 +76,8 @@ A simplifier can eliminate an unselected branch. It cannot generally replace
 zero multiplied by an expression with zero, because the expression may never
 terminate. SimplifyRecursor conservatively preserves this case:
 
-Preserve a potentially divergent strict operand:
+Inspect the simplified tree. The potentially divergent strict operand remains:
 
 ```wl
-SimplifyRecursor[Mul[Const[0], WhileLoop[Const[0], Const[1], Acc]]]
+RecursorProgramTree[SimplifyRecursor[Mul[Const[0], WhileLoop[Const[0], Const[1], Acc]]]]
 ```

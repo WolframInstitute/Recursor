@@ -1,5 +1,8 @@
 # Recursor
 
+[![CI](https://github.com/WolframInstitute/Recursor/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/WolframInstitute/Recursor/actions/workflows/ci.yml)
+[![Release](https://github.com/WolframInstitute/Recursor/actions/workflows/release.yml/badge.svg)](https://github.com/WolframInstitute/Recursor/actions/workflows/release.yml)
+
 A universal natural-number language for program synthesis and evolution.
 
 Recursor includes a direct interpreter, a compiler to closed lambda terms, a
@@ -8,12 +11,12 @@ and ancestry plots.
 
 Requires Wolfram Language 15.0 or later.
 
-## Why a DSL for AI?
+## Why a DSL for evolving lambda expressions?
 
-A compact DSL gives AI systems a small, explicit language for proposing,
-testing and transforming programs, with clear rules for scope and execution.
-Recursor compiles directly to lambda expressions, giving these programs a
-portable computational meaning and a basis for formal reasoning.
+A compact DSL provides a structured search space for generating, testing and
+evolving programs, with explicit rules for scope and execution. Recursor
+compiles these programs directly to lambda expressions, giving them a portable
+representation and a basis for formal reasoning.
 
 Wolfram Language supports the experiments and visualizations. Arbitrary WL
 expressions can depend on definitions, attributes, evaluation order and side
@@ -73,7 +76,7 @@ Run `CheckRecursorProofs[]` to build and check the packaged Lean proofs.
 - [Computational walkthrough](notebooks/RecursorWalkthrough-01.nb) — runnable Input cells with saved results.
 - [Language semantics](docs/en/Tutorials/LanguageSemantics.md) — syntax, scope and evaluation.
 - [Formal verification](docs/en/Tutorials/FormalVerification.md) — checked statements and their scope.
-- [Programs for AI](docs/en/Tutorials/ProgramsForAI.md) — explicit programs and portable lambda terms.
+- [Evolving lambda expressions](docs/en/Tutorials/EvolvingLambdaExpressions.md) — candidate programs, finite fitness and portable lambda terms.
 - [Universal computation](docs/en/Tutorials/UniversalComputation.md) — counter machines and the checked universality theorem.
 - [Arithmetic patterns](docs/en/Tutorials/ArithmeticPatterns.md) — recurrences, binary digits and residues.
 - [Halting and budgets](docs/en/Tutorials/HaltingAndBudgets.md) — trajectories and finite observation.
@@ -92,4 +95,7 @@ Run `CheckRecursorProofs[]` to build and check the packaged Lean proofs.
 | `make publish` | Publish the paclet and documentation |
 
 See [GUIDE.md](GUIDE.md) for development conventions and
-[API naming](docs/notes/Naming.md) for public-name conventions.
+[API naming](docs/notes/Naming.md) for public-name conventions. The
+[CI and release guide](docs/workflows.md) describes automated checks and publication.
+
+Released under the [MIT license](LICENSE).

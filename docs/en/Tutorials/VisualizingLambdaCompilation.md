@@ -17,7 +17,7 @@ What structure is introduced when a small arithmetic program is compiled?
 This essay follows successor applied to two, so the result can be checked
 independently. It uses the optional [Wolfram/Lambda paclet](https://github.com/WolframInstitute/WolframLambda),
 installed with `PacletInstall["Wolfram/Lambda"]` if necessary. The examples were
-verified with version 1.2.5. Recursor's evaluator and compiler do not depend on it.
+verified with version 1.2.6. Recursor's evaluator and compiler do not depend on it.
 
 Load the visualization tools:
 

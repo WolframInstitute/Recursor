@@ -8,7 +8,7 @@ Title: Language
 Description: Language tools for computing with natural-number programs
 Keywords: [program synthesis, computation, Recursor]
 RelatedGuides: [Recursor]
-RelatedTutorials: [ProgramsForAI, ArithmeticPatterns, LanguageSemantics, UniversalComputation]
+RelatedTutorials: [EvolvingLambdaExpressions, ArithmeticPatterns, LanguageSemantics, UniversalComputation]
 ---
 
 ## Abstract

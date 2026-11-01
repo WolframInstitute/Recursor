@@ -28,10 +28,10 @@ to positive, or jumps to zero if that register is already zero. A machine
 with m instructions halts at address m+1. This is the deterministic format
 used by Ruliology's register-machine tools.
 
-Translate and run a one-instruction increment machine:
+Translate a one-instruction increment machine and plot its outputs:
 
 ```wl
-With[{program = ToRecursor[{{1, 0, {2}}}]}, {RecursorProgramQ[program], Table[EvaluateRecursor[program, n], {n, 0, 3}]} ]
+With[{program = ToRecursor[{{1, 0, {2}}}]}, ListPlot[Table[{n, EvaluateRecursor[program, n]}, {n, 0, 3}], AxesLabel -> {"Input", "Output"}]]
 ```
 
 This program increments its input and halts. The translation contains only
@@ -111,10 +111,11 @@ receives pair(a,pair(index,previous)). Define addition in this representation:
 additionCode = {"Recurse", {"Pair", "Left", "Right"}, {"Compose", "Successor", {"Compose", "Right", "Right"}}}
 ```
 
-Compute on the first nine paired inputs:
+Mathlib pairs a and b as b^2+a when a<b, and a^2+a+b otherwise. Evaluate all
+pairs with a and b from zero through two. The color records the returned sum:
 
 ```wl
-Table[EvaluateRecursor[ToRecursor[additionCode, "PartialRecursive"], n], {n, 0, 8}]
+MatrixPlot[Table[EvaluateRecursor[ToRecursor[additionCode, "PartialRecursive"], If[a < b, b^2 + a, a^2 + a + b]], {a, 0, 2}, {b, 0, 2}], FrameTicks -> {{{1, 0}, {2, 1}, {3, 2}}, {{1, 0}, {2, 1}, {3, 2}}}, FrameLabel -> {"a", "b"}, PlotLegends -> Automatic]
 ```
 
 The Lean theorem translate_scoped proves that each translated program has no
@@ -157,10 +158,10 @@ WhileLoop compiles with a fixed-point combinator. The compiler first builds
 named intermediate terms, then lowers them to one-based de Bruijn indices
 under the formal lambda symbol. There is no external Lambda dependency.
 
-Evaluate countdown through the lambda backend:
+Check countdown through the lambda backend on inputs zero through four:
 
 ```wl
-Table[EvaluateRecursor[WhileLoop[Var, Acc, Pred[Acc]], n, Method -> "Lambda"], {n, 0, 4}]
+AllTrue[Range[0, 4], EvaluateRecursor[WhileLoop[Var, Acc, Pred[Acc]], #, Method -> "Lambda"] == 0 &]
 ```
 
 Normal-order reduction must not erase a diverging strict operand. The compiler
