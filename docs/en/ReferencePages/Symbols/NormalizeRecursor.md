@@ -83,4 +83,3 @@ Draw the lambda structure directly:
 ```wl
 LambdaTree[NormalizeRecursor[Var]]
 ```
-

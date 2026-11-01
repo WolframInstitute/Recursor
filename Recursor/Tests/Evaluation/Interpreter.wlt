@@ -6,7 +6,7 @@ VerificationTest[Table[EvaluateRecursor[RecursorExamples["Factorial"], n], {n, 0
 VerificationTest[Table[EvaluateRecursor[RecursorExamples["Fibonacci"], n], {n, 0, 12}], Fibonacci[Range[0, 12]], TestID -> "fibonacci-course-recursion"
 	]
 
-VerificationTest[Table[EvaluateRecursor[RecursorExamples["PopulationCount"], n], {n, 0, 20}], DigitCount[Range[0, 20], 2, 1], TestID -> 
+VerificationTest[Table[EvaluateRecursor[RecursorExamples["PopulationCount"], n], {n, 0, 20}], DigitCount[Range[0, 20], 2, 1], TestID ->
 	"population-count"]
 
 VerificationTest[Table[EvaluateRecursor[RecursorExamples["PowerOfTwo"], n], {n, 0, 10}], 2 ^ Range[0, 10], TestID -> "bounded-iteration"
@@ -63,5 +63,5 @@ VerificationTest[FailureQ[EvaluateRecursor[Var, 0, "MaxSteps" -> -1]], True, Tes
 VerificationTest[EvaluateRecursor[WhileLoop[Const[0], Const[1], Acc], 0, "MaxSteps" -> Infinity, "TimeLimit" -> 0.05]["Tag"], "TimeLimit",
 	 TestID -> "time-limit-independent-of-step-limit"]
 
-VerificationTest[EvaluateRecursor[WhileLoop[Var, Acc, Pred[Acc]], 20, "MaxSteps" -> Infinity, "TimeLimit" -> Infinity, "MemoryLimit" -> 
+VerificationTest[EvaluateRecursor[WhileLoop[Var, Acc, Pred[Acc]], 20, "MaxSteps" -> Infinity, "TimeLimit" -> Infinity, "MemoryLimit" ->
 	Infinity], 0, TestID -> "unbounded-mode-terminating-program"]

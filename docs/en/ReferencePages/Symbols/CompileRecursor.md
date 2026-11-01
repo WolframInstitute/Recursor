@@ -59,4 +59,3 @@ Draw the lambda structure directly:
 ```wl
 LambdaTree[CompileRecursor[Succ[Var]]]
 ```
-

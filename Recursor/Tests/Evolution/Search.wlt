@@ -71,7 +71,7 @@ VerificationTest[ScoreRecursor[RecursorExamples["Nonterminating"], {{0, 0}, {1, 
 	]
 
 VerificationTest[
-	With[{result = EvolveRecursor[{{0, 0}, {1, 1}, {2, 4}}, "PopulationSize" -> 4, "InitialPopulation" -> {Mul[Var, Var]}, "RandomSeed" -> 
+	With[{result = EvolveRecursor[{{0, 0}, {1, 1}, {2, 4}}, "PopulationSize" -> 4, "InitialPopulation" -> {Mul[Var, Var]}, "RandomSeed" ->
 		8]},
 		{result["Solved"], result["Generations"], result["Program"], Length[result["Population"]]}
 	],
