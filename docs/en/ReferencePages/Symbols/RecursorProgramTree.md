@@ -19,6 +19,7 @@ RelatedTutorials: [ArithmeticPatterns]
 
 - Accepts TreeGraph options and inherits its presentation defaults, including `ImageSize -> Automatic`.
 - `VertexLabels -> Automatic` labels vertices with syntax constructors, constants and variable names. Use `VertexLabels -> None` to omit them.
+- `GraphRoot -> Automatic` uses the program's root expression, vertex 1.
 - Constants and variable atoms are leaves. Repeated subexpressions have separate vertices.
 
 ## Basic Examples

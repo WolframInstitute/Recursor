@@ -25,16 +25,18 @@ the implementation as well as the Options declaration.
   use FilterRules against the target's supported options. Handle nested option
   lists without dropping RuleDelayed values.
 - Choose the right built-in representation before forcing a layout. Resolve
-  Automatic to program-specific labels or data coordinates only when needed
-  to explain the result. Document such behavior and allow callers to override
-  it, including disabling labels with None.
+  Automatic to program-specific labels, a syntax root or data coordinates only
+  when needed to explain the result. Document such behavior and allow callers
+  to override it, including disabling labels with None.
 - Preserve computational parameters, resource budgets and necessary dialog
   geometry. They are not interchangeable with visualization defaults. Do not
   change them as a side effect of a presentation-options audit.
 - Check observable defaults and overrides, including a SetOptions change and
-  an explicit call that overrides it. Restore defaults after tests. Render
-  representative outputs in light and dark appearances; correct the data or
-  representation if a figure is awkward instead of adding hidden sizes.
+  an explicit call that overrides it. For trees, verify that the root and edge
+  directions still represent the source structure. Restore defaults after
+  tests. Render representative outputs in light and dark appearances; correct
+  the data or representation if a figure is awkward instead of adding hidden
+  sizes.
 
 Sources: [ImageSize](https://reference.wolfram.com/language/ref/ImageSize.html),
 [Options](https://reference.wolfram.com/language/ref/Options.html),

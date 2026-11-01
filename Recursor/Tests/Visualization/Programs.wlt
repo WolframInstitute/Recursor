@@ -27,6 +27,23 @@ visualizationResult = <|
 visualizationOptionValues[native_, options_List, names_] := OptionValue[native, FilterRules[options, Options[native]], names]
 
 VerificationTest[
+	Map[Function[root, With[{graph = RecursorProgramTree[RecursorExamples["Factorial"], GraphRoot -> root]},
+		First[Ordering[Last /@ (VertexCoordinates /. AbsoluteOptions[graph, VertexCoordinates]), -1]]
+	]], {Automatic, 4}],
+	{1, 4}, TestID -> "syntax-tree-root-is-the-program-root-unless-overridden"
+]
+
+VerificationTest[
+	Module[{graph = RecursorProgramTree[Add[Mul[Var, Var], Mul[Var, Var]]], coordinates, edges},
+		coordinates = AssociationThread[VertexList[graph], VertexCoordinates /. AbsoluteOptions[graph, VertexCoordinates]];
+		edges = EdgeList[graph];
+		{VertexList[graph], edges, AllTrue[edges, Last[coordinates[First[#]]] > Last[coordinates[Last[#]]] &]}
+	],
+	{Range[7], {1 \[DirectedEdge] 2, 2 \[DirectedEdge] 3, 2 \[DirectedEdge] 4, 1 \[DirectedEdge] 5, 5 \[DirectedEdge] 6, 5 \[DirectedEdge] 7}, True},
+	TestID -> "repeated-subexpressions-keep-distinct-directed-paths-below-root"
+]
+
+VerificationTest[
 	And[
 		FilterRules[Options[RecursorProgramTree], Except[VertexLabels]] === FilterRules[Options[TreeGraph], Except[VertexLabels]],
 		FilterRules[Options[RecursorGenealogyGraph], Except[VertexLabels]] === FilterRules[Options[Graph], Except[VertexLabels]],

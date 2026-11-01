@@ -19,6 +19,7 @@ RecursorProgramTree[program_?RecursorExpressionQ, opts : OptionsPattern[]] := Mo
 	With[{constructor = If[edges === {}, Graph, TreeGraph]},
 		constructor[Range[Length[sites]], edges,
 			VertexLabels -> Replace[OptionValue[VertexLabels], Automatic :> Thread[Range[Length[sites]] -> (label /@ Lookup[sites, "Expression"])]],
+			GraphRoot -> Replace[OptionValue[GraphRoot], Automatic -> 1],
 			FilterRules[Flatten[{opts, Options[RecursorProgramTree]}], Options[constructor]]
 		]
 	]
