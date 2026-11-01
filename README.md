@@ -11,6 +11,10 @@ and ancestry plots.
 
 Requires Wolfram Language 15.0 or later.
 
+[Documentation](https://www.wolframcloud.com/obj/wolframinstitute/Recursor/) ·
+[Wolfram resource](https://www.wolframcloud.com/obj/wolframinstitute/DeployedResources/Paclet/WolframInstitute/Recursor/) ·
+[Releases](https://github.com/WolframInstitute/Recursor/releases)
+
 ## Why a DSL for evolving lambda expressions?
 
 A compact DSL provides a structured search space for generating, testing and
@@ -26,10 +30,10 @@ explicit semantics that can be translated and verified independently.
 
 ## Get started
 
-Load the source paclet from this repository:
+Install and load the paclet:
 
 ```wl
-PacletDirectoryLoad[FileNameJoin[{Directory[], "Recursor"}]]
+PacletInstall[ResourceObject["https://wolfr.am/1IuTobNWg"]]
 Needs["WolframInstitute`Recursor`"]
 ```
 
@@ -66,24 +70,33 @@ For scripts, install the selected libraries directly:
 InstallRecursorLibraries[{"LeanLink", "MathlibLink", "Lambda"}]
 ```
 
-Use `RecursorLibraries[]` to check their status. See
-[external libraries](docs/notes/OptionalLibraries.md) for setup details.
+Use [`RecursorLibraries[]`](https://www.wolframcloud.com/obj/wolframinstitute/Recursor/#ref/RecursorLibraries)
+to check their status. See [library installation](https://www.wolframcloud.com/obj/wolframinstitute/Recursor/#ref/InstallRecursorLibraries)
+for setup details.
 
-Run `CheckRecursorProofs[]` to build and check the packaged Lean proofs.
+Run [`CheckRecursorProofs[]`](https://www.wolframcloud.com/obj/wolframinstitute/Recursor/#ref/CheckRecursorProofs) to build and check the packaged Lean proofs.
 
 ## Documentation
 
+- [Guides and function reference](https://www.wolframcloud.com/obj/wolframinstitute/Recursor/#guide/Recursor).
 - [Computational walkthrough](notebooks/RecursorWalkthrough-01.nb) — runnable Input cells with saved results.
-- [Language semantics](docs/en/Tutorials/LanguageSemantics.md) — syntax, scope and evaluation.
-- [Formal verification](docs/en/Tutorials/FormalVerification.md) — checked statements and their scope.
-- [Evolving lambda expressions](docs/en/Tutorials/EvolvingLambdaExpressions.md) — candidate programs, finite fitness and portable lambda terms.
-- [Universal computation](docs/en/Tutorials/UniversalComputation.md) — counter machines and the checked universality theorem.
-- [Arithmetic patterns](docs/en/Tutorials/ArithmeticPatterns.md) — recurrences, binary digits and residues.
-- [Halting and budgets](docs/en/Tutorials/HaltingAndBudgets.md) — trajectories and finite observation.
-- [Lambda reductions](docs/en/Tutorials/VisualizingLambdaCompilation.md) — compiled terms and reduction graphs.
-- [Evolutionary experiments](docs/en/Tutorials/EvolutionaryExperiments.md) — mutation, search and ancestry.
+- [Language semantics](https://www.wolframcloud.com/obj/wolframinstitute/Recursor/#tutorial/LanguageSemantics) — syntax, scope and evaluation.
+- [Formal verification](https://www.wolframcloud.com/obj/wolframinstitute/Recursor/#tutorial/FormalVerification) — checked statements and their scope.
+- [Evolving lambda expressions](https://www.wolframcloud.com/obj/wolframinstitute/Recursor/#tutorial/EvolvingLambdaExpressions) — candidate programs, finite fitness and portable lambda terms.
+- [Universal computation](https://www.wolframcloud.com/obj/wolframinstitute/Recursor/#tutorial/UniversalComputation) — counter machines and the checked universality theorem.
+- [Arithmetic patterns](https://www.wolframcloud.com/obj/wolframinstitute/Recursor/#tutorial/ArithmeticPatterns) — recurrences, binary digits and residues.
+- [Halting and budgets](https://www.wolframcloud.com/obj/wolframinstitute/Recursor/#tutorial/HaltingAndBudgets) — trajectories and finite observation.
+- [Lambda reductions](https://www.wolframcloud.com/obj/wolframinstitute/Recursor/#tutorial/VisualizingLambdaCompilation) — compiled terms and reduction graphs.
+- [Evolutionary experiments](https://www.wolframcloud.com/obj/wolframinstitute/Recursor/#tutorial/EvolutionaryExperiments) — mutation, search and ancestry.
 
 ## Development
+
+Load the source paclet from this repository:
+
+```wl
+PacletDirectoryLoad[FileNameJoin[{Directory[], "Recursor"}]]
+Needs["WolframInstitute`Recursor`"]
+```
 
 | Command | Purpose |
 | --- | --- |
