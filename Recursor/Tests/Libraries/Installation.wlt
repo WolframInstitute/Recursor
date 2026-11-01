@@ -301,5 +301,118 @@ VerificationTest[
 		WolframInstitute`Recursor`Libraries`Installation`Private`libraryInstallResource["Wolfram/Lambda", "1.2.5"], arguments
 	}]],
 	{"https://example.com/library.paclet", {"Wolfram/Lambda", ResourceVersion -> "1.2.5"}},
-	TestID -> "resource-resolution-uses-tested-version-and-keeps-valid-metadata-with-update-notice"
+	TestID -> "resource-resolution-uses-versioned-metadata-and-keeps-valid-archive-with-update-notice"
+]
+
+VerificationTest[
+	Module[{ready = False, before, result}, Block[{
+		PacletFind = Function[name, {PacletObject[<|"Name" -> name, "Version" -> "1.2.5"|>]}],
+		WolframInstitute`Recursor`PackageScope`libraryStatus = Function[Null, If[ready, "Ready", "Needs setup"]],
+		WolframInstitute`Recursor`PackageScope`libraryReadyQ = Function[Null, ready],
+		WolframInstitute`Recursor`Libraries`Installation`Private`libraryLoadQ = (True &),
+		WolframInstitute`Recursor`Libraries`Installation`Private`libraryInstallMathlib = Function[Null, ready = True; File["runtime"]],
+		WolframInstitute`Recursor`Libraries`Installation`Private`installLibraryPaclet = (Throw["Unexpected reinstallation"] &)
+	}, Catch[
+		before = RecursorLibraries["LeanLink"]["Status"];
+		result = InstallRecursorLibraries[{"LeanLink", "MathlibLink", "LeanLink"}];
+		{before, Keys[result], MatchQ[result["LeanLink"], _PacletObject],
+			MatchQ[result["MathlibLink"], _PacletObject], RecursorLibraries["LeanLink"]["Status"]}
+	]]],
+	{"Needs setup", {"LeanLink", "MathlibLink"}, True, True, "Ready"},
+	TestID -> "bulk-install-prepares-toolchain-before-reporting-LeanLink-success"
+]
+
+VerificationTest[
+	Module[{before = $ContextPath, result}, Block[{
+		WolframInstitute`Recursor`PackageScope`libraryInstall = Function[name,
+			PrependTo[$ContextPath, "TemporaryInstaller`"]; name]
+	},
+		result = InstallRecursorLibraries[{"Lambda", "LeanLink"}];
+		{result, $ContextPath === before}
+	]],
+	{<|"Lambda" -> "Lambda", "LeanLink" -> "LeanLink"|>, True},
+	TestID -> "public-installer-preserves-results-and-context-path-through-cold-initialization"
+]
+
+VerificationTest[
+	Module[{before = $ContextPath, single, all, singlePreserved}, Block[{
+		PacletFind = Function[Null, PrependTo[$ContextPath, "TemporaryPacletScan`"]; {}],
+		WolframInstitute`Recursor`PackageScope`libraryStatus = Function[Null,
+			PrependTo[$ContextPath, "TemporaryStatusProbe`"]; "Not installed"]
+	},
+		single = RecursorLibraries["Lambda"];
+		singlePreserved = $ContextPath === before;
+		all = RecursorLibraries[];
+		{single["Status"], singlePreserved, Keys[all], Values[all][[All, "Status"]], $ContextPath === before}
+	]],
+	{"Not installed", True, {"Lambda", "LeanLink", "MathlibLink"}, ConstantArray["Not installed", 3], True},
+	TestID -> "library-status-access-preserves-context-path"
+]
+
+VerificationTest[
+	Module[{base = FileNameJoin[{$TemporaryDirectory, "recursor-archive-fixture"}], override, sibling, location},
+		override = FileNameJoin[{base, "selected.paclet"}];
+		sibling = FileNameJoin[{base, "Mathematics", "MathlibLink", "dist", "WolframInstitute__MathlibLink-0.1.0.paclet"}];
+		location = FileNameJoin[{base, "AI", "Recursor", "Recursor"}];
+		Table[Block[{
+			Environment = Function[name, If[name === "MATHLIBLINK_PACLET", override, $Failed]],
+			PacletObject = (<|"Location" -> location|> &),
+			FileExistsQ = Function[file, MemberQ[present, file]]
+		}, WolframInstitute`Recursor`Libraries`Installation`Private`mathlibLinkArchive[]],
+			{present, {{override, sibling}, {sibling}, {}}}] === {override, sibling, Missing["NotFound"]}
+	], True, TestID -> "mathlib-archive-prefers-explicit-path-then-sibling-archive"
+]
+
+VerificationTest[
+	Block[{
+		WolframInstitute`Recursor`Libraries`Installation`Private`mathlibLinkArchive = ("local.paclet" &),
+		WolframInstitute`Recursor`Libraries`Installation`Private`libraryInstallFile = Identity,
+		WolframInstitute`Recursor`Libraries`Installation`Private`libraryInstallURL = (Throw["Unexpected download"] &)
+	}, Catch[WolframInstitute`Recursor`Libraries`Installation`Private`installLibraryPaclet[
+		WolframInstitute`Recursor`PackageScope`$libraryRegistry["MathlibLink"]]]],
+	File["local.paclet"], TestID -> "mathlib-local-archive-does-not-request-release-download"
+]
+
+VerificationTest[
+	Module[{downloadURL, temporary, result, installed}, Block[{
+		WolframInstitute`Recursor`Libraries`Installation`Private`mathlibLinkArchive = (Missing["NotFound"] &),
+		WolframInstitute`Recursor`Libraries`Installation`Private`libraryDownload = Function[{url, file},
+			downloadURL = url; temporary = file; File[file]],
+		Import = ({"PacletInfo.wl"} &),
+		PacletInstall = Function[file, installed = FileExistsQ[First[file]]; installedPaclet]
+	},
+		result = WolframInstitute`Recursor`Libraries`Installation`Private`installLibraryPaclet[
+			WolframInstitute`Recursor`PackageScope`$libraryRegistry["MathlibLink"]];
+		{result, downloadURL, installed, ! FileExistsQ[temporary]}
+	]],
+	{installedPaclet, "https://github.com/WolframInstitute/MathlibLink/releases/download/v0.1.0/WolframInstitute__MathlibLink-0.1.0.paclet", True, True},
+	TestID -> "mathlib-release-fallback-uses-verified-download-and-cleans-temporary-archive"
+]
+
+VerificationTest[
+	Module[{result, temporary}, Block[{
+		WolframInstitute`Recursor`Libraries`Installation`Private`mathlibLinkArchive = (Missing["NotFound"] &),
+		WolframInstitute`Recursor`Libraries`Installation`Private`libraryDownload = Function[{url, file},
+			temporary = file;
+			WolframInstitute`Recursor`Libraries`Installation`Private`libraryDownloadResult[url, file, <|"StatusCode" -> 404|>]],
+		PacletInstall = (Throw["Unexpected installation"] &)
+	}, Catch[
+		result = WolframInstitute`Recursor`Libraries`Installation`Private`installLibraryPaclet[
+			WolframInstitute`Recursor`PackageScope`$libraryRegistry["MathlibLink"]];
+		{result["Tag"], result["Result"]["Result"]["StatusCode"],
+			StringContainsQ[result["MessageTemplate"], "MATHLIBLINK_PACLET"], ! FileExistsQ[temporary]}
+	]]],
+	{"MathlibLinkReleaseUnavailable", 404, True, True},
+	TestID -> "unpublished-mathlib-release-reports-local-archive-remedy"
+]
+
+VerificationTest[
+	Block[{
+		PacletFind = ({} &),
+		URLDownloadSubmit = (Throw["Unexpected download"] &),
+		ResourceObject = (Throw["Unexpected repository lookup"] &),
+		PacletInstall = (Throw["Unexpected installation"] &),
+		WolframInstitute`Recursor`Libraries`Installation`Private`mathlibLinkArchive = (Throw["Unexpected archive lookup"] &)
+	}, Catch[Values[RecursorLibraries[]][[All, "Status"]]]],
+	ConstantArray["Not installed", 3], TestID -> "library-status-does-not-resolve-or-download-release-archives"
 ]

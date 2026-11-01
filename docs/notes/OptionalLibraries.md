@@ -17,17 +17,25 @@ Library checks preserve the caller's context path. An installed paclet that
 cannot load returns a setup diagnostic; updating a loaded paclet can require
 a fresh kernel.
 
-## Local MathlibLink development
+## MathlibLink installation
 
-Before MathlibLink has a published release, build its archive with
-`make check-publish` in the Mathematics/MathlibLink repository. The installer
-finds `dist/WolframInstitute__MathlibLink-0.1.0.paclet` in that sibling project
-when Recursor is loaded from the Institute source tree. Set
-`MATHLIBLINK_PACLET` to an absolute local archive path for another layout.
-No unpublished cloud URL is used as an installation source.
+The installer checks `MATHLIBLINK_PACLET`, then the sibling
+Mathematics/MathlibLink/dist directory, then the versioned GitHub release.
+The remote archive follows the same cancellable download and ZIP validation
+as the other libraries. A missing release reports how to build or select a
+local archive.
+
+The first release is pending. For local development, build its archive with
+`make check-publish` in Mathematics/MathlibLink. Recursor finds
+`dist/WolframInstitute__MathlibLink-0.1.0.paclet` when loaded from the Institute
+source tree. Set `MATHLIBLINK_PACLET` to an absolute archive path for another
+layout.
 
 After installing the bridge, Recursor delegates runtime setup to
-`InstallMathlib[]`. MathlibLink owns the toolchain, mathlib checkout and cache.
+`InstallMathlib[]`. MathlibLink installs missing elan, Git and curl tools and prepares the Lean
+toolchain, mathlib checkout and cache locally. It reuses compatible existing
+tools. Downloads come from upstream releases; computations run on the user's
+computer. The installer does not change shell profiles or the global Lean default.
 Its `MathlibInstallation[]` record reports the exact versions and directory.
 The [mathlib documentation](https://leanprover-community.github.io/mathlib4_docs/)
 tracks a newer development version; the installed source revision is authoritative.

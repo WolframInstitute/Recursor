@@ -12,26 +12,26 @@ $proofTheorems = "RecursorProofs." <> # & /@ Flatten[Values[$proofModules]]
 
 proofFailure[tag_, message_, data_ : <||>] := Failure[tag, Join[<|"MessageTemplate" -> message|>, data]]
 
-lakeExecutable[] := SelectFirst[
-	Join[FileNames["lake" <> If[$OperatingSystem === "Windows", ".exe", ""], StringSplit[Replace[Environment["PATH"], Except[_String] -> ""], If[$OperatingSystem === "Windows", ";", ":"]]],
-		{FileNameJoin[{Replace[Environment["ELAN_HOME"], Except[_String] -> FileNameJoin[{$HomeDirectory, ".elan"}]], "bin", "lake" <> If[$OperatingSystem === "Windows", ".exe", ""]}]}],
-	StringQ[#] && FileExistsQ[#] &, Missing["NotFound", "lake"]
-]
+(* The +toolchain argument belongs to elan's proxy, not a native Lake binary. *)
+lakeExecutable[] := With[{path = FileNameJoin[{
+	Replace[Environment["ELAN_HOME"], Except[_String] -> FileNameJoin[{$HomeDirectory, ".elan"}]],
+	"bin", "lake" <> If[$OperatingSystem === "Windows", ".exe", ""]
+}]}, If[FileExistsQ[path], path, Missing["NotFound", "lake"]]]
 
 tomlString[value_String] := "\"" <> StringReplace[value, {"\\" -> "\\\\", "\"" -> "\\\"", "\n" -> "\\n", "\r" -> "\\r", "\t" -> "\\t"}] <> "\""
 
-proofProcessEnvironment[executables_Association] := With[{
+proofProcessEnvironment[executables_Association, paths_List : {}] := With[{
 	environment = Association[GetEnvironment[]],
-	directories = DeleteDuplicates[DirectoryName /@ Cases[Values[executables], _String]],
+	directories = DeleteDuplicates[Join[Cases[paths, _String], DirectoryName /@ Cases[Values[executables], _String]]],
 	separator = If[$OperatingSystem === "Windows", ";", ":"]
 }, Join[environment, <|
 	"PATH" -> StringRiffle[Join[directories, DeleteCases[{Lookup[environment, "PATH", ""]}, ""]], separator],
 	"MATHLIB_NO_CACHE_ON_UPDATE" -> "1"
 |>]]
 
-proofCommand[arguments_List, directory_String, executables_Association] := Quiet[Check[
+proofCommand[arguments_List, directory_String, executables_Association, paths_List] := Quiet[Check[
 	RunProcess[arguments, All, ProcessDirectory -> directory,
-		ProcessEnvironment -> proofProcessEnvironment[executables]],
+		ProcessEnvironment -> proofProcessEnvironment[executables, paths]],
 	$Failed
 ]]
 
@@ -74,7 +74,7 @@ proofAudit[directory_String, mathlib_String] := Module[{environment, names, axio
 	<|"Directory" -> directory, "Theorems" -> $proofTheorems, "Axioms" -> axioms, "KernelChecks" -> checks|>
 ]
 
-CheckRecursorProofs[] := Module[{info = mathlibInformation[], executables, lake, directory, log, result},
+CheckRecursorProofs[] := Module[{info = mathlibInformation[], executables, paths, lake, directory, log, result},
 	If[! AssociationQ[info] || Lookup[info, "Status", None] =!= "Ready",
 		Return[proofFailure["MathlibSetupRequired", "Run InstallRecursorLibraries[{\"MathlibLink\"}] before checking the proofs."]]
 	];
@@ -82,6 +82,7 @@ CheckRecursorProofs[] := Module[{info = mathlibInformation[], executables, lake,
 		Return[proofFailure["MathlibVersionMismatch", "The proof project requires the pinned Lean and mathlib versions.", <|"Installation" -> info|>]]
 	];
 	executables = Lookup[info, "Executables", <||>];
+	paths = Lookup[info, "PathDirectories", {}];
 	lake = Lookup[executables, "Lake", None];
 	If[! StringQ[lake] || ! FileExistsQ[lake], lake = lakeExecutable[]];
 	If[! StringQ[lake], Return[proofFailure["LakeNotFound", "Lake could not be found. Check the elan installation."]]];
@@ -90,7 +91,7 @@ CheckRecursorProofs[] := Module[{info = mathlibInformation[], executables, lake,
 	WithCleanup[
 		Do[
 			WriteString[log, StringRiffle[command, " "] <> "\n"];
-			result = proofCommand[command, directory, executables];
+			result = proofCommand[command, directory, executables, paths];
 			If[AssociationQ[result], WriteString[log, result["StandardOutput"], result["StandardError"], "\n"]];
 			If[! AssociationQ[result] || result["ExitCode"] =!= 0,
 				Return[proofFailure["ProofBuildFailed", "The Lean proof build failed. See verification.log in the proof directory.", <|"Directory" -> directory, "Command" -> command, "Process" -> result|>]]

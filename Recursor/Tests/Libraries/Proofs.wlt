@@ -32,12 +32,32 @@ VerificationTest[
 ]
 
 VerificationTest[
-	Module[{before = GetEnvironment[], environment, executables, separator},
+	Module[{before = GetEnvironment[], environment, extended, executables, separator, path},
 		executables = <|"Lake" -> FileNameJoin[{$TemporaryDirectory, "lean", "bin", "lake"}],
 			"Git" -> FileNameJoin[{$TemporaryDirectory, "git", "bin", "git"}]|>;
 		separator = If[$OperatingSystem === "Windows", ";", ":"];
+		path = FileNameJoin[{$TemporaryDirectory, "managed-libraries"}];
 		environment = WolframInstitute`Recursor`Libraries`Proofs`Private`proofProcessEnvironment[executables];
+		extended = WolframInstitute`Recursor`Libraries`Proofs`Private`proofProcessEnvironment[executables, {path}];
 		{Take[StringSplit[environment["PATH"], separator], 2] === (DirectoryName /@ Values[executables]),
+			First[StringSplit[extended["PATH"], separator]] === path,
 			environment["MATHLIB_NO_CACHE_ON_UPDATE"], GetEnvironment[] === before}
-	], {True, "1", True}, TestID -> "proof-build-uses-managed-tools-without-changing-environment"
+	], {True, True, "1", True}, TestID -> "proof-build-uses-managed-tools-without-changing-environment"
+]
+
+VerificationTest[
+	Module[{directory = CreateDirectory[], proxy, native},
+		WithCleanup[
+			native = FileNameJoin[{directory, "lake" <> If[$OperatingSystem === "Windows", ".exe", ""]}];
+			proxy = FileNameJoin[{directory, "elan", "bin", FileNameTake[native]}];
+			CreateFile[native];
+			Block[{Environment = Function[name, Switch[name, "PATH", directory,
+				"ELAN_HOME", FileNameJoin[{directory, "elan"}], _, $Failed]]},
+				{MissingQ[WolframInstitute`Recursor`Libraries`Proofs`Private`lakeExecutable[]],
+					CreateDirectory[DirectoryName[proxy], CreateIntermediateDirectories -> True]; CreateFile[proxy];
+					WolframInstitute`Recursor`Libraries`Proofs`Private`lakeExecutable[] === proxy}
+			],
+			DeleteDirectory[directory, DeleteContents -> True]
+		]
+	], {True, True}, TestID -> "proof-build-fallback-selects-elan-proxy-instead-of-native-lake"
 ]

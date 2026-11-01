@@ -19,11 +19,12 @@ RelatedTutorials: [FormalVerification, VisualizingLambdaCompilation]
 - Supported names are "Lambda", "LeanLink" and "MathlibLink".
 - Results are an association indexed by library name. Successful paclet installations return PacletObject; the MathlibLink setup returns its PacletObject after checking the shared mathlib installation. Failures include diagnostic details and, when setup is required, a setup link.
 - Ready installations are kept. Duplicate names are processed once. Unknown names and invalid argument shapes remain unevaluated without starting an installation.
+- When both proof libraries are selected, MathlibLink prepares the Lean toolchain before checking LeanLink. Results retain the requested library order.
 - Lambda supplies lambda-calculus diagrams. LeanLink supplies the native Lean bridge. MathlibLink supplies the pinned mathematical library and a bridge to its declarations.
-- MathlibLink performs explicit runtime setup. It installs the pinned Lean toolchain without changing the global default and prepares the full mathlib library.
+- MathlibLink prepares its runtime locally, installing missing elan, Git and curl tools automatically. It installs the pinned Lean toolchain without changing the global default and prepares the full mathlib library.
 - Setup downloads can be substantial. Runtime details are returned by RecursorLibraries["MathlibLink"].
 - An installed paclet that cannot load reports LibrarySetupRequired. Restart the kernel after updating a loaded paclet. Run InstallRecursorLibraries[{"MathlibLink"}] again to resume incomplete mathlib runtime setup.
-- Before the first MathlibLink release, its paclet is installed from the local Mathematics/MathlibLink/dist archive. Set MATHLIBLINK_PACLET to use another local archive.
+- The MathlibLink paclet is taken first from MATHLIBLINK_PACLET, then a sibling Mathematics/MathlibLink/dist archive, then its versioned GitHub release. The first release is pending; use a local archive until it is published.
 - Run [CheckRecursorProofs]() to build and check the formalization against the shared mathlib installation. The terminal equivalent is make check-proofs.
 - No library is installed automatically when loading Recursor or checking library status.
 

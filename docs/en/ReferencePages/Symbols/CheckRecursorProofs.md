@@ -18,6 +18,7 @@ RelatedTutorials: [FormalVerification, UniversalComputation]
 - Install LeanLink and MathlibLink with [SetupRecursor]() or [InstallRecursorLibraries]() before running the check. The check does not install missing libraries.
 - The proof project uses Lean 4.35.0 and the pinned mathlib v4.35.0 checkout managed by MathlibLink. An incompatible runtime returns Failure.
 - The sources are copied from the paclet to a user proof workspace and built with Lake. Mathlib is shared with MathlibLink; no second checkout is created.
+- The build uses MathlibLink's local tools, including a managed Git runtime when needed. The caller's environment is preserved.
 - The check inspects twelve theorem declarations and their transitive axiom dependencies. Only propext, Classical.choice and Quot.sound are accepted.
 - Lean's kernel replays both declaring modules. A successful result is an association with keys "Directory", "Theorems", "Axioms" and "KernelChecks". A failed build or proof check returns Failure.
 - "Directory" contains the proof project and verification.log. "KernelChecks" contains the kernel's Success records for Recursor and Universality.

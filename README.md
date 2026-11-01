@@ -51,7 +51,7 @@ and return `Failure` when a limit is reached.
 
 ## External libraries
 
-Open the library installer:
+Open the local library installer:
 
 ```wl
 SetupRecursor[]

@@ -1,6 +1,6 @@
 Needs["WolframInstitute`Recursor`"]
 
-(* Render the changing row order without a front end. *)
+(* Resolve the dynamic library rows without a front end. *)
 setupResolveRows[boxes_] := boxes /. Cases[boxes,
 	dynamic : HoldPattern[DynamicBox[ToBoxes[grid_Grid, StandardForm], ___]] :>
 		With[{rendered = ToBoxes[grid]}, dynamic -> rendered], Infinity]
@@ -126,7 +126,7 @@ VerificationTest[
 					! FreeQ[HoldComplete[label], "Uninstall"] :> {label, enabled}, Infinity]
 			}]], {0, Infinity}]
 	]]],
-	{0, {"Not installed", "Needs setup", "Ready", "Unsupported"},
+	{0, {"Not installed", "Ready", "Needs setup", "Unsupported"},
 		{{"Install", True}, {"Uninstall", True}, {"Uninstall", True}, {"Uninstall", True}}},
 	TestID -> "Setup-offers-uninstall-for-ready-unusable-and-unsupported-installed-libraries"
 ]
@@ -255,7 +255,7 @@ VerificationTest[
 		With[{boxes = WolframInstitute`Recursor`Libraries`Setup`Private`$librarySetupDialog},
 			{
 				Cases[boxes, HoldPattern[WolframInstitute`Recursor`PackageScope`libraryUninstall[name_String]] :> name, Infinity],
-				! FreeQ[boxes, "\"varies; Lean and mathlib\""],
+				! FreeQ[boxes, "\"varies; includes runtime\""],
 				! FreeQ[boxes, "https://leanprover-community.github.io/install/project.html"]
 			}
 		]
@@ -367,8 +367,8 @@ VerificationTest[
 			HoldPattern[WolframInstitute`Recursor`PackageScope`libraryUninstall[name_String]] :> name, Infinity]},
 		{"First", "Second"}
 	],
-	{{"Not installed", "Ready"}, {{"Install", True}, {"Uninstall", True}}, {"Second", "First"}},
-	TestID -> "Setup-moves-uninstalled-library-ahead-of-installed-libraries-immediately"
+	{{"Ready", "Not installed"}, {{"Uninstall", True}, {"Install", True}}, {"First", "Second"}},
+	TestID -> "Setup-preserves-library-order-after-uninstalling"
 ]
 
 VerificationTest[
@@ -381,8 +381,8 @@ VerificationTest[
 		{setupStatuses[], Cases[setupBoxes,
 			HoldPattern[WolframInstitute`Recursor`PackageScope`libraryUninstall[name_String]] :> name, Infinity]}
 	],
-	{{"Not installed", "Ready"}, {"Second", "First"}},
-	TestID -> "Setup-moves-newly-installed-library-after-missing-libraries"
+	{{"Ready", "Not installed"}, {"First", "Second"}},
+	TestID -> "Setup-preserves-library-order-after-installing"
 ]
 
 VerificationTest[

@@ -14,7 +14,7 @@ $libraryRegistry = <|
 		"Description" -> "Lambda-term diagrams and reduction graphs.",
 		"URL" -> "https://resources.wolframcloud.com/PacletRepository/resources/Wolfram/Lambda/",
 		"Platforms" -> {"Linux-x86-64", "Linux-ARM64", "MacOSX-ARM64", "MacOSX-x86-64", "Windows-x86-64"},
-		"DownloadSize" -> AssociationMap["varies by release" &,
+		"DownloadSize" -> AssociationMap["1.3 MB" &,
 			{"Linux-x86-64", "Linux-ARM64", "MacOSX-ARM64", "MacOSX-x86-64", "Windows-x86-64"}],
 		"License" -> "MIT"|>,
 	"LeanLink" -> <|"Paclet" -> "Wolfram/LeanLink", "Context" -> "Wolfram`LeanLink`", "MinimumVersion" -> "1.2.5",
@@ -27,13 +27,14 @@ $libraryRegistry = <|
 		"License" -> "MIT",
 		"Archive" -> "https://www.wolframcloud.com/obj/wolframinstitute/Resources/49e/49e8aa40-9838-4632-a71f-7a9e5aa43f48/download/1-2-5/PacletArchive.paclet"|>,
 	"MathlibLink" -> <|"Paclet" -> "WolframInstitute/MathlibLink", "Context" -> "WolframInstitute`MathlibLink`", "MinimumVersion" -> "0.1.0",
-		"Description" -> "Mathlib declarations, computation and proofs. Requires elan and Git.",
+		"Description" -> "Mathlib declarations, computation and proofs.",
 		"URL" -> "https://leanprover-community.github.io/install/project.html",
 		"SetupLinks" -> <|"mathlib documentation" -> "https://leanprover-community.github.io/mathlib4_docs/"|>,
 		"Platforms" -> {"Linux-x86-64", "Linux-ARM64", "MacOSX-ARM64", "MacOSX-x86-64", "Windows-x86-64"},
-		"DownloadSize" -> AssociationMap["varies; Lean and mathlib" &,
+		"DownloadSize" -> AssociationMap["varies; includes runtime" &,
 			{"Linux-x86-64", "Linux-ARM64", "MacOSX-ARM64", "MacOSX-x86-64", "Windows-x86-64"}],
-		"License" -> "MIT; runtime licenses apply"|>
+		"License" -> "MIT; runtime licenses apply",
+		"Archive" -> "https://github.com/WolframInstitute/MathlibLink/releases/download/v0.1.0/WolframInstitute__MathlibLink-0.1.0.paclet"|>
 |>
 
 versionAtLeastQ[installed_String, minimum_String] := With[{
@@ -85,22 +86,22 @@ libraryStatus[name_String] := With[{entry = $libraryRegistry[name]}, With[{insta
 	]
 ]] /; KeyExistsQ[$libraryRegistry, name]
 
-RecursorLibraries[name_String] := With[{entry = $libraryRegistry[name]},
+RecursorLibraries[name_String] := Block[{$ContextPath = $ContextPath}, With[{entry = $libraryRegistry[name]},
 	Join[KeyDrop[entry, {"Archive", "Context"}],
 		With[{installed = PacletFind[entry["Paclet"]]}, <|"Version" -> If[installed === {}, Missing["NotInstalled"], First[installed]["Version"]]|>],
 		If[name === "MathlibLink" && PacletFind[entry["Paclet"]] =!= {},
 			With[{info = mathlibInformation[]}, If[AssociationQ[info], KeyTake[info, {"Directory", "MathlibDirectory", "Toolchain", "Revision"}], <||>]], <||>],
 		<|"Status" -> libraryStatus[name]|>
 	]
-] /; KeyExistsQ[$libraryRegistry, name]
-RecursorLibraries[] := AssociationMap[RecursorLibraries, Keys[$libraryRegistry]]
+]] /; KeyExistsQ[$libraryRegistry, name]
+RecursorLibraries[] := Block[{$ContextPath = $ContextPath}, AssociationMap[RecursorLibraries, Keys[$libraryRegistry]]]
 
 libraryFailure[name_, tag_, result_] := Failure[tag, <|
 	"MessageTemplate" -> "`1` could not be made ready. See the setup instructions and the returned result.",
 	"MessageParameters" -> {name}, "Result" -> result, "URL" -> $libraryRegistry[name]["URL"]
 |>]
 
-(* Until its first release, the bridge is installed from a local verified archive. *)
+(* Prefer an explicit or sibling development archive before the published release. *)
 mathlibLinkArchive[] := SelectFirst[{
 	Environment["MATHLIBLINK_PACLET"],
 	FileNameJoin[{DirectoryName[PacletObject["WolframInstitute/Recursor"]["Location"], 3], "Mathematics", "MathlibLink", "dist", "WolframInstitute__MathlibLink-0.1.0.paclet"}]
@@ -109,13 +110,22 @@ mathlibLinkArchive[] := SelectFirst[{
 installLibraryPaclet[entry_Association] := Quiet[Which[
 	TrueQ[libraryCancelledQ[]], libraryCancellation[],
 	entry["Paclet"] === "WolframInstitute/MathlibLink",
-		With[{archive = mathlibLinkArchive[]}, If[StringQ[archive],
-			libraryInstallFile[File[archive]],
-			Failure["MathlibLinkArchiveRequired", <|"MessageTemplate" -> "Build MathlibLink with make check-publish, or set MATHLIBLINK_PACLET to its local paclet archive."|>]
-		]],
+		libraryInstallMathlibArchive[entry],
 	KeyExistsQ[entry, "Archive"], libraryInstallURL[entry["Archive"]],
 	True, libraryInstallResource[entry["Paclet"], entry["MinimumVersion"]]
 ]]
+
+libraryInstallMathlibArchive[entry_Association] := Module[{archive = mathlibLinkArchive[], result},
+	If[StringQ[archive], Return[libraryInstallFile[File[archive]]]];
+	result = libraryInstallURL[entry["Archive"]];
+	If[MatchQ[result, Failure["LibraryDownloadFailed", KeyValuePattern["Result" -> KeyValuePattern["StatusCode" -> 404]]]],
+		Failure["MathlibLinkReleaseUnavailable", <|
+			"MessageTemplate" -> "The MathlibLink release archive is not available. Build MathlibLink with make check-publish, or set MATHLIBLINK_PACLET to a local paclet archive.",
+			"URL" -> entry["Archive"], "Result" -> result
+		|>],
+		result
+	]
+]
 
 (* Resolve the repository's archive metadata, then use the same cancellable
    transfer as libraries with an explicit release archive. *)
@@ -275,5 +285,10 @@ libraryUninstall[name_String] := With[{paclet = $libraryRegistry[name]["Paclet"]
 	]
 ] /; KeyExistsQ[$libraryRegistry, name]
 
-InstallRecursorLibraries[names : {___String}] := AssociationMap[libraryInstall, DeleteDuplicates[names]] /;
-	AllTrue[names, KeyExistsQ[$libraryRegistry, #] &]
+InstallRecursorLibraries[names : {___String}] := Block[{$ContextPath = $ContextPath}, With[{selected = DeleteDuplicates[names]},
+	(* MathlibLink supplies the toolchain needed to make LeanLink ready. *)
+	With[{order = If[ContainsAll[selected, {"LeanLink", "MathlibLink"}],
+		DeleteDuplicates[selected /. "LeanLink" -> Sequence["MathlibLink", "LeanLink"]], selected]},
+		KeyTake[AssociationMap[libraryInstall, order], selected]
+	]
+]] /; AllTrue[names, KeyExistsQ[$libraryRegistry, #] &]

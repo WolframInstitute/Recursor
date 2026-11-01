@@ -136,7 +136,7 @@ SetupRecursor[] := If[
 										Enabled -> Dynamic[Refresh[! busy && (installed[label] || statuses[label] =!= "Unsupported"), TrackedSymbols :> {busy, installed, statuses}]]
 									]
 								}, Alignment -> Right, Spacings -> 0.8], 180, Alignment -> {Right, Top}]
-							}], KeySortBy[libraries, Function[name, {Boole[installed[name]], name}]]],
+							}], libraries],
 							Alignment -> {{Left, Right}, Top}, Spacings -> {1, 1.5}], TrackedSymbols :> {installed}],
 							ImageSize -> {616, UpTo[320]}, Scrollbars -> {False, Automatic},
 							AppearanceElements -> None, Alignment -> {Left, Top}]},
