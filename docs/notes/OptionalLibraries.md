@@ -30,8 +30,13 @@ The remote archive follows the same cancellable download and ZIP validation
 as the other libraries. A missing release reports how to build or select a
 local archive.
 
-The first release is pending. For local development, build its archive with
-`make check-publish` in Mathematics/MathlibLink. Recursor finds
+The published [MathlibLink 0.1.0 release](https://github.com/WolframInstitute/MathlibLink/releases/tag/v0.1.0)
+supports Linux x86-64, Windows x86-64 and macOS ARM64. Its
+[documentation](https://www.wolframcloud.com/obj/wolframinstitute/MathlibLink/)
+describes installation, sessions and proof checking.
+
+For local development, build its archive with `make check-publish` in
+Mathematics/MathlibLink. Recursor finds
 `dist/WolframInstitute__MathlibLink-0.1.0.paclet` when loaded from the Institute
 source tree. Set `MATHLIBLINK_PACLET` to an absolute archive path for another
 layout.

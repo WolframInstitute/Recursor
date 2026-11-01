@@ -23,7 +23,7 @@ RelatedTutorials: [FormalVerification, VisualizingLambdaCompilation]
 - A desktop load can show a reminder about missing libraries until setup has been used or dismissed. Loading Recursor never opens the dialog or installs a library automatically.
 - SetupRecursor[] returns Null after opening the dialog. It returns Failure["NotebookRequired", ...] in scripts, cloud evaluations, CI and parallel kernels. Use [InstallRecursorLibraries]() for scripted installation.
 - MathlibLink installs missing prerequisites and prepares the pinned Lean toolchain and mathlib. It keeps compatible existing tools.
-- The MathlibLink paclet is taken first from MATHLIBLINK_PACLET, then a sibling Mathematics/MathlibLink/dist archive, then its versioned GitHub release. The first release is pending; use a local archive until it is published. A missing release reports how to build or select one.
+- The MathlibLink paclet is taken first from MATHLIBLINK_PACLET, then a sibling Mathematics/MathlibLink/dist archive, then its versioned GitHub release. A missing release reports how to build or select one.
 - If MathlibLink's paclet is installed but its runtime setup is incomplete, its button reads Uninstall. Resume runtime setup with InstallRecursorLibraries[{"MathlibLink"}], or uninstall the paclet and install it again in the dialog.
 - Libraries that need manual setup retain their setup instructions. Older MathlibLink releases without cancellable runtime setup show an indeterminate installation indicator while that operation runs.
 

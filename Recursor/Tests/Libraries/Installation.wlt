@@ -353,7 +353,7 @@ VerificationTest[
 	Module[{base = FileNameJoin[{$TemporaryDirectory, "recursor-archive-fixture"}], override, sibling, location},
 		override = FileNameJoin[{base, "selected.paclet"}];
 		sibling = FileNameJoin[{base, "Mathematics", "MathlibLink", "dist", "WolframInstitute__MathlibLink-0.1.0.paclet"}];
-		location = FileNameJoin[{base, "AI", "Recursor", "Recursor"}];
+		location = FileNameJoin[{base, "Programs", "Recursor", "Recursor"}];
 		Table[Block[{
 			Environment = Function[name, If[name === "MATHLIBLINK_PACLET", override, $Failed]],
 			PacletObject = (<|"Location" -> location|> &),

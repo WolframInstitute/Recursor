@@ -256,7 +256,7 @@ VerificationTest[
 			{
 				Cases[boxes, HoldPattern[WolframInstitute`Recursor`PackageScope`libraryUninstall[name_String]] :> name, Infinity],
 				! FreeQ[boxes, "\"varies; includes runtime\""],
-				! FreeQ[boxes, "https://leanprover-community.github.io/install/project.html"]
+				! FreeQ[boxes, "https://www.wolframcloud.com/obj/wolframinstitute/MathlibLink/#ref/InstallMathlib"]
 			}
 		]
 	]],

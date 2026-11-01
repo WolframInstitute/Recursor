@@ -28,11 +28,11 @@ $libraryRegistry = <|
 		"Archive" -> "https://www.wolframcloud.com/obj/wolframinstitute/Resources/49e/49e8aa40-9838-4632-a71f-7a9e5aa43f48/download/1-2-5/PacletArchive.paclet"|>,
 	"MathlibLink" -> <|"Paclet" -> "WolframInstitute/MathlibLink", "Context" -> "WolframInstitute`MathlibLink`", "MinimumVersion" -> "0.1.0",
 		"Description" -> "Mathlib declarations, computation and proofs.",
-		"URL" -> "https://leanprover-community.github.io/install/project.html",
+		"URL" -> "https://www.wolframcloud.com/obj/wolframinstitute/MathlibLink/#ref/InstallMathlib",
 		"SetupLinks" -> <|"mathlib documentation" -> "https://leanprover-community.github.io/mathlib4_docs/"|>,
-		"Platforms" -> {"Linux-x86-64", "Linux-ARM64", "MacOSX-ARM64", "MacOSX-x86-64", "Windows-x86-64"},
+		"Platforms" -> {"Linux-x86-64", "MacOSX-ARM64", "Windows-x86-64"},
 		"DownloadSize" -> AssociationMap["varies; includes runtime" &,
-			{"Linux-x86-64", "Linux-ARM64", "MacOSX-ARM64", "MacOSX-x86-64", "Windows-x86-64"}],
+			{"Linux-x86-64", "MacOSX-ARM64", "Windows-x86-64"}],
 		"License" -> "MIT; runtime licenses apply",
 		"Archive" -> "https://github.com/WolframInstitute/MathlibLink/releases/download/v0.1.0/WolframInstitute__MathlibLink-0.1.0.paclet"|>
 |>

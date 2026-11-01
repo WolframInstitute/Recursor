@@ -44,10 +44,9 @@ In a script, request the libraries directly:
 InstallRecursorLibraries[{"LeanLink", "MathlibLink", "Lambda"}]
 ```
 
-Ready installations are reused. Before the first MathlibLink release, its
-archive must be built in the sibling Mathematics/MathlibLink project, or its
-path supplied through MATHLIBLINK_PACLET. See the external-library reference
-pages for setup details.
+Ready installations are reused. MathlibLink is installed from its published
+release; its setup manages the pinned Lean and mathlib runtime. See the
+external-library reference pages for setup details.
 
 ## Compute and check proofs
 

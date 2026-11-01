@@ -24,7 +24,7 @@ RelatedTutorials: [FormalVerification, VisualizingLambdaCompilation]
 - MathlibLink prepares its runtime locally, installing missing elan, Git and curl tools automatically. It installs the pinned Lean toolchain without changing the global default and prepares the full mathlib library.
 - Setup downloads can be substantial. Runtime details are returned by RecursorLibraries["MathlibLink"].
 - An installed paclet that cannot load reports LibrarySetupRequired. Restart the kernel after updating a loaded paclet. Run InstallRecursorLibraries[{"MathlibLink"}] again to resume incomplete mathlib runtime setup.
-- The MathlibLink paclet is taken first from MATHLIBLINK_PACLET, then a sibling Mathematics/MathlibLink/dist archive, then its versioned GitHub release. The first release is pending; use a local archive until it is published.
+- The MathlibLink paclet is taken first from MATHLIBLINK_PACLET, then a sibling Mathematics/MathlibLink/dist archive, then its versioned GitHub release.
 - Run [CheckRecursorProofs]() to build and check the formalization against the shared mathlib installation. The terminal equivalent is make check-proofs.
 - No library is installed automatically when loading Recursor or checking library status.
 
