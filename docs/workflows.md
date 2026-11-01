@@ -11,7 +11,7 @@ desktop Wolfram installers.
 | --- | --- | --- |
 | [Repository checks](../.github/workflows/pull-request.yml) | Pull requests; called by CI | Source whitespace, proof pins, license and workflow syntax |
 | [CI](../.github/workflows/ci.yml) | Push to `main`; manual dispatch from `main` | Wolfram tests, Lean proofs, documentation, archive contents and installation |
-| [Release](../.github/workflows/release.yml) | `vX.Y.Z` tag; manual retry from `main` | Exact successful CI commit, PacletPage publication, then GitHub release |
+| [Release](../.github/workflows/release.yml) | Successful CI on `main`; `vX.Y.Z` tag; manual retry | Exact successful CI commit, PacletPage publication, then GitHub release |
 
 CI runs `make check`, `make test`, `make check-proofs` and `make check-publish`.
 The proof check builds both Lean modules, audits twelve theorem declarations
@@ -66,21 +66,36 @@ credentials are exposed only to the final publishing step.
 
 ## Release and publish
 
-1. Commit the version in `Recursor/PacletInfo.wl` and matching notes in
-   `docs/releases/X.Y.Z.md`, then push to `main`.
-2. Wait for CI to pass on that exact commit.
-3. Create and push the matching `vX.Y.Z` tag.
+Commit the version in `Recursor/PacletInfo.wl` and matching notes in
+`docs/releases/X.Y.Z.md`, then push to `main`:
+
+```sh
+git push origin main
+```
+
+Successful CI starts Release automatically for the current `main` commit.
+Failed CI does not publish. A superseded CI run is skipped, as is a version
+already tagged at another commit or already released. For subsequent
+releases, bump the version and add its release notes before pushing.
 
 The release workflow downloads that commit's `Recursor-verified` CI artifact,
 checks its provenance and digests, and restores the PacletPage build. It
 publishes the resource and documentation, checks the live site, then creates
-the GitHub release with the same archive. Publication does not submit to the
-Wolfram Paclet Repository.
+the matching version tag and GitHub release with the same archive. The tag
+points to the verified commit and is never moved. Publication does not submit
+to the Wolfram Paclet Repository.
 
 GitHub assets include the `.paclet`, `SHA256SUMS`, `build.json` and
 `pacletpage-build.tar.gz`. A retry accepts identical assets and refuses to
-replace changed ones. To retry an existing tag, dispatch **Release** from
-`main`. CI artifacts expire after 30 days.
+replace changed ones. Retry a failed **Release** run to retain its original
+CI artifact. If the tag exists, a manual **Release** dispatch from `main` is
+also available. Existing manually pushed version tags still require successful
+CI for their exact commit. CI artifacts expire after 30 days.
+
+Automatic publication uses GitHub's
+[`workflow_run` event](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#workflow_run).
+The gate checks the CI workflow path, repository, branch, completion status
+and commit before exposing publication credentials.
 
 Use `make check-publish` for a local dry run. `make publish` requires the
 verified archive and its corresponding build, checks both before publication,

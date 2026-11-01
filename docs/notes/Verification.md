@@ -95,7 +95,9 @@ publication dry run preserved the archive's SHA-256 exactly.
 Workflow validation covers YAML, actionlint, both supported ShellCheck
 versions, all 23 shell blocks and embedded Python. Fifteen release fixtures
 check provenance and release ordering; eight archive fixtures check the
-source, license, page coverage, cell styles and forbidden paths. Hosted CI
+source, license, page coverage, cell styles and forbidden paths. Twenty-four
+automatic-release fixtures check the triggering CI run, stale commits,
+existing versions, retries and tag creation without moving tags. Hosted CI
 remains a separate check after these workflows are pushed. No cloud
 publication was performed during local verification.
 

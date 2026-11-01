@@ -37,6 +37,9 @@ installer downloads. Pin external build dependencies. Preserve test and proof
 reports, verify the installed archive, and reuse the exact CI artifact for
 release. Publish through PacletPage before creating the GitHub release. Require
 successful CI for the tag's exact commit. See docs/workflows.md.
+After successful CI, automatically publish a new version on main from that
+run's verified artifact. Create its tag only after cloud publication succeeds;
+skip completed releases and never move an existing version tag.
 
 Keep LICENSE and Recursor/Assets/LICENSE identical so the repository and
 distributed paclet carry the same MIT license. Commit focused, verified changes.
