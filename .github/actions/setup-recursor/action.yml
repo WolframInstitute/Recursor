@@ -1,0 +1,119 @@
+name: Prepare Recursor
+description: Verify the container license and prepare the released proof, visualization and documentation dependencies.
+inputs:
+  documentation:
+    description: Require the pinned PacletPage builder and a working front end.
+    default: 'false'
+  entitlement:
+    description: On-demand license entitlement for the fresh hosted runner.
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Require the hosted-runner entitlement
+      shell: bash
+      env:
+        RECURSOR_ENTITLEMENT: ${{ inputs.entitlement }}
+      run: |
+        test -n "$RECURSOR_ENTITLEMENT" || { echo '::error::Set the WOLFRAMSCRIPT_ENTITLEMENTID repository secret; see docs/workflows.md.'; exit 1; }
+        [[ "$RECURSOR_ENTITLEMENT" != *$'\n'* && "$RECURSOR_ENTITLEMENT" != *$'\r'* ]] || { echo '::error::The entitlement ID must be one line.'; exit 1; }
+
+    - name: Check container tools and Wolfram license
+      shell: bash
+      env:
+        RECURSOR_ENTITLEMENT: ${{ inputs.entitlement }}
+      run: |
+        for tool in git make python3 wolframscript; do
+          command -v "$tool" >/dev/null || { echo "::error::Required runner tool is missing: $tool"; exit 1; }
+        done
+        python3 -c 'import sys; assert sys.version_info >= (3, 12), "Python 3.12 or later is required"'
+        export WOLFRAMSCRIPT_ENTITLEMENTID="$RECURSOR_ENTITLEMENT"
+        printf 'WOLFRAMSCRIPT_ENTITLEMENTID=%s\n' "$WOLFRAMSCRIPT_ENTITLEMENTID" >> "$GITHUB_ENV"
+        echo 'Using the configured on-demand entitlement.'
+        # Wolfram symbols must reach the kernel literally.
+        # shellcheck disable=SC2016
+        wolframscript -code '
+          If[! TrueQ[15 <= $VersionNumber < 16] || $SystemID =!= "Linux-x86-64", Print[{$Version, $SystemID}]; Exit[1]];
+          Print[$Version, " | ", $SystemID];'
+
+    - name: Install the verified MathlibLink release
+      shell: bash
+      run: |
+        archive="$RUNNER_TEMP/WolframInstitute__MathlibLink-0.1.0.paclet"
+        curl --fail --location --retry 3 --retry-all-errors --connect-timeout 30 --max-time 180 \
+          https://github.com/WolframInstitute/MathlibLink/releases/download/v0.1.0/WolframInstitute__MathlibLink-0.1.0.paclet \
+          --output "$archive"
+        echo "a592a6d29e4943e7cb00924b469864ae88855df77f38ce0f606ef9f2ef3b32f1  $archive" | sha256sum --check
+        export MATHLIBLINK_PACLET="$archive"
+        echo "MATHLIBLINK_PACLET=$MATHLIBLINK_PACLET" >> "$GITHUB_ENV"
+        # shellcheck disable=SC2016
+        wolframscript -code '
+          installed = PacletInstall[Environment["MATHLIBLINK_PACLET"]];
+          If[! MatchQ[installed, _PacletObject] || installed["Version"] =!= "0.1.0", Print[InputForm[installed]]; Exit[1]];'
+
+    - name: Install the verified Lambda release
+      shell: bash
+      run: |
+        archive="$RUNNER_TEMP/Wolfram__Lambda-1.2.6.paclet"
+        curl --fail --location --retry 3 --retry-all-errors --connect-timeout 30 --max-time 180 \
+          https://www.wolframcloud.com/obj/86bf2943-b420-4ae5-8bb8-1f85b2428031 \
+          --output "$archive"
+        echo "f511a206dcbe43511eae949efc017795a2769fb60c3b2d568116f1b5c86bfb46  $archive" | sha256sum --check
+        export RECURSOR_LAMBDA_PACLET="$archive"
+        # shellcheck disable=SC2016
+        wolframscript -code '
+          installed = PacletInstall[Environment["RECURSOR_LAMBDA_PACLET"]];
+          If[! MatchQ[installed, _PacletObject] || installed["Version"] =!= "1.2.6", Print[InputForm[installed]]; Exit[1]];'
+
+    - name: Prepare the proof and visualization libraries
+      shell: bash
+      run: |
+        # shellcheck disable=SC2016
+        wolframscript -code '
+          PacletDirectoryLoad[FileNameJoin[{Directory[], "Recursor"}]];
+          Needs["WolframInstitute`Recursor`"];
+          result = InstallRecursorLibraries[{"MathlibLink", "LeanLink", "Lambda"}];
+          If[! AssociationQ[result] || ! AllTrue[Values[result], MatchQ[#, _PacletObject] &], Print[InputForm[result]]; Exit[1]];
+          status = RecursorLibraries[];
+          If[! AllTrue[Values[status], #["Status"] === "Ready" &], Print[InputForm[status]]; Exit[1]];
+          If[Lookup[status["MathlibLink"], "Toolchain"] =!= "leanprover/lean4:v4.35.0" ||
+            Lookup[status["MathlibLink"], "Revision"] =!= "56a005855ea17e0b0958f73ec801ae140b0a1679", Print["Unexpected proof runtime."]; Exit[1]];
+          If[PacletObject["Wolfram/LeanLink"]["Version"] =!= "1.2.5" || PacletObject["Wolfram/Lambda"]["Version"] =!= "1.2.6", Print["Unexpected proof or visualization library version."]; Exit[1]];
+          Print[Map[KeyTake[#, {"Version", "Status"}] &, status]];'
+
+    - name: Install pinned documentation tools
+      if: inputs.documentation == 'true'
+      shell: bash
+      run: |
+        root="$RUNNER_TEMP/recursor-doc-tools"
+        mkdir -p "$root/sources" "$root/archives"
+        fetch() {
+          local name="$1" url="$2" revision="$3" checkout="$root/$1"
+          git init --quiet "$checkout"
+          git -C "$checkout" remote add origin "$url"
+          git -C "$checkout" fetch --quiet --depth 1 origin "$revision"
+          git -C "$checkout" checkout --quiet --detach FETCH_HEAD
+          test "$(git -C "$checkout" rev-parse HEAD)" = "$revision"
+          mkdir -p "$root/sources/$name"
+          git -C "$checkout" archive HEAD | tar -x -C "$root/sources/$name"
+        }
+        fetch PacletPage https://github.com/WolframInstitute/PacletPage.git ad583493187194eeaa22d7e774a30ca475934aa4
+        fetch MarkdownToNotebook https://github.com/WolframInstitute/MarkdownToNotebook.git c2b5703cc813ef620dd744fca82353bfbfb6ca6f
+        fetch WolframParser https://github.com/sw1sh/WolframParser.git 0697ceb787111be04f0d9f043d7674ee146c76c2
+        export RECURSOR_DOC_TOOLS="$root/sources"
+        echo "RECURSOR_DOC_TOOLS=$RECURSOR_DOC_TOOLS" >> "$GITHUB_ENV"
+        # shellcheck disable=SC2016
+        wolframscript -code '
+          root = Environment["RECURSOR_DOC_TOOLS"];
+          output = FileNameJoin[{DirectoryName[root], "archives"}];
+          Do[
+            archive = CreatePacletArchive[directory, output];
+            If[! StringQ[archive] || ! FileExistsQ[archive], Print["Could not pack a documentation dependency."]; Exit[1]];
+            installed = PacletInstall[archive, ForceVersionInstall -> True];
+            If[! MatchQ[installed, _PacletObject], Print[InputForm[installed]]; Exit[1]],
+            {directory, {FileNameJoin[{root, "WolframParser", "Parser"}], FileNameJoin[{root, "PacletPage"}]}}
+          ];
+          If[PacletObject["WolframInstitute/PacletPage"]["Version"] =!= "0.3.42", Print["Unexpected PacletPage version."]; Exit[1]];
+          Needs["WolframInstitute`PacletPage`"];
+          Needs["Wolfram`Parser`"];
+          If[! TrueQ[UsingFrontEnd[MatchQ[$FrontEnd, _FrontEndObject]]], Print["The documentation runner needs a working front end."]; Exit[1]];'

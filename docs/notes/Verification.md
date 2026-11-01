@@ -58,29 +58,42 @@ the entire universality development or all of mathlib.
 
 ## Documentation and walkthrough
 
-All 280 evaluated Markdown inputs, in 196 independent groups, completed
-without unexpected messages. The walkthrough contains 89 Input cells: 88
-computational inputs were evaluated, and the desktop installer invocation was
-retained for interactive use. Installation examples marked `eval: false` were
-not run as documentation side effects. Changed examples received additional
-checks of their actual result shapes.
+The documentation contains 286 executable Markdown inputs, plus two resource
+examples. PacletPage evaluates pages in fresh kernels and rejects failed,
+unevaluated or flagged output. Installation examples marked `eval: false` are
+not run as documentation side effects.
 
-The documentation and walkthrough contain 174 computed figures and tables.
-All were rendered in light and dark appearances. Visual review checked labels,
-legends, contrast, orientation and native display sizing. The final transition
-budget map uses MatrixPlot so both outcomes remain visible in dark appearance.
-The walkthrough's table style applies only to its dedicated output cells and
-does not override the global Grid style used by notebook controls.
-The largest translated syntax trees retain Wolfram's native automatic layout;
-their labels can be crowded. Rendering checks use saved output boxes, since
+The tutorial audit evaluated all 86 inputs without unexpected messages and
+rendered 52 computed figures in both light and dark appearances. These include
+syntax and scope diagrams, recurrence dependencies, finite orbits, shared
+trajectories, search ancestry and theorem-to-axiom graphs. Tutorials have no
+tabular computation outputs; the two Markdown tables specify binding rules
+and API migration names. Graph orientation and roots were checked against the
+represented computation, and crowded ancestry examples were reduced.
+
+The unchanged walkthrough contains 89 Input cells: its 88 computational inputs
+were evaluated and the desktop installer invocation was retained for
+interactive use. The reference figures and walkthrough outputs also passed
+their light and dark rendering review. Its table style applies only to
+dedicated output cells and does not override the general Grid style used by
+notebook controls. Rendering checks use saved output boxes, since
 round-tripping native TreeGraph values through InputForm can lose their roots.
 
 ## Packaging
 
-PacletPage built all 61 Recursor documentation notebooks. The local dry-run
-publication check produced an archive containing those pages and the four
-Lean project assets. Archive checks found no message cells, runtime caches or
-build artifacts. No cloud publication was performed.
+PacletPage 0.3.42, the pinned MarkdownToNotebook and WolframParser sources,
+Lambda 1.2.6, LeanLink 1.2.5 and MathlibLink 0.1.0 were used in an isolated
+Wolfram profile. The build contains all 61 documentation notebooks, the four
+Lean project assets and the MIT license. The archive audit compares packaged
+kernel code, assets and stylesheets byte-for-byte with the checkout and
+rejects message/code cells and runtime caches.
+
+Workflow validation covers YAML, actionlint, both supported ShellCheck
+versions, all 23 shell blocks and embedded Python. Fifteen release fixtures
+check provenance and release ordering; eight archive fixtures check the
+source, license, page coverage, cell styles and forbidden paths. Hosted CI
+remains a separate check after these workflows are pushed. No cloud
+publication was performed during local verification.
 
 ## Scope of the result
 

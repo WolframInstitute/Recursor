@@ -11,6 +11,9 @@ If[! loaded || ! MemberQ[$Packages, context], Print["The paclet did not load cle
 If[MemberQ[Rest[$ScriptCommandLine], "proofs"],
 	result = Symbol[context <> "CheckRecursorProofs"][];
 	If[! AssociationQ[result], Print[InputForm[result]]; Exit[1]];
+	If[! DirectoryQ["build"], CreateDirectory["build"]];
+	Put[result, "build/ProofReport.wl"];
+	CopyFile[FileNameJoin[{result["Directory"], "verification.log"}], "build/verification.log", OverwriteTarget -> True];
 	Print[Length[result["Theorems"]], " theorems checked; ", Length[result["KernelChecks"]], " modules replayed by Lean."];
 	Print["Proof project: ", result["Directory"]];
 	Exit[0]

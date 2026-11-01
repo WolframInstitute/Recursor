@@ -1,0 +1,47 @@
+name: Repository checks
+
+on:
+  pull_request:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  repository:
+    name: Sources and workflow syntax
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Check sources, proof metadata and license
+        run: |
+          git diff --check "$(git hash-object -t tree /dev/null)" HEAD
+          python3 - <<'PYTHON'
+          import tomllib
+          from pathlib import Path
+          root = Path("Recursor/Assets/Lean")
+          config = tomllib.loads((root / "lakefile.toml").read_text())
+          assert config["defaultTargets"] == ["Recursor", "Universality"], "Both proof modules must build"
+          assert (root / "lean-toolchain").read_text().strip() == "leanprover/lean4:v4.35.0", "Unexpected Lean toolchain"
+          requirement, = config["require"]
+          assert requirement["git"] == "https://github.com/leanprover-community/mathlib4.git"
+          assert requirement["rev"] == "56a005855ea17e0b0958f73ec801ae140b0a1679", "Unexpected mathlib revision"
+          assert Path("LICENSE").read_bytes() == Path("Recursor/Assets/LICENSE").read_bytes(), "Packaged license differs"
+          PYTHON
+
+      - name: Validate workflows with pinned actionlint
+        run: |
+          archive="$RUNNER_TEMP/actionlint.tar.gz"
+          curl --fail --location --retry 3 \
+            https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz \
+            --output "$archive"
+          echo "8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8  $archive" | sha256sum --check
+          tar -xzf "$archive" -C "$RUNNER_TEMP" actionlint
+          "$RUNNER_TEMP/actionlint" -color

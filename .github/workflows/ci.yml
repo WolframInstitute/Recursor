@@ -1,0 +1,190 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: recursor-ci
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  trusted-ref:
+    name: Require main
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Require the trusted branch
+        env:
+          REF: ${{ github.ref }}
+        run: |
+          test "$REF" = refs/heads/main || { echo '::error::Run CI from main.'; exit 1; }
+
+  repository:
+    uses: ./.github/workflows/pull-request.yml
+
+  paclet:
+    name: Wolfram tests, Lean proofs and paclet
+    needs: [trusted-ref, repository]
+    runs-on: ubuntu-24.04
+    container:
+      image: wolframresearch/wolframengine:15.0@sha256:3ac08d6aaa33e6dccdda38d14cf8a7e5c22cc84d037a1a7562900914a487ef65
+      options: --user root --init
+    env:
+      QT_QPA_PLATFORM: offscreen
+    timeout-minutes: 180
+    steps:
+      - name: Install Linux container tools
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends git make python3 ca-certificates curl tar xz-utils unzip zstd
+          git config --system --add safe.directory "$GITHUB_WORKSPACE"
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: ./.github/actions/setup-recursor
+        with:
+          documentation: 'true'
+          entitlement: ${{ secrets.WOLFRAMSCRIPT_ENTITLEMENTID }}
+
+      - name: Check sources and run all Wolfram tests
+        run: |
+          set -o pipefail
+          mkdir -p build/ci
+          make check 2>&1 | tee build/ci/check.log
+          make test 2>&1 | tee build/ci/local.log
+          make check-proofs 2>&1 | tee build/ci/proofs.log
+
+      - name: Preserve Wolfram test results
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: Recursor-tests-Linux-x86-64
+          path: |
+            build/ci/*.log
+            build/TestReports.wl
+            build/ProofReport.wl
+            build/verification.log
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Build and check documentation and archive
+        run: |
+          set -o pipefail
+          mkdir -p build/ci
+          make check-publish 2>&1 | tee build/ci/documentation.log
+
+      - name: Install the archive and check the public Wolfram interface
+        run: |
+          # shellcheck disable=SC2016
+          wolframscript -code '
+            archive = First[FileNames["*.paclet", FileNameJoin[{Directory[], "dist"}]]];
+            installed = PacletInstall[archive, ForceVersionInstall -> True];
+            If[! MatchQ[installed, _PacletObject], Print[InputForm[installed]]; Exit[1]];
+            Needs["WolframInstitute`Recursor`"];
+            If[! StringStartsQ[FindFile["WolframInstitute`Recursor`"], installed["Location"]], Print["The package did not load from the installed archive."]; Exit[1]];
+            program = RecursorExamples["Factorial"];
+            ok = EvaluateRecursor[program, 6] === 720 &&
+              EvaluateRecursor[WhileLoop[Var, Acc, Pred[Acc]], 100] === 0 &&
+              EvaluateRecursor[Mul[Var, Var], 3, Method -> "Lambda"] === 9 &&
+              ParseRecursor[FormatRecursor[program]] === program &&
+              FileExistsQ[PacletObject["WolframInstitute/Recursor"]["AssetLocation", "License"]] &&
+              FileExistsQ[FileNameJoin[{PacletObject["WolframInstitute/Recursor"]["AssetLocation", "Lean"], "Universality.lean"}]];
+            If[! TrueQ[ok], Print["The installed Recursor interface or assets failed their checks."]; Exit[1]];'
+
+      - name: Audit the archive against the source
+        run: |
+          python3 - <<'PYTHON'
+          import re, subprocess, zipfile
+          from pathlib import Path, PurePosixPath
+          source = Path("Recursor")
+          archive, = Path("dist").glob("*.paclet")
+          with zipfile.ZipFile(archive) as package:
+              assert package.testzip() is None, "Corrupt paclet archive"
+              files = [name for name in package.namelist() if not name.endswith("/")]
+              prefix = archive.stem + "/"
+              assert len(files) == len(set(files)), "Duplicate archive entries"
+              assert all(name.startswith(prefix) and ".." not in PurePosixPath(name).parts for name in files), "Unexpected archive root"
+              contents = {name[len(prefix):]: package.read(name) for name in files}
+              for folder in ("Kernel", "Assets", "FrontEnd"):
+                  tracked = subprocess.check_output(["git", "ls-files", "-z", str(source / folder)], text=True).split("\0")
+                  expected = {Path(p).relative_to(source).as_posix(): Path(p).read_bytes() for p in tracked if p}
+                  actual = {name: data for name, data in contents.items() if name.startswith(folder + "/")}
+                  assert actual == expected, f"The archive differs from {folder} sources"
+              assert contents["Assets/LICENSE"] == Path("LICENSE").read_bytes(), "Missing or changed license"
+              notebooks = {name: data for name, data in contents.items() if name.startswith("Documentation/") and name.endswith(".nb")}
+              assert len(notebooks) == len(list(Path("docs/en").rglob("*.md"))), "Documentation pages missing from the archive"
+              assert all(not re.search(rb',\s*"(?:Code|Message)"', data) for data in notebooks.values()), "Unexpected documentation cell style"
+              assert all(not (set(PurePosixPath(name).parts) & {".git", ".lake", "build", "__pycache__"}) for name in contents), "Runtime or build cache in the archive"
+          print(f"Verified {len(notebooks)} documentation pages, source files and the MIT license.")
+          PYTHON
+
+      - name: Preserve the verified archive and PacletPage build
+        run: |
+          git diff --exit-code
+          git diff --cached --exit-code
+          mkdir -p build/release
+          cp dist/*.paclet build/release/
+          tar --exclude=build/cache --exclude=build/incremental \
+            -czf build/release/pacletpage-build.tar.gz -C Recursor \
+            Documentation ResourceDefinition.nb build
+          python3 - <<'PY'
+          import hashlib, json, os, re
+          from pathlib import Path
+          root = Path("build/release")
+          version = re.search(r'^\s*"Version" -> "([^"]+)"', Path("Recursor/PacletInfo.wl").read_text(), re.M)[1]
+          archive = root / f"WolframInstitute__Recursor-{version}.paclet"
+          assert list(root.glob("*.paclet")) == [archive], "Expected exactly the current version's archive"
+          files = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in [archive, root / "pacletpage-build.tar.gz"]}
+          manifest = {"commit": os.environ["GITHUB_SHA"], "version": version, "run_id": os.environ["GITHUB_RUN_ID"], "files": files}
+          provenance = root / "build.json"
+          provenance.write_text(json.dumps(manifest, indent=2) + "\n")
+          files[provenance.name] = hashlib.sha256(provenance.read_bytes()).hexdigest()
+          (root / "SHA256SUMS").write_text("".join(f"{digest}  {name}\n" for name, digest in sorted(files.items())))
+          PY
+
+      - name: Verify publication can reuse the build in a clean checkout
+        env:
+          RECURSOR_RESTORE: ${{ runner.temp }}/recursor-release-check
+        run: |
+          git worktree add --detach "$RECURSOR_RESTORE" HEAD
+          trap 'git worktree remove --force "$RECURSOR_RESTORE"' EXIT
+          tar -xzf build/release/pacletpage-build.tar.gz -C "$RECURSOR_RESTORE/Recursor"
+          mkdir -p "$RECURSOR_RESTORE/dist"
+          cp build/release/*.paclet "$RECURSOR_RESTORE/dist/"
+          # Wolfram symbols and contexts must reach the kernel literally.
+          # shellcheck disable=SC2016
+          wolframscript -code '
+            Needs["WolframInstitute`PacletPage`"];
+            root = Environment["RECURSOR_RESTORE"];
+            expected = FileHash[First[FileNames["*.paclet", FileNameJoin[{root, "dist"}]]], "SHA256"];
+            result = PublishPacletPage[FileNameJoin[{root, "Recursor"}], "Recursor", "Build" -> False, "DryRun" -> True, "ResourceOptions" -> {"Build" -> False, "Parallel" -> False}];
+            If[! AssociationQ[result] || ! StringQ[result["Resource"]["Archive"]] || FileHash[result["Resource"]["Archive"], "SHA256"] =!= expected, Print[InputForm[result]]; Exit[1]];'
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: Recursor-verified
+          path: build/release/*
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 30
+
+      - name: Preserve documentation log
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: Recursor-documentation-log
+          path: build/ci/documentation.log
+          if-no-files-found: warn
+          retention-days: 30

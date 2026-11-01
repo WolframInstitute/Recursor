@@ -31,6 +31,16 @@ writes to the Wolfram Cloud and is a separate release action.
 Keep scripts limited to check.wls, test.wls and docs.wls. Put language code in
 the paclet, examples in documentation, and design rationale in docs/notes.
 
+Follow the PARILink and MathlibLink CI/CD arrangement: use the official Linux
+Wolfram Engine container for Wolfram checks and packaging, without desktop
+installer downloads. Pin external build dependencies. Preserve test and proof
+reports, verify the installed archive, and reuse the exact CI artifact for
+release. Publish through PacletPage before creating the GitHub release. Require
+successful CI for the tag's exact commit. See docs/workflows.md.
+
+Keep LICENSE and Recursor/Assets/LICENSE identical so the repository and
+distributed paclet carry the same MIT license. Commit focused, verified changes.
+
 ## Documentation playbooks
 
 Read the relevant local skill before writing docs: [symbol pages](.agent-skills/wolfram-symbol-page/SKILL.md),

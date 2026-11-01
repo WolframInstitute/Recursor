@@ -21,4 +21,4 @@ check-publish:
 publish:
 	$(WOLFRAMSCRIPT) -file scripts/docs.wls publish
 
-all: check test check-publish
+all: check test check-proofs check-publish
