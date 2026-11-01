@@ -64,6 +64,13 @@ the account authorized to publish the resource. No separate GitHub environment
 is required. Pull requests use read-only tokens and no secrets. Cloud
 credentials are exposed only to the final publishing step.
 
+The hosted launcher retries the exact kernel-startup licensing error twice,
+after 10 and 30 seconds. It preserves output and exit status for every other
+failure; tests, evaluated documentation and publication are never retried by
+this launcher. If startup still fails, check the entitlement's expiry, active
+kernel count and service-credit balance. Retrying cannot repair an expired
+entitlement or an exhausted allowance.
+
 ## Release and publish
 
 Commit the version in `Recursor/PacletInfo.wl` and matching notes in
