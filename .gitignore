@@ -1,0 +1,39 @@
+# Build output, distributions and generated documentation
+/build/
+/dist/
+/Recursor/build/
+/Recursor/Documentation/
+/Recursor/ResourceDefinition.nb
+*.paclet
+
+# Lean and language-tool caches
+.lake/
+**/.lake/
+*.olean
+*.olean.private
+*.olean.server
+*.ilean
+*.trace
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+
+# Local settings, credentials and logs
+.env
+.env.*
+!.env.example
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+.DS_Store
+.AppleDouble
+
+# Local agent history and snapshots
+.nit/
+gol-snapshots/
