@@ -37,6 +37,10 @@ the implementation as well as the Options declaration.
   tests. Render representative outputs in light and dark appearances; correct
   the data or representation if a figure is awkward instead of adding hidden
   sizes.
+- Render saved notebook output boxes when reviewing delivered figures. A
+  native Graph value can lose consumed TreeGraph options such as GraphRoot
+  when round-tripped through InputForm. Capture boxes during evaluation rather
+  than using a reconstructed Graph as evidence of the original rendering.
 
 Sources: [ImageSize](https://reference.wolfram.com/language/ref/ImageSize.html),
 [Options](https://reference.wolfram.com/language/ref/Options.html),

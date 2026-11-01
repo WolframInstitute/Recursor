@@ -18,11 +18,14 @@ separate command; these checks do not publish to Wolfram Cloud.
 
 ## Language and implementation
 
-The source check covers 43 exported symbols and their reference pages.
-All 111 Wolfram tests passed, including syntax and scope, parser round trips,
+The source check covers 45 exported symbols and their reference pages.
+All 189 Wolfram tests passed, including syntax and scope, parser round trips,
 strictness and divergence budgets, both evaluation backends, counter-machine
 and partial-recursive translations, genetic operators, seeded search,
 visualizations, installation behavior and proof-workspace configuration.
+Visualization checks cover inherited native defaults, SetOptions, explicit
+option precedence, single-node trees, syntax roots and distinct directed
+paths for repeated subexpressions.
 
 The partial-recursive translator was also reviewed against the formal
 translation. Its eight constructors agree, including strict composition,
@@ -55,17 +58,29 @@ the entire universality development or all of mathlib.
 
 ## Documentation and walkthrough
 
-All 278 evaluated Markdown inputs, in 194 independent groups, and all 65
-walkthrough Input cells completed without unexpected messages. Installation
-examples marked `eval: false` were not run as documentation side effects.
-Changed examples received additional checks of their actual result shapes.
+All 280 evaluated Markdown inputs, in 196 independent groups, completed
+without unexpected messages. The walkthrough contains 89 Input cells: 88
+computational inputs were evaluated, and the desktop installer invocation was
+retained for interactive use. Installation examples marked `eval: false` were
+not run as documentation side effects. Changed examples received additional
+checks of their actual result shapes.
 
-The documentation and walkthrough contain 169 computed figures and tables.
+The documentation and walkthrough contain 174 computed figures and tables.
 All were rendered in light and dark appearances. Visual review checked labels,
-legends, contrast, orientation and bounded display sizes. The final transition
+legends, contrast, orientation and native display sizing. The final transition
 budget map uses MatrixPlot so both outcomes remain visible in dark appearance.
 The walkthrough's table style applies only to its dedicated output cells and
 does not override the global Grid style used by notebook controls.
+The largest translated syntax trees retain Wolfram's native automatic layout;
+their labels can be crowded. Rendering checks use saved output boxes, since
+round-tripping native TreeGraph values through InputForm can lose their roots.
+
+## Packaging
+
+PacletPage built all 61 Recursor documentation notebooks. The local dry-run
+publication check produced an archive containing those pages and the four
+Lean project assets. Archive checks found no message cells, runtime caches or
+build artifacts. No cloud publication was performed.
 
 ## Scope of the result
 
