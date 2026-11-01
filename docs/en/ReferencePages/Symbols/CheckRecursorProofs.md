@@ -15,6 +15,8 @@ RelatedTutorials: [FormalVerification, UniversalComputation]
 
 ## Details & Options
 
+- MathlibLink and LeanLink are loaded internally when needed. After installation, no separate Needs call is required to use CheckRecursorProofs[].
+
 - Install LeanLink and MathlibLink with [SetupRecursor]() or [InstallRecursorLibraries]() before running the check. The check does not install missing libraries.
 - The proof project uses Lean 4.35.0 and the pinned mathlib v4.35.0 checkout managed by MathlibLink. An incompatible runtime returns Failure.
 - The sources are copied from the paclet to a user proof workspace and built with Lake. Mathlib is shared with MathlibLink; no second checkout is created.

@@ -46,8 +46,8 @@ EvaluateRecursor[WhileLoop[Var, Acc, Pred[Acc]], 100]
 
 `WhileLoop` provides unbounded iteration. `ToRecursor` translates counter
 machines and partial-recursive codes. Lean checks the formal language's
-universality theorem. Evaluations use finite resource budgets by default
-and return `Failure` when a limit is reached.
+universality theorem. The evaluator uses finite resource budgets by default
+and returns `Failure` when one is exhausted. Each budget accepts `Infinity`.
 
 ## External libraries
 

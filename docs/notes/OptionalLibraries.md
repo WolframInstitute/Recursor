@@ -1,15 +1,20 @@
 # External libraries
 
-SetupRecursor opens the desktop library installer, following PureMathSetup's
-per-library workflow. InstallRecursorLibraries provides the script interface.
-Both offer Lambda, LeanLink and MathlibLink. The shared registry and readiness
-checks follow PureMath's OptionalLibraries.wl. Loading Recursor and checking
+SetupRecursor opens the desktop library installer. InstallRecursorLibraries
+provides the script interface. Both offer Lambda, LeanLink and MathlibLink
+through a shared registry and readiness checks. Loading Recursor and checking
 library status never download or install software.
 
 Lambda provides lambda-calculus diagrams. LeanLink provides the native proof
 bridge. MathlibLink manages the pinned mathlib installation and gives generic
 access to its declarations, computations and proofs. These are explicit
 external-library choices; documentation tooling is not part of this list.
+
+Recursor functions load the links they use internally.
+`CheckRecursorProofs[]` needs no separate MathlibLink or LeanLink load.
+The walkthrough loads those contexts explicitly only where it demonstrates
+their own APIs. For example, using the short names `StartMathlibSession` and
+`MathlibCall` directly requires ``Needs["WolframInstitute`MathlibLink`"]``.
 
 Ready installations are kept. LeanLink readiness checks its local native
 runtime before compiling a small theorem, preventing an implicit elan download.
@@ -32,8 +37,8 @@ source tree. Set `MATHLIBLINK_PACLET` to an absolute archive path for another
 layout.
 
 After installing the bridge, Recursor delegates runtime setup to
-`InstallMathlib[]`. MathlibLink installs missing elan, Git and curl tools and prepares the Lean
-toolchain, mathlib checkout and cache locally. It reuses compatible existing
+`InstallMathlib[]`. MathlibLink installs missing elan, Git and curl tools and
+prepares the Lean toolchain, mathlib checkout and cache locally. It reuses compatible existing
 tools. Downloads come from upstream releases; computations run on the user's
 computer. The installer does not change shell profiles or the global Lean default.
 Its `MathlibInstallation[]` record reports the exact versions and directory.

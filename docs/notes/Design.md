@@ -1,9 +1,8 @@
 # Design decisions
 
 The paclet contains the DSL, compiler, normalizer, genetic operators, proposal
-validation, search and program visualizations. PureMath's GUIDE.md supplied
-the code style and StructuredPackageFormat conventions; Ruliology supplied
-the paclet/docs/test layout. Neither is a runtime dependency.
+validation, search and program visualizations. It uses StructuredPackageFormat
+and a paclet, documentation and test layout adapted from Ruliology.
 
 - Retain compact syntax names for recognizable program trees. Public actions
   use operation-first names; queries and representations use descriptive noun

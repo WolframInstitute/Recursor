@@ -7,7 +7,7 @@ operation-first names such as MutateRecursor and EvaluateRecursor. Use noun
 phrases for returned properties and representations, Q for predicates, and
 ToRecursor for conversion. Follow [the naming skill](.agent-skills/wolfram-api-naming/SKILL.md).
 
-Follow the Wolfram Language style in the PureMath GUIDE.md: tab indentation,
+Follow the Wolfram Language style in GUIDE.md: tab indentation,
 specific argument patterns, local helpers, no trailing top-level semicolons,
 and Failure values for computations that start but cannot finish. Wrong-shape
 arguments remain unevaluated; predicates return booleans.

@@ -1,13 +1,12 @@
 # Code and documentation conventions
 
-Kernel code follows PureMath's Wolfram Language style: StructuredPackageFormat,
+Kernel code follows Wolfram Language conventions: StructuredPackageFormat,
 one public context, private helpers, tab indentation, complete API names,
 specific patterns and structured failures. Syntax nodes retain their original
 compact spellings. Wrong-type function inputs stay unevaluated; predicates
 are boolean. Evaluation limits do not decide termination.
 
-Documentation follows the local .agent-skills playbooks adapted from PureMath
-and Ruliology. Markdown is authoritative; PacletPage generates notebooks.
+Documentation follows the local .agent-skills playbooks and Ruliology conventions. Markdown is authoritative; PacletPage generates notebooks.
 Use Symbol, Guide and TechNote templates, real Usage signatures, headerless
 option tables, and reciprocal related-page links. Context names need doubled
 Markdown backticks. Keep a caption ending in a colon before each wl fence.
