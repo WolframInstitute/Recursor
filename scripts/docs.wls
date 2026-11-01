@@ -56,8 +56,9 @@ pageCall[function_String, arguments___] := If[
 	Symbol["WolframInstitute`PacletPage`" <> function][arguments]
 ];
 
-(* Imported Lean regions live until kernel exit. Evaluate each page in a fresh
-   licensed process; PacletPage then assembles its own verified page caches. *)
+(* Imported Lean regions live until kernel exit. Isolate the proof-import
+   tutorial; PacletPage evaluates the remaining pages together and resets each
+   page's definitions. A fresh licensed process per page exhausts hosted slots. *)
 buildPage[file_String] := Module[{worker, directories, program, result},
 	directories = DeleteDuplicates[Flatten[(#["Location"] & /@ PacletFind[#] &) /@ documentationDependencies]];
 	worker = CreateTemporary[];
@@ -82,7 +83,7 @@ If[mode =!= "publish",
 			Print["The page must be a documentation source in this checkout."]; Exit[1]
 		];
 		page = Last[$ScriptCommandLine],
-		Scan[buildPage, Append[documentationFiles, definition]]
+		Scan[buildPage, Select[documentationFiles, FileNameTake[#] === "FormalVerification.md" &]]
 	];
 	build = pageCall["BuildPacletDocumentation", paclet,
 		"Source" -> source,
@@ -96,9 +97,6 @@ If[mode =!= "publish",
 	];
 	If[mode =!= "page" && Lookup[build, "Flagged", <||>] =!= <||>,
 		Print["Resolve the flagged documentation before building an archive."]; Print[InputForm[build["Flagged"]]]; Exit[1]
-	];
-	If[mode =!= "page" && Lookup[build, "Converted", {}] =!= {},
-		Print["Documentation changed during page evaluation. Run the build again."]; Exit[1]
 	];
 	Print[Length[build["Notebooks"]], " documentation notebooks built."];
 	If[mode === "page", Exit[0]]

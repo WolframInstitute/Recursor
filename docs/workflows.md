@@ -19,7 +19,9 @@ and their axioms, and replays the modules in Lean's kernel. The formal model
 and implementation have distinct verification scopes; see
 [the verification record](notes/Verification.md).
 
-Documentation pages evaluate in fresh kernels. The archive audit compares
+PacletPage evaluates the documentation in one sequential build, resetting
+definitions between pages. The proof-import tutorial runs in a separate kernel
+to release its native Lean regions when it exits. The archive audit compares
 kernel code, Lean sources, stylesheets and the packaged license with the
 checkout, verifies every documentation page is present, and rejects runtime
 caches. An installed-archive check exercises the interpreter, lambda backend,
@@ -59,17 +61,16 @@ gh secret set WOLFRAM_CLOUD_USER --repo WolframInstitute/Recursor
 gh secret set WOLFRAM_CLOUD_PASSWORD --repo WolframInstitute/Recursor
 ```
 
-The entitlement licenses fresh Wolfram kernels. Cloud credentials belong to
-the account authorized to publish the resource. No separate GitHub environment
+Use a dedicated Recursor entitlement to keep its kernel allowance separate
+from other projects. The entitlement licenses fresh Wolfram kernels. Cloud
+credentials belong to the account authorized to publish the resource. No separate GitHub environment
 is required. Pull requests use read-only tokens and no secrets. Cloud
 credentials are exposed only to the final publishing step.
 
-The hosted launcher retries the exact kernel-startup licensing error twice,
-after 10 and 30 seconds. It preserves output and exit status for every other
-failure; tests, evaluated documentation and publication are never retried by
-this launcher. If startup still fails, check the entitlement's expiry, active
-kernel count and service-credit balance. Retrying cannot repair an expired
-entitlement or an exhausted allowance.
+If a fresh kernel reports "No valid password found", check the entitlement's
+expiry, active kernel count and service-credit balance. Occupied license slots
+can outlive a stopped runner until their leases expire. Repeated CI runs can
+consume the remaining slots; wait for capacity rather than repeatedly retrying.
 
 ## Release and publish
 

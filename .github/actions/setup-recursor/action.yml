@@ -18,59 +18,6 @@ runs:
         test -n "$RECURSOR_ENTITLEMENT" || { echo '::error::Set the WOLFRAMSCRIPT_ENTITLEMENTID repository secret; see docs/workflows.md.'; exit 1; }
         [[ "$RECURSOR_ENTITLEMENT" != *$'\n'* && "$RECURSOR_ENTITLEMENT" != *$'\r'* ]] || { echo '::error::The entitlement ID must be one line.'; exit 1; }
 
-    - name: Retry startup license failures on the hosted runner
-      shell: bash
-      run: |
-        launcher="$RUNNER_TEMP/recursor-wolframscript"
-        mkdir -p "$launcher"
-        export RECURSOR_WOLFRAMSCRIPT
-        RECURSOR_WOLFRAMSCRIPT=$(command -v wolframscript)
-        echo "RECURSOR_WOLFRAMSCRIPT=$RECURSOR_WOLFRAMSCRIPT" >> "$GITHUB_ENV"
-        cat > "$launcher/wolframscript" <<'PY'
-        #!/usr/bin/env python3
-        import os
-        import subprocess
-        import sys
-        import threading
-        import time
-
-        command = [os.environ["RECURSOR_WOLFRAMSCRIPT"], *sys.argv[1:]]
-        startup_errors = {
-            "No valid password found. Connection closed by WolframKernel.",
-            "Connection closed by WolframKernel. No valid password found.",
-        }
-
-        def forward(source, target, captured):
-            while chunk := source.read1(65536):
-                target.buffer.write(chunk)
-                target.buffer.flush()
-                captured.append(chunk)
-
-        for attempt in range(3):
-            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            output = [[], []]
-            readers = [threading.Thread(target=forward, args=args) for args in (
-                (process.stdout, sys.stdout, output[0]),
-                (process.stderr, sys.stderr, output[1]),
-            )]
-            for reader in readers:
-                reader.start()
-            status = process.wait()
-            for reader in readers:
-                reader.join()
-            diagnostic = " ".join(b"".join(output[0] + output[1]).decode("utf-8", errors="replace").split())
-            if status != 255 or diagnostic not in startup_errors:
-                sys.exit(status if status >= 0 else 128 - status)
-            if attempt < 2:
-                delay = (10, 30)[attempt]
-                print(f"Wolfram kernel licensing failed before evaluation; retrying in {delay} seconds.", file=sys.stderr, flush=True)
-                time.sleep(delay)
-        print("::error::Wolfram kernel licensing failed after three startup attempts. Check the entitlement expiry, available kernel slots and service credits.", file=sys.stderr)
-        sys.exit(255)
-        PY
-        chmod +x "$launcher/wolframscript"
-        echo "$launcher" >> "$GITHUB_PATH"
-
     - name: Check container tools and Wolfram license
       shell: bash
       env:

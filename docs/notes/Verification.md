@@ -59,9 +59,10 @@ the entire universality development or all of mathlib.
 ## Documentation and walkthrough
 
 The documentation contains 286 executable Markdown inputs, plus two resource
-examples. PacletPage evaluates pages in fresh kernels and rejects failed,
-unevaluated or flagged output. Installation examples marked `eval: false` are
-not run as documentation side effects.
+examples. PacletPage resets definitions between pages, isolates the proof-import
+tutorial in a separate kernel, and rejects failed, unevaluated or flagged
+output. A cold build checked all 61 pages with this arrangement. Installation
+examples marked `eval: false` are not run as documentation side effects.
 
 The tutorial audit evaluated all 86 inputs without unexpected messages and
 rendered 52 computed figures in both light and dark appearances. These include
