@@ -8,7 +8,7 @@ Paclet: WolframInstitute/Recursor
 URI: WolframInstitute/Recursor/tutorial/EvolutionaryExperiments
 Keywords: [computational essay, natural numbers, program behavior]
 RelatedGuides: [Evolution, Recursor, Visualization]
-RelatedTutorials: [LanguageSemantics, UniversalComputation]
+RelatedTutorials: [MeasuringOEISSequenceDiscovery, LanguageSemantics, UniversalComputation]
 ---
 
 ## A finite search experiment

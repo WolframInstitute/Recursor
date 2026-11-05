@@ -1,0 +1,28 @@
+{
+  "Repository": "https://github.com/WolframInstitute/OEIS",
+  "RepositoryRevision": "d82309e7f1436b641490aa8abf426c39e0d158a7",
+  "DataRevision": "69c667df437a093151042e2cbec1f1198e70765a",
+  "SequenceTree": "620667d5f3792fe7c28039ee8534910354f8466b",
+  "VerifiedUTC": "2026-11-05T17:22:32.757369+00:00",
+  "SequenceFiles": 393450,
+  "RawBytes": 573052965,
+  "FirstID": "A000001",
+  "LastID": "A393922",
+  "BlobIntegrity": "Every raw file matches its Git blob object identifier.",
+  "InventorySHA256": "2f6091f44c70386249e517303de5ff48c0ab590ac92b191e904c545373ca4431",
+  "InventoryFormat": "Sorted relative path, NUL, lowercase file SHA256, newline; UTF-8.",
+  "Eligibility": "Explicit nonn keyword, nonnegative first offset, at least 20 integer terms, all recorded terms nonnegative, neither dead nor full.",
+  "EligibilityCounts": {
+    "Eligible": 283167,
+    "No nonn keyword": 23775,
+    "Dead or full entry": 2673,
+    "Fewer than 20 terms": 83219,
+    "Negative offset": 616
+  },
+  "NumericErrors": [],
+  "PilotSourceHashesMatched": 40,
+  "PilotSampleReproducedFromFullCorpus": true,
+  "DataLicense": "CC BY-SA 4.0",
+  "DataCopyright": "OEIS Foundation Inc. and its contributors",
+  "DataLicenseURL": "https://creativecommons.org/licenses/by-sa/4.0/"
+}

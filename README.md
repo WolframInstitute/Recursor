@@ -88,6 +88,7 @@ Run [`CheckRecursorProofs[]`](https://www.wolframcloud.com/obj/wolframinstitute/
 - [Halting and budgets](https://www.wolframcloud.com/obj/wolframinstitute/Recursor/#tutorial/HaltingAndBudgets) — trajectories and finite observation.
 - [Lambda reductions](https://www.wolframcloud.com/obj/wolframinstitute/Recursor/#tutorial/VisualizingLambdaCompilation) — compiled terms and reduction graphs.
 - [Evolutionary experiments](https://www.wolframcloud.com/obj/wolframinstitute/Recursor/#tutorial/EvolutionaryExperiments) — mutation, search and ancestry.
+- [OEIS benchmark](docs/en/Tutorials/MeasuringOEISSequenceDiscovery.md) — measured fits, training curves and held-out predictions using WolframInstitute/OEIS data.
 
 ## Development
 
@@ -112,3 +113,4 @@ See [GUIDE.md](GUIDE.md) for development conventions and
 [CI and release guide](docs/workflows.md) describes automated checks and publication.
 
 Released under the [MIT license](LICENSE).
+OEIS benchmark data retain their [CC BY-SA 4.0 license and attribution](Recursor/Assets/Benchmarks/OEIS/NOTICE.md).

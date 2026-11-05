@@ -6,7 +6,7 @@ Paclet: WolframInstitute/Recursor
 URI: WolframInstitute/Recursor/ref/EvolveRecursor
 RelatedGuides: [Evolution, Recursor]
 SeeAlso: [EvaluateRecursor, RecursorProgramQ]
-RelatedTutorials: [EvolutionaryExperiments]
+RelatedTutorials: [EvolutionaryExperiments, MeasuringOEISSequenceDiscovery]
 ---
 
 ## Usage
@@ -83,6 +83,10 @@ KeyTake[EvolveRecursor[{{0, 7}, {1, 8}}, "PopulationSize" -> 3, "EliteCount" -> 
 ```
 
 ## Applications
+
+The [OEIS sequence-discovery benchmark](paclet:WolframInstitute/Recursor/tutorial/MeasuringOEISSequenceDiscovery)
+measures exact training fits, error curves and later-term predictions using
+pinned data from WolframInstitute/OEIS.
 
 Inspect best fitness over generations:
 

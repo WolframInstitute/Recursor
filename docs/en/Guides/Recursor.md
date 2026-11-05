@@ -8,7 +8,7 @@ Title: Recursor
 Description: Recursor tools for computing with natural-number programs
 Keywords: [program synthesis, computation, Recursor]
 RelatedGuides: [Compilation, Evaluation, Evolution, Language, Visualization]
-RelatedTutorials: [FormalVerification, EvolvingLambdaExpressions,VisualizingLambdaCompilation, ArithmeticPatterns, EvolutionaryExperiments, EvolvingPrograms, HaltingAndBudgets, LanguageSemantics, MigratingNotebooks, UniversalComputation]
+RelatedTutorials: [FormalVerification, EvolvingLambdaExpressions,VisualizingLambdaCompilation, ArithmeticPatterns, EvolutionaryExperiments, MeasuringOEISSequenceDiscovery, EvolvingPrograms, HaltingAndBudgets, LanguageSemantics, MigratingNotebooks, UniversalComputation]
 ---
 
 ## Abstract

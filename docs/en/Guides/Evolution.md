@@ -8,7 +8,7 @@ Title: Evolution
 Description: Evolution tools for computing with natural-number programs
 Keywords: [program synthesis, computation, Recursor]
 RelatedGuides: [Recursor]
-RelatedTutorials: [EvolvingLambdaExpressions, EvolutionaryExperiments, LanguageSemantics, UniversalComputation]
+RelatedTutorials: [EvolvingLambdaExpressions, EvolutionaryExperiments, MeasuringOEISSequenceDiscovery, LanguageSemantics, UniversalComputation]
 ---
 
 ## Abstract
