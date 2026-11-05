@@ -65,3 +65,18 @@ VerificationTest[EvaluateRecursor[WhileLoop[Const[0], Const[1], Acc], 0, "MaxSte
 
 VerificationTest[EvaluateRecursor[WhileLoop[Var, Acc, Pred[Acc]], 20, "MaxSteps" -> Infinity, "TimeLimit" -> Infinity, "MemoryLimit" ->
 	Infinity], 0, TestID -> "unbounded-mode-terminating-program"]
+
+VerificationTest[
+	EvaluateRecursor[Iter[Const[10^30], Const[7], Succ[Acc]], 0, "MaxSteps" -> 10]["Tag"],
+	"StepLimit", TestID -> "iteration-count-beyond-machine-integer-obeys-budget"
+]
+
+VerificationTest[
+	EvaluateRecursor[Rec[Const[10^30], Const[7], Succ[Acc]], 0, "MaxSteps" -> 10]["Tag"],
+	"StepLimit", TestID -> "recursion-count-beyond-machine-integer-obeys-budget"
+]
+
+VerificationTest[
+	EvaluateRecursor[CoRec[Const[10^30], Const[7]], 0, "MaxSteps" -> 10]["Tag"],
+	"StepLimit", TestID -> "history-count-beyond-machine-integer-obeys-budget"
+]

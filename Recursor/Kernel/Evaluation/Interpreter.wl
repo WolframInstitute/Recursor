@@ -70,19 +70,23 @@ interpret[Rem[a_, b_], environment_] := With[{
 interpret[Ifz[condition_, zero_, positive_], environment_] :=
 	recursorEvaluateNode[If[recursorEvaluateNode[condition, environment] === 0, zero, positive], environment]
 
+(* Explicit counters support natural numbers beyond the host iterator limit. *)
 interpret[Iter[count_, base_, step_], environment_] := Module[{
-	iterations = recursorEvaluateNode[count, environment], accumulator = recursorEvaluateNode[base, environment]
+	iterations = recursorEvaluateNode[count, environment], accumulator = recursorEvaluateNode[base, environment], index = 0
 },
-	Do[accumulator = recursorEvaluateNode[step, Append[environment, "Accumulator" -> accumulator]], {iterations}];
+	While[index < iterations,
+		accumulator = recursorEvaluateNode[step, Append[environment, "Accumulator" -> accumulator]];
+		index++
+	];
 	accumulator
 ]
 
 interpret[Rec[count_, base_, step_], environment_] := Module[{
-	iterations = recursorEvaluateNode[count, environment], accumulator = recursorEvaluateNode[base, environment]
+	iterations = recursorEvaluateNode[count, environment], accumulator = recursorEvaluateNode[base, environment], index = 0
 },
-	Do[
-		accumulator = recursorEvaluateNode[step, Join[environment, <|"Accumulator" -> accumulator, "Index" -> index|>]],
-		{index, 0, iterations - 1}
+	While[index < iterations,
+		accumulator = recursorEvaluateNode[step, Join[environment, <|"Accumulator" -> accumulator, "Index" -> index|>]];
+		index++
 	];
 	accumulator
 ]
@@ -91,8 +95,9 @@ historyStep[step_, environment_, history_] := Append[history,
 	Length[history] -> recursorEvaluateNode[step, Join[environment, <|"Index" -> Length[history], "History" -> history|>]]
 ]
 
-interpret[CoRec[count_, step_], environment_] := With[{last = recursorEvaluateNode[count, environment]},
-	Lookup[Nest[historyStep[step, environment, #] &, <||>, last + 1], last]
+interpret[CoRec[count_, step_], environment_] := Module[{last = recursorEvaluateNode[count, environment], history = <||>},
+	While[Length[history] <= last, history = historyStep[step, environment, history]];
+	Lookup[history, last]
 ]
 
 interpret[CGet[index_], environment_] := Lookup[environment["History"], recursorEvaluateNode[index, environment], 0]
