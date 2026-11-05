@@ -8,6 +8,10 @@ contains executable analysis, five scientific figures and the complete trial
 function. Dataset and result files are in
 [`Recursor/Assets/Benchmarks/OEIS`](../../Recursor/Assets/Benchmarks/OEIS).
 
+The [full-corpus experiment protocol](OEISCorpusExperiment.md) extends this
+pilot with complete corpus coverage, additional seeds, mutation comparisons
+and standalone WL program exports.
+
 ## Source and selection
 
 - Repository revision: `d82309e7f1436b641490aa8abf426c39e0d158a7`.
