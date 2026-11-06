@@ -8418,10 +8418,13 @@ three and at most sixty nodes; mutation calls do not invoke Lean or mathlib."}\
       "Caption"]}, Open]], 
   Cell[CellGroupData[{Cell[TextData[{"What are the loss curves like?"}], 
       "Section"], Cell[TextData[{"Loss is ", 
-        StyleBox["1 - exact training matches/8", "Input"], ", recorded for \
-the best candidate at each generation boundary; it is not a squared numerical \
-error or a per-candidate trace."}], "Text"], 
-     Cell[CellGroupData[{Cell[BoxData[RowBox[{"ListLinePlot", "[", 
+        StyleBox["1 - exact training matches/8", "Input"], ": zero means all \
+eight training terms match, 0.125 means seven match, and one means none \
+match. It measures exact agreement, not how close a wrong number is to the \
+correct one. Each curve tracks the best training score so far; a \
+downward-only curve is expected because that best score is retained."}], 
+      "Text"], Cell[CellGroupData[
+       {Cell[BoxData[RowBox[{"ListLinePlot", "[", 
             RowBox[{RowBox[{"{", RowBox[{"primaryLoss", ",", "cohortLoss"}], 
                 "}"}], ",", RowBox[{"DataRange", "\[Rule]", RowBox[
                  {"{", RowBox[{"0", ",", "20"}], "}"}]}], ",", 
@@ -8724,18 +8727,24 @@ error or a per-candidate trace."}], "Text"],
             (RowBox[{"Legended", "[", RowBox[{#1, ",", RowBox[{"Placed", "[", 
                    RowBox[{#2, ",", "After"}], "]"}]}], "]"}] & ), 
            Editable -> True]], "Output", CellLabel -> "Out[23]="]}, Open]], 
-     Cell[TextData[{"Figure 19. Across 283,164 completed first-pass searches, \
-mismatch falls from 70.45% to 64.43%; the selected-fit curve reaches zero by \
-selection and is not an unbiased success estimate."}], "Caption"], 
-     Cell[CellGroupData[{Cell[BoxData[RowBox[{"Histogram", "[", 
-            RowBox[{RowBox[{"Flatten", "[", RowBox[{"MapThread", "[", 
-                  RowBox[{"ConstantArray", ",", RowBox[{"{", RowBox[
-                       {RowBox[{"Range", "[", RowBox[{"0", ",", "20"}], 
-                          "]"}], ",", "generationCounts"}], "}"}]}], "]"}], 
-                "]"}], ",", RowBox[{"{", RowBox[{RowBox[{"-", "0.5`"}], ",", 
-                  "20.5`", ",", "1"}], "}"}], ",", RowBox[{"Frame", 
-                "\[Rule]", "True"}], ",", RowBox[{"FrameLabel", "\[Rule]", 
-                RowBox[{"{", RowBox[{"\"First-fit generation\"", ",", 
+     Cell[TextData[{"Figure 19. Blue averages all 283,164 completed \
+first-pass searches; orange averages the 9,110 training fits selected from \
+completed seeds."}], "Caption"], 
+     Cell[TextData[{StyleBox["The broad search improves modestly:", 
+         FontWeight -> Bold], " mean loss falls from 70.45% to 64.43%, \
+equivalent to increasing the average number of correct training terms from \
+2.36 to 2.85 out of eight. The orange curve ends at zero because it includes \
+only eventual training fits; it cannot establish that the search usually \
+succeeds."}], "Text"], Cell[CellGroupData[
+       {Cell[BoxData[RowBox[{"Histogram", "[", RowBox[
+             {RowBox[{"Flatten", "[", RowBox[{"MapThread", "[", RowBox[
+                   {"ConstantArray", ",", RowBox[{"{", RowBox[{RowBox[
+                         {"Range", "[", RowBox[{"0", ",", "20"}], "]"}], ",", 
+                        "generationCounts"}], "}"}]}], "]"}], "]"}], ",", 
+              RowBox[{"{", RowBox[{RowBox[{"-", "0.5`"}], ",", "20.5`", ",", 
+                  "1"}], "}"}], ",", RowBox[{"Frame", "\[Rule]", "True"}], 
+              ",", RowBox[{"FrameLabel", "\[Rule]", RowBox[{"{", 
+                  RowBox[{"\"First-fit generation\"", ",", 
                     "\"OEIS entries\""}], "}"}]}]}], "]"}]], "Input", 
          CellLabel -> "In[24]:="], Cell[BoxData[GraphicsBox[
            {{Directive[EdgeForm[Directive[Thickness[Small], Opacity[0.66], 
@@ -8982,9 +8991,15 @@ selection and is not an unbiased success estimate."}], "Caption"],
               {None, Scaled[0.05]}}, Ticks -> {Automatic, Automatic}}]], 
          "Output", CellLabel -> "Out[24]="]}, Open]], 
      Cell[TextData[{"Figure 20. A perfect training fit already exists at \
-generation zero in 7,107 of the selected histories (78.01%); 2,003 first \
-reach it later."}], "Caption"], Cell[CellGroupData[
-       {Cell[BoxData[RowBox[{"ListLinePlot", "[", 
+generation zero in 7,107 selected histories (78.01%); 2,003 first reach it \
+later."}], "Caption"], Cell[TextData[{"Generation zero is the population of \
+24 randomly generated programs, before mutation or crossover. ", 
+        StyleBox["Most selected training fits therefore already have a \
+fitting candidate before evolution begins", FontWeight -> Bold], ", although \
+evolution can subsequently find another fitting program or reduce its size. \
+The later 2,003 fits cannot be credited specifically to mutation without a \
+comparison that removes it."}], "Text"], 
+     Cell[CellGroupData[{Cell[BoxData[RowBox[{"ListLinePlot", "[", 
             RowBox[{RowBox[{RowBox[{"(", RowBox[{RowBox[{"1", "-", 
                       FractionBox[RowBox[{"#1", "[", "\"FitnessHistory\"", 
                          "]"}], "8"]}], "&"}], ")"}], "/@", RowBox[
@@ -9342,8 +9357,22 @@ reach it later."}], "Caption"], Cell[CellGroupData[
                    RowBox[{#2, ",", "After"}], "]"}]}], "]"}] & ), 
            Editable -> True]], "Output", CellLabel -> "Out[25]="]}, Open]], 
      Cell[TextData[{"Figure 21. A028552 first fits at generation 19, A037915 \
-at 14 and A191967 at 11, while A002837 starts with a perfect training fit but \
-later predicts a wrong term."}], "Caption"]}, Open]], 
+at 14 and A191967 at 11; A002837 has zero training loss from the start."}], 
+      "Caption"], Cell[TextData[{"Flat portions mean the best exact-match \
+count stays unchanged; a drop of 0.125 means one additional training term \
+matches. A028552's final drop adds six matches at once. Only generation \
+boundaries were recorded, so the connecting lines do not show every candidate \
+or identify which operator caused an improvement."}], "Text"], 
+     Cell[TextData[{StyleBox["Lower training loss is not yet evidence of \
+discovering the sequence rule.", FontWeight -> Bold], " A002837 has zero \
+training loss but fails at its 42nd recorded term. Of all 9,110 training \
+fits, only 897 pass the next twelve terms and 91 match every recorded term. \
+On the matched 2,048-entry control, evolution and evolution without mutation \
+each achieve eight primary successes, versus nine for random search. Thus \
+these curves show training progress and some predictive programs, but do not \
+yet demonstrate a generalization advantage from mutation. Held-out terms were \
+checked only for final selected programs, so there is no measured test-loss \
+curve over generations."}], "Text"]}, Open]], 
   Cell[CellGroupData[{Cell[TextData[{"How successful is generalization?"}], 
       "Section"], Cell[CellGroupData[
        {Cell[BoxData[RowBox[{"BarChart", "[", RowBox[{FractionBox[RowBox[

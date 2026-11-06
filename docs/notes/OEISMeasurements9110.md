@@ -90,19 +90,27 @@ These ten examples illustrate different recovered behaviors. In prediction plots
 
 ## What are the loss curves like?
 
-Loss is `1 - exact training matches/8`, recorded for the best candidate at each generation boundary; it is not a squared numerical error or a per-candidate trace.
+Loss is `1 - exact training matches/8`: zero means all eight training terms match, 0.125 means seven match, and one means none match. It measures exact agreement, not how close a wrong number is to the correct one. Each curve tracks the best training score so far; a downward-only curve is expected because that best score is retained.
 
 ![Mean training loss](figures/OEISMeasurements9110/05-loss.svg)
 
-*Figure 19. Across 283,164 completed first-pass searches, mismatch falls from 70.45% to 64.43%; the selected-fit curve reaches zero by selection and is not an unbiased success estimate.*
+*Figure 19. Blue averages all 283,164 completed first-pass searches; orange averages the 9,110 training fits selected from completed seeds.*
+
+**The broad search improves modestly:** mean loss falls from 70.45% to 64.43%, equivalent to increasing the average number of correct training terms from 2.36 to 2.85 out of eight. The orange curve ends at zero because it includes only eventual training fits; it cannot establish that the search usually succeeds.
 
 ![First generation with a training fit](figures/OEISMeasurements9110/06-first-fit.svg)
 
-*Figure 20. A perfect training fit already exists at generation zero in 7,107 of the selected histories (78.01%); 2,003 first reach it later.*
+*Figure 20. A perfect training fit already exists at generation zero in 7,107 selected histories (78.01%); 2,003 first reach it later.*
+
+Generation zero is the population of 24 randomly generated programs, before mutation or crossover. **Most selected training fits therefore already have a fitting candidate before evolution begins**, although evolution can subsequently find another fitting program or reduce its size. The later 2,003 fits cannot be credited specifically to mutation without a comparison that removes it.
 
 ![Individual loss histories](figures/OEISMeasurements9110/07-individual-loss.svg)
 
-*Figure 21. A028552 first fits at generation 19, A037915 at 14 and A191967 at 11, while A002837 starts with a perfect training fit but later predicts a wrong term.*
+*Figure 21. A028552 first fits at generation 19, A037915 at 14 and A191967 at 11; A002837 has zero training loss from the start.*
+
+Flat portions mean the best exact-match count stays unchanged; a drop of 0.125 means one additional training term matches. A028552's final drop adds six matches at once. Only generation boundaries were recorded, so the connecting lines do not show every candidate or identify which operator caused an improvement.
+
+**Lower training loss is not yet evidence of discovering the sequence rule.** A002837 has zero training loss but fails at its 42nd recorded term. Of all 9,110 training fits, only 897 pass the next twelve terms and 91 match every recorded term. On the matched 2,048-entry control, evolution and evolution without mutation each achieve eight primary successes, versus nine for random search. Thus these curves show training progress and some predictive programs, but do not yet demonstrate a generalization advantage from mutation. Held-out terms were checked only for final selected programs, so there is no measured test-loss curve over generations.
 
 ## How successful is generalization?
 
