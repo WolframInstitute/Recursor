@@ -6,6 +6,11 @@ to a complete, pinned OEIS snapshot. The protocol is frozen before the main run;
 results are written as jobs finish. An unfinished run is reported with its
 actual coverage, never as a completed corpus experiment.
 
+The [9,110-fit checkpoint report](OEISMeasurements9110.md) includes the
+measured loss curves, mutation comparisons, prediction checks and an
+evaluated Mathematica notebook. It is an interim result at 07:26:05 UTC on
+6 November 2026; the workers continued after that checkpoint.
+
 ## Data and coverage
 
 The source is [WolframInstitute/OEIS](https://github.com/WolframInstitute/OEIS),
