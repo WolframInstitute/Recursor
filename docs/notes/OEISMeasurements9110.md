@@ -254,7 +254,7 @@ Flat portions mean the best exact-match count stays unchanged; a drop of 0.125 m
 
 ![Prediction agreement map](figures/OEISMeasurements9110/10-predictions.svg)
 
-*Figure 34. Each column is a program and each row a sequence position; 0 means a match, 1 a wrong or unfinished prediction.*
+*Figure 34. Each column is a program: blue marks correct predictions, orange marks wrong or unfinished predictions.*
 
 ![Constant and varying training prefixes](figures/OEISMeasurements9110/11-prefix-groups.svg)
 
