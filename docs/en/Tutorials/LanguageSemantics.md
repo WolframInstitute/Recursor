@@ -15,8 +15,8 @@ numbers to natural numbers. Partial means that some inputs may never yield a
 value. Values are arbitrary-precision integers.
 
 The atoms are Var, Acc and Idx. Const[n] has an integer payload. Unary heads
-are Succ, Pred, Half and CGet; binary heads are Add, Mul, Monus, Rem and CoRec;
-ternary heads are Ifz, Iter, Rec and WhileLoop. Arity is exact.
+are Succ, Pred, Half and CGet; binary heads are Add, Mul, Monus, Rem, Quot,
+CoRec and Let; ternary heads are Ifz, Iter, Rec and WhileLoop. Arity is exact.
 
 Check syntax and lexical closure:
 
@@ -34,7 +34,8 @@ RecursorProgramTree[Add[Mul[Var, Var], Const[1]]]
 ## Arithmetic and branching
 
 Pred and Monus stop at zero. Half is division by two rounded down. Rem[a,b]
-gives a when b is zero, otherwise the usual remainder. Arithmetic evaluates
+gives a when b is zero, otherwise the usual remainder. Quot[a,b] gives zero
+when b is zero, otherwise the quotient rounded down. Arithmetic evaluates
 both arguments fully, from left to right. Multiplying a diverging expression
 by zero still diverges. Ifz evaluates its condition fully, then only the
 selected zero or positive branch.
@@ -78,6 +79,7 @@ The nearest enclosing binder wins. Other outer bindings remain visible.
 | Rec | step | Acc, Idx |
 | CoRec | step | Idx, CGet |
 | WhileLoop | condition, step | Acc |
+| Let | body | Var |
 
 CoRec does not bind Acc. It inherits an outer accumulator. In this tree, the
 Acc leaf refers to the enclosing Iter even though it occurs inside CoRec:
@@ -90,6 +92,25 @@ Read an outer accumulator through a course-of-values recursion:
 
 ```wl
 EvaluateRecursor[Iter[Const[1], Const[9], CoRec[Const[2], Acc]], 0]
+```
+
+## Local input
+
+Let[value,body] evaluates value in the enclosing scope, then body with Var
+bound to that value. Acc, Idx and CGet stay as they were. A closed program
+used as the body is thereby applied to value, so programs compose.
+
+Apply the factorial program to twice the input:
+
+```wl
+Table[EvaluateRecursor[Let[Mul[Const[2], Var], RecursorExamples["Factorial"]], n], {n, 0, 5}]
+```
+
+Sum a program over the indices of a loop. The body reads the loop index
+through Let and the running sum through Acc:
+
+```wl
+ListLinePlot[Table[EvaluateRecursor[Rec[Var, Const[0], Add[Acc, Let[Idx, RecursorExamples["DivisorCount"]]]], n], {n, 0, 40}], DataRange -> {0, 40}, AxesLabel -> {"Input", "Sum of divisor counts"}]
 ```
 
 ## Unbounded iteration

@@ -7,7 +7,7 @@ URI: WolframInstitute/Recursor/guide/Evolution
 Title: Evolution
 Description: Evolution tools for computing with natural-number programs
 Keywords: [program synthesis, computation, Recursor]
-RelatedGuides: [Recursor]
+RelatedGuides: [Recursor, Synthesis]
 RelatedTutorials: [EvolvingLambdaExpressions, EvolutionaryExperiments, MeasuringOEISSequenceDiscovery, LanguageSemantics, UniversalComputation]
 ---
 

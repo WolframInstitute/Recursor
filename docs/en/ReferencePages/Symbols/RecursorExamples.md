@@ -19,7 +19,8 @@ RelatedTutorials: [ArithmeticPatterns]
 
 ## Details & Options
 
-- Names are Countdown, Factorial, Fibonacci, Nonterminating, PopulationCount, PowerOfTwo and Square.
+- Names are Catalan, Countdown, DigitSum, DivisorCount, Factorial, Fibonacci, Nonterminating, PopulationCount, PowerOfTwo, Prime and Square.
+- Prime gives the primes from input zero. It searches upward and tests each candidate with DivisorCount through Let.
 - Unknown names return Missing. The Nonterminating example needs a finite evaluation budget.
 
 ## Basic Examples

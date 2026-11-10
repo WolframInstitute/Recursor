@@ -6,6 +6,9 @@ to a complete, pinned OEIS snapshot. The protocol is frozen before the main run;
 results are written as jobs finish. An unfinished run is reported with its
 actual coverage, never as a completed corpus experiment.
 
+The [corpus v2 experiment](OEISCorpusExperimentV2.md) repeats this study on
+the same snapshot with deterministic synthesis in place of evolution.
+
 The [9,110-fit checkpoint report](OEISMeasurements9110.md) includes the
 measured loss curves, mutation comparisons, prediction checks and an
 evaluated Mathematica notebook. It is an interim result at 07:26:05 UTC on

@@ -1,6 +1,6 @@
 Needs["WolframInstitute`Recursor`"]
 
-VerificationTest[RecursorProgramQ /@ Values[RecursorExamples[]], ConstantArray[True, 7], TestID -> "example-programs-closed"]
+VerificationTest[RecursorProgramQ /@ Values[RecursorExamples[]], ConstantArray[True, 11], TestID -> "example-programs-closed"]
 
 VerificationTest[RecursorExpressionQ /@ {Acc, Idx, CGet[Const[0]]}, {True, True, True}, TestID -> "open-expressions-well-formed"]
 
@@ -53,3 +53,21 @@ VerificationTest[FailureQ[ParseRecursor["Succ[Succ[Var]]", "MaxNodes" -> 2]], Tr
 VerificationTest[FailureQ[ParseRecursor["Succ[Succ[Var]]", "MaxDepth" -> 2]], True, TestID -> "parser-depth-limit"]
 
 VerificationTest[RecursorProgramQ[Nest[Succ, Var, 70]], True, TestID -> "language-has-no-sixty-node-limit"]
+
+VerificationTest[Lookup[$RecursorGrammar, {"Quot", "Let"}], {2, 2}, TestID -> "grammar-lists-quotient-and-let"]
+
+VerificationTest[RecursorExpressionQ /@ {Quot[Var, Const[2]], Let[Var, Var], Quot[Var], Let[Var], Let[Var, Var, Var]}, {True, True, False, False,
+	False}, TestID -> "quotient-and-let-arities"]
+
+VerificationTest[RecursorProgramQ /@ {Let[Succ[Var], Mul[Var, Var]], Let[Var, Acc], Let[Idx, Var], Let[Var, CGet[Var]]}, {True, False, False, False},
+	TestID -> "let-binds-only-the-input"]
+
+VerificationTest[RecursorFreeVariables[Let[Acc, Idx]], {Acc, Idx}, TestID -> "let-keeps-enclosing-bindings-free"]
+
+VerificationTest[RecursorProgramQ[Rec[Var, Const[0], Add[Acc, Let[Idx, Mul[Var, Var]]]]], True, TestID -> "let-inherits-loop-bindings"]
+
+VerificationTest[Lookup[RecursorSites[Iter[Var, Const[0], Let[Acc, Var]]], "Bindings"], {{}, {}, {}, {Acc}, {Acc}, {Acc}}, TestID -> "let-sites-add-no-bindings"]
+
+VerificationTest[ParseRecursor["Let[Quot[Var, Const[3]], Succ[Var]]"], Let[Quot[Var, Const[3]], Succ[Var]], TestID -> "parser-reads-quotient-and-let"]
+
+VerificationTest[FailureQ[ParseRecursor["Let[Var, Acc]"]], True, TestID -> "parser-rejects-unbound-accumulator-under-let"]

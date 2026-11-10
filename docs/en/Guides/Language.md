@@ -8,7 +8,7 @@ Title: Language
 Description: Language tools for computing with natural-number programs
 Keywords: [program synthesis, computation, Recursor]
 RelatedGuides: [Recursor]
-RelatedTutorials: [EvolvingLambdaExpressions, ArithmeticPatterns, LanguageSemantics, UniversalComputation]
+RelatedTutorials: [EvolvingLambdaExpressions, ArithmeticPatterns, LanguageSemantics, SynthesizingSequences, UniversalComputation]
 ---
 
 ## Abstract
@@ -37,9 +37,11 @@ Language tools for the Recursor natural-number language.
 - `Idx` Idx denotes the current recursion index.
 - `Ifz` Ifz[condition, zero, positive] branches on zero.
 - `Iter` Iter[count, base, step] repeats a step a bounded number of times.
+- `Let` Let[value, body] evaluates a body with a new input.
 - `Monus` Monus[a, b] subtracts b from a, stopping at zero.
 - `Mul` Mul[a, b] multiplies two values.
 - `Pred` Pred[e] subtracts one, stopping at zero.
+- `Quot` Quot[a, b] computes an integer quotient.
 - `Rec` Rec[count, base, step] performs primitive recursion.
 - `Rem` Rem[a, b] computes a remainder.
 - `Succ` Succ[e] adds one to e.

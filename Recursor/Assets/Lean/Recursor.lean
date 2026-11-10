@@ -14,11 +14,12 @@ inductive Expr where
   | var | acc | idx
   | const (n : Nat)
   | succ (e : Expr) | pred (e : Expr) | half (e : Expr)
-  | add (a b : Expr) | mul (a b : Expr) | monus (a b : Expr) | rem (a b : Expr)
+  | add (a b : Expr) | mul (a b : Expr) | monus (a b : Expr) | rem (a b : Expr) | quot (a b : Expr)
   | ifz (condition zero positive : Expr)
   | iter (count base step : Expr) | recur (count base step : Expr)
   | corec (count step : Expr) | cget (index : Expr)
   | whileLoop (base condition step : Expr)
+  | letE (value body : Expr)
   deriving DecidableEq, Repr
 
 structure Env where
@@ -33,7 +34,7 @@ inductive Unary where
   deriving DecidableEq, Repr
 
 inductive Binary where
-  | add | mul | monus | rem
+  | add | mul | monus | rem | quot
   deriving DecidableEq, Repr
 
 def Unary.apply : Unary → Nat → Nat
@@ -46,6 +47,7 @@ def Binary.apply : Binary → Nat → Nat → Nat
   | .mul, a, b => a * b
   | .monus, a, b => a - b
   | .rem, a, b => a % b
+  | .quot, a, b => a / b
 
 inductive Frame where
   | unary (op : Unary)
@@ -64,6 +66,7 @@ inductive Frame where
   | whileBase (condition step : Expr) (env : Env)
   | whileCondition (value : Nat) (condition step : Expr) (env : Env)
   | whileNext (condition step : Expr) (env : Env)
+  | letBody (body : Expr) (env : Env)
   deriving DecidableEq, Repr
 
 inductive State where
@@ -87,12 +90,14 @@ def step : State → State
     | .mul a b => .evaluate a env (.binaryLeft .mul b env :: stack)
     | .monus a b => .evaluate a env (.binaryLeft .monus b env :: stack)
     | .rem a b => .evaluate a env (.binaryLeft .rem b env :: stack)
+    | .quot a b => .evaluate a env (.binaryLeft .quot b env :: stack)
     | .ifz c z p => .evaluate c env (.branch z p env :: stack)
     | .iter c b s => .evaluate c env (.iterCount b s env :: stack)
     | .recur c b s => .evaluate c env (.recCount b s env :: stack)
     | .corec c s => .evaluate c env (.corecCount s env :: stack)
     | .cget i => .evaluate i env (.historyRead env.history :: stack)
     | .whileLoop b c s => .evaluate b env (.whileBase c s env :: stack)
+    | .letE v b => .evaluate v env (.letBody b env :: stack)
   | .returning v [] => .halt v
   | .returning v (frame :: stack) => match frame with
     | .unary op => .returning (op.apply v) stack
@@ -121,6 +126,7 @@ def step : State → State
     | .whileCondition a c s env =>
       if v = 0 then .returning a stack
       else .evaluate s {env with accumulator := a} (.whileNext c s env :: stack)
+    | .letBody b env => .evaluate b {env with input := v} stack
 
 /-- A bounded observer; `none` says only that this observation did not finish. -/
 def run : Nat → State → Option Nat

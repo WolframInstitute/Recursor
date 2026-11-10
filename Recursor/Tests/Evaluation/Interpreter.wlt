@@ -80,3 +80,35 @@ VerificationTest[
 	EvaluateRecursor[CoRec[Const[10^30], Const[7]], 0, "MaxSteps" -> 10]["Tag"],
 	"StepLimit", TestID -> "history-count-beyond-machine-integer-obeys-budget"
 ]
+
+VerificationTest[
+	Table[EvaluateRecursor[Quot[Const[a], Const[b]], 0], {a, 0, 9}, {b, 0, 4}],
+	Table[If[b === 0, 0, Quotient[a, b]], {a, 0, 9}, {b, 0, 4}],
+	TestID -> "quotient-including-zero-divisor"
+]
+
+VerificationTest[Table[EvaluateRecursor[Add[Mul[Const[3], Quot[Var, Const[3]]], Rem[Var, Const[3]]], n], {n, 0, 20}], Range[0, 20], TestID -> "quotient-and-remainder-reconstruct-input"]
+
+VerificationTest[Table[EvaluateRecursor[Half[Var], n] === EvaluateRecursor[Quot[Var, Const[2]], n], {n, 0, 12}], ConstantArray[True, 13], TestID -> "half-is-quotient-by-two"]
+
+VerificationTest[Table[EvaluateRecursor[Let[Add[Var, Const[2]], Mul[Var, Var]], n], {n, 0, 5}], Range[2, 7]^2, TestID -> "let-binds-input"]
+
+VerificationTest[EvaluateRecursor[Let[Const[2], Let[Succ[Var], Mul[Var, Var]]], 100], 9, TestID -> "nested-let-shadows-input"]
+
+VerificationTest[EvaluateRecursor[Add[Let[Const[5], Var], Var], 7], 12, TestID -> "let-scope-ends-with-its-body"]
+
+VerificationTest[Table[EvaluateRecursor[Rec[Var, Const[0], Add[Acc, Let[Idx, Mul[Var, Var]]]], n], {n, 0, 8}], Table[Sum[k^2, {k, 0, n - 1}], {n, 0, 8}], TestID -> "let-inherits-accumulator-and-index"]
+
+VerificationTest[EvaluateRecursor[CoRec[Const[3], Let[Idx, Add[Var, CGet[Pred[Var]]]]], 0], 6, TestID -> "let-inherits-history"]
+
+VerificationTest[FailureQ[EvaluateRecursor[Let[RecursorExamples["Nonterminating"], Const[1]], 0, "MaxSteps" -> 50]], True, TestID -> "let-value-is-strict"]
+
+VerificationTest[Table[EvaluateRecursor[Let[Mul[Const[2], Var], RecursorExamples["Factorial"]], n], {n, 0, 5}], (2 Range[0, 5])!, TestID -> "let-applies-a-closed-program"]
+
+VerificationTest[Table[EvaluateRecursor[RecursorExamples["Prime"], n], {n, 0, 11}], Prime[Range[12]], TestID -> "prime-search-through-let"]
+
+VerificationTest[Table[EvaluateRecursor[RecursorExamples["Catalan"], n], {n, 0, 10}], CatalanNumber[Range[0, 10]], TestID -> "catalan-exact-quotient"]
+
+VerificationTest[Table[EvaluateRecursor[RecursorExamples["DigitSum"], n], {n, 0, 60}], Total /@ IntegerDigits[Range[0, 60]], TestID -> "decimal-digit-sum"]
+
+VerificationTest[Table[EvaluateRecursor[RecursorExamples["DivisorCount"], n], {n, 1, 30}], DivisorSigma[0, Range[30]], TestID -> "divisor-count"]

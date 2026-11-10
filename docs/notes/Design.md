@@ -22,6 +22,26 @@ and a paclet, documentation and test layout adapted from Ruliology.
 - Parse generated text directly, without ToExpression or ReleaseHold.
 - Use model-independent proposal callbacks. Target sequence catalogs and the
   notebook's separate Wolfram/Lambda experiments are outside this DSL paclet.
+- Add Quot beside Rem. A quotient by a non-constant divisor otherwise needs a
+  loop, which put floor formulas out of reach of search. Quot[a, 0] is zero,
+  as in Lean's natural-number division, so the formal model needs no case
+  split and Add[Mul[b, Quot[a, b]], Rem[a, b]] is always a.
+- Add Let as the only construct that rebinds Var. A closed program placed in
+  its body is applied to a value, so programs compose: sums and products of a
+  subprogram, searches for the n-th number with a property and compositions
+  need no further primitives. Acc, Idx and CGet keep their scoping, so every
+  earlier program means what it meant. A scope-escape form was considered and
+  left out: Let covers the measured needs and keeps Env a flat record in Lean.
+- Synthesize deterministically before evolving. SynthesizeRecursor enumerates
+  programs by cost up to observational equivalence, checks recurrence steps
+  against the data, and solves for constants exactly. The corpus experiments
+  showed that sampling 464 trees per sequence finds little beyond constants
+  and lines, while exhaustive enumeration with equivalence classes covers
+  every function of small cost. EvolveRecursor stays for stochastic studies.
+- Price constants by magnitude in the synthesizer's cost: 0 to 3 cost one
+  node, every further two bits one more. Initial terms read from data then
+  pay for what they say, and a recurrence with several large seeds no longer
+  beats a short closed program. RecursorNodeCount is unchanged.
 
 Turing completeness concerns unbounded semantics. Physical resources still
 bound real runs. Counter translation favors a simple proof over performance;

@@ -17,6 +17,7 @@ Categories: [Core Language & Structure]
 
 - A compact natural-number DSL with bounded recursion and unbounded iteration.
 - Programs can be interpreted directly or compiled to closed lambda terms.
+- A deterministic synthesizer finds programs from examples by enumeration, recurrences checked against the data and exact solving.
 - Scope-aware generation, mutation and crossover support evolutionary experiments.
 - Evaluation limits return structured failures.
 - A Lean proof translates mathlib partial-recursive codes to closed DSL programs with the same partial denotation.

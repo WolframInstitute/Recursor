@@ -51,3 +51,18 @@ VerificationTest[
 	True,
 	TestID -> "normalization-rejects-invalid-resource-options"
 ]
+
+VerificationTest[Table[EvaluateRecursor[program, n, Method -> "Lambda", "MaxSteps" -> 2000000, "TimeLimit" -> 30], {program, {Quot[Var, Const[2]], Quot[Var,
+	Const[3]], Quot[Var, Const[0]], Quot[Const[7], Var], Let[Succ[Var], Mul[Var, Var]], Let[Const[2], Let[Succ[Var], Mul[Var, Var]]], Add[Let[
+	Const[5], Var], Var]}}, {n, 0, 4}], Table[EvaluateRecursor[program, n], {program, {Quot[Var, Const[2]], Quot[Var, Const[3]], Quot[Var, Const[
+	0]], Quot[Const[7], Var], Let[Succ[Var], Mul[Var, Var]], Let[Const[2], Let[Succ[Var], Mul[Var, Var]]], Add[Let[Const[5], Var], Var]}}, {n, 0,
+	4}], TestID -> "interpreter-compiler-quotient-and-let-agreement"]
+
+VerificationTest[Table[EvaluateRecursor[Rec[Var, Const[0], Add[Acc, Let[Idx, Mul[Var, Var]]]], n, Method -> "Lambda", "MaxSteps" -> 5000000, "TimeLimit"
+	 -> 60], {n, 0, 4}], {0, 0, 1, 5, 14}, TestID -> "compiler-let-inherits-loop-bindings"]
+
+VerificationTest[AllTrue[{Let[RecursorExamples["Nonterminating"], Const[1]], Quot[Const[0], RecursorExamples["Nonterminating"]], Quot[RecursorExamples[
+	"Nonterminating"], Const[0]]}, FailureQ[EvaluateRecursor[#, 0, Method -> "Lambda", "MaxSteps" -> 1000]]&], True, TestID -> "compiler-keeps-let-and-quotient-strict"
+	]
+
+VerificationTest[EvaluateRecursor[RecursorExamples["Prime"], 2, Method -> "Lambda", "MaxSteps" -> 10000000, "TimeLimit" -> 120], 5, TestID -> "compiler-prime-search-through-let"]

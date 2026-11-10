@@ -25,6 +25,7 @@ noncomputable def denote : Expr → Env → Part Nat
   | .mul a b, env => do return (← denote a env) * (← denote b env)
   | .monus a b, env => do return (← denote a env) - (← denote b env)
   | .rem a b, env => do return (← denote a env) % (← denote b env)
+  | .quot a b, env => do return (← denote a env) / (← denote b env)
   | .ifz c z p, env => do
       let n ← denote c env
       if n = 0 then denote z env else denote p env
@@ -52,6 +53,9 @@ noncomputable def denote : Expr → Env → Part Nat
         let c ← denote condition {env with accumulator := a}
         if c = 0 then pure (Sum.inl a)
         else Sum.inr <$> denote body {env with accumulator := a}) a
+  | .letE value body, env => do
+      let v ← denote value env
+      denote body {env with input := v}
 
 /-- Execute an index-parameterized program on a new argument. The early
 iterations retain the argument; only the last iteration evaluates the body. -/
@@ -378,7 +382,7 @@ def Scoped (accumulator index history : Bool) : Expr → Prop
   | .acc => accumulator = true
   | .idx => index = true
   | .succ e | .pred e | .half e => Scoped accumulator index history e
-  | .add a b | .mul a b | .monus a b | .rem a b =>
+  | .add a b | .mul a b | .monus a b | .rem a b | .quot a b | .letE a b =>
       Scoped accumulator index history a ∧ Scoped accumulator index history b
   | .ifz c z p => Scoped accumulator index history c ∧ Scoped accumulator index history z ∧ Scoped accumulator index history p
   | .iter n a b => Scoped accumulator index history n ∧ Scoped accumulator index history a ∧ Scoped true index history b

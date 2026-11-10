@@ -7,8 +7,8 @@ URI: WolframInstitute/Recursor/guide/Recursor
 Title: Recursor
 Description: Recursor tools for computing with natural-number programs
 Keywords: [program synthesis, computation, Recursor]
-RelatedGuides: [Compilation, Evaluation, Evolution, Language, Visualization]
-RelatedTutorials: [FormalVerification, EvolvingLambdaExpressions,VisualizingLambdaCompilation, ArithmeticPatterns, EvolutionaryExperiments, MeasuringOEISSequenceDiscovery, EvolvingPrograms, HaltingAndBudgets, LanguageSemantics, MigratingNotebooks, UniversalComputation]
+RelatedGuides: [Compilation, Evaluation, Evolution, Language, Synthesis, Visualization]
+RelatedTutorials: [FormalVerification, EvolvingLambdaExpressions,VisualizingLambdaCompilation, ArithmeticPatterns, EvolutionaryExperiments, MeasuringOEISSequenceDiscovery, EvolvingPrograms, HaltingAndBudgets, LanguageSemantics, MigratingNotebooks, SynthesizingSequences, UniversalComputation]
 ---
 
 ## Abstract
@@ -16,6 +16,7 @@ RelatedTutorials: [FormalVerification, EvolvingLambdaExpressions,VisualizingLamb
 Recursor is a natural-number language for program synthesis and evolutionary
 experiments. It supports unbounded WhileLoop iteration.
 Programs have explicit lexical binding and compile to closed lambda terms.
+A deterministic synthesizer finds programs from the terms of a sequence.
 
 ## Functions
 
@@ -45,6 +46,10 @@ Programs have explicit lexical binding and compile to closed lambda terms.
 - `SimplifyRecursor` simplify with partial computations in mind
 - `ScoreRecursor` count exact matches on examples
 - `EvolveRecursor` evolve a population against training data
+
+### [Synthesis](paclet:WolframInstitute/Recursor/guide/Synthesis)
+
+- `SynthesizeRecursor` find the cheapest program matching examples
 
 ### [Visualization](paclet:WolframInstitute/Recursor/guide/Visualization)
 

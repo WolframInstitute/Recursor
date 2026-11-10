@@ -152,3 +152,34 @@ VerificationTest[
 	True,
 	TestID -> "evolution-rejects-invalid-resource-options"
 ]
+
+
+VerificationTest[SimplifyRecursor /@ {Quot[Const[7], Const[2]], Quot[Const[7], Const[0]], Quot[Var, Const[1]], Quot[Var, Const[0]], Let[Succ[Var],
+	Var], Let[Var, Half[Var]], Let[Const[5], Const[2]]}, {Const[3], Const[0], Var, Const[0], Succ[Var], Half[Var], Const[2]}, TestID -> "simplification-of-quotient-and-let"
+	]
+
+VerificationTest[SimplifyRecursor[Let[WhileLoop[Const[0], Const[1], Acc], Const[2]]], Let[WhileLoop[Const[0], Const[1], Acc], Const[2]], TestID -> "simplification-retains-divergent-let-value"
+	]
+
+VerificationTest[SimplifyRecursor[Quot[WhileLoop[Const[0], Const[1], Acc], Const[0]]], Quot[WhileLoop[Const[0], Const[1], Acc], Const[0]], TestID -> "simplification-retains-divergent-dividend"
+	]
+
+VerificationTest[
+	BlockRandom[
+		SeedRandom[98];
+		With[{programs = Table[RandomRecursor[4], {300}]}, {AllTrue[programs, RecursorProgramQ], ! FreeQ[programs, _Let], ! FreeQ[programs, _Quot]}]
+	],
+	{True, True, True},
+	TestID -> "generator-produces-closed-let-and-quotient"
+]
+
+VerificationTest[
+	BlockRandom[
+		SeedRandom[99];
+		With[{programs = Table[RandomRecursor[4, "IncludeWhile" -> False], {40}]},
+			AllTrue[programs, Function[program, AllTrue[Range[0, 3], EvaluateRecursor[SimplifyRecursor[program], #, "MaxSteps" -> 200000] === EvaluateRecursor[program, #, "MaxSteps" -> 200000]&]]]
+		]
+	],
+	True,
+	TestID -> "simplification-preserves-values-with-new-syntax"
+]

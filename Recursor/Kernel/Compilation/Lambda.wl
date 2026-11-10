@@ -65,6 +65,18 @@ combinator["Rem"] = function[Function[left, function[Function[right,
 	]
 ]]]]
 
+(* The fold keeps a pair of quotient and remainder; a zero divisor gives zero. *)
+combinator["Quot"] = function[Function[left, function[Function[right,
+	zeroBranch[right, numeral[0],
+		first @ call[left, function[Function[state,
+			zeroBranch[call[combinator["Monus"], right, successor[second[state]]],
+				pair[successor[first[state]], numeral[0]],
+				pair[first[state], successor[second[state]]]
+			]
+		]], pair[numeral[0], numeral[0]]]
+	]
+]]]]
+
 compile[Var, environment_] := environment["Input"]
 compile[Acc, environment_] := environment["Accumulator"]
 compile[Idx, environment_] := environment["Index"]
@@ -73,13 +85,18 @@ compile[Const[n_], _] := numeral[n]
 compile[node : (Succ | Pred | Half)[argument_], environment_] := strict[compile[argument, environment],
 	Function[value, call[combinator[SymbolName[Head[node]]], value]]
 ]
-compile[node : (Add | Mul | Monus | Rem)[left_, right_], environment_] := strict[compile[left, environment],
+compile[node : (Add | Mul | Monus | Rem | Quot)[left_, right_], environment_] := strict[compile[left, environment],
 	Function[firstValue, strict[compile[right, environment],
 		Function[secondValue, call[combinator[SymbolName[Head[node]]], firstValue, secondValue]]
 	]]
 ]
 compile[Ifz[condition_, zero_, positive_], environment_] := strict[compile[condition, environment],
 	Function[value, zeroBranch[value, compile[zero, environment], compile[positive, environment]]]
+]
+
+(* The bound value is forced before the body, including when the body ignores it. *)
+compile[Let[value_, body_], environment_] := strict[compile[value, environment],
+	Function[bound, compile[body, Append[environment, "Input" -> bound]]]
 ]
 
 compile[Iter[count_, base_, step_], environment_] := strict[compile[count, environment],

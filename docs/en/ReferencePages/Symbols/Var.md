@@ -17,7 +17,8 @@ RelatedTutorials: [ArithmeticPatterns]
 ## Details & Options
 
 - This is inert Recursor syntax.
-- The input is a nonnegative integer and remains visible inside every binder.
+- The input is a nonnegative integer and remains visible inside Iter, Rec, CoRec and WhileLoop.
+- Inside the body of Let, Var is the value bound by the nearest enclosing Let.
 
 ## Basic Examples
 

@@ -10,8 +10,8 @@ ParseRecursor[text_String, OptionsPattern[]] := Module[{
 	compact = StringReplace[text, WhitespaceCharacter -> ""], tokens, position = 1, read, require,
 	nodes = 0, maximumNodes = OptionValue["MaxNodes"], maximumDepth = OptionValue["MaxDepth"],
 	names = AssociationThread[
-		{"Var", "Acc", "Idx", "Const", "Succ", "Pred", "Half", "Add", "Mul", "Monus", "Rem", "Ifz", "Iter", "Rec", "CoRec", "CGet", "WhileLoop"},
-		{Var, Acc, Idx, Const, Succ, Pred, Half, Add, Mul, Monus, Rem, Ifz, Iter, Rec, CoRec, CGet, WhileLoop}
+		{"Var", "Acc", "Idx", "Const", "Succ", "Pred", "Half", "Add", "Mul", "Monus", "Rem", "Quot", "Ifz", "Iter", "Rec", "CoRec", "CGet", "WhileLoop", "Let"},
+		{Var, Acc, Idx, Const, Succ, Pred, Half, Add, Mul, Monus, Rem, Quot, Ifz, Iter, Rec, CoRec, CGet, WhileLoop, Let}
 	], tag = Unique["parse"], result
 },
 	tokens = StringCases[text, RegularExpression["[A-Za-z][A-Za-z0-9]*|[0-9]+|\\[|\\]|,"]];

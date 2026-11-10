@@ -1,5 +1,36 @@
 # Verification record
 
+## Update for 0.2.0
+
+Checked on 2026-11-10 with Wolfram Language 15.0 on macOS ARM64, after adding
+Quot, Let and SynthesizeRecursor. The record for 0.1.0 follows unchanged.
+
+- `make check` covers 29 source and test files and 48 exported symbols with
+  reference pages.
+- `make test` passed all 245 tests in eleven files. The new tests cover both
+  constructs in the interpreter, the lambda compiler, the parser, the
+  generators and the simplifier, and cover the synthesizer's methods, options
+  and failure behavior.
+- `make check-proofs` passed with quot and letE in the operational and
+  denotational Lean models. LeanLink replayed all 565 declarations of Recursor
+  and all 183 of Universality. The twelve designated theorems keep their axiom
+  sets.
+- `make check-publish` built all 67 documentation pages and the archive. The
+  archive audit of the CI workflow was run on that archive.
+- The [corpus v2 experiment](OEISCorpusExperimentV2.md) evaluated every
+  program proposed by its native search with EvaluateRecursor: 176,182
+  proposals in four rounds per protocol. All but eight reproduced their
+  training terms. Those eight reached the interpreter's step limit; none
+  returned a different value. This compares two implementations on many
+  programs; it is not a proof of either.
+
+Not repeated for this update: the TypeTheory bridge check, the workflow
+fixtures and the walkthrough refresh. Random generation now also produces Quot
+and Let, so the seeded outputs saved in the walkthrough notebook predate this
+version.
+
+## Record for 0.1.0
+
 Checked on 2026-11-01 with Wolfram Language 15.0 on macOS ARM64.
 
 ## Reproduce

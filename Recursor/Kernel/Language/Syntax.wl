@@ -1,13 +1,13 @@
 PackageExported[{
-	Var, Acc, Idx, Const, Succ, Pred, Half, Add, Mul, Monus, Rem,
-	Ifz, Iter, Rec, CoRec, CGet, WhileLoop,
+	Var, Acc, Idx, Const, Succ, Pred, Half, Add, Mul, Monus, Rem, Quot,
+	Ifz, Iter, Rec, CoRec, CGet, WhileLoop, Let,
 	RecursorExpressionQ, RecursorProgramQ, RecursorFreeVariables,
 	RecursorNodeCount, RecursorSites, ReplaceRecursorPart, FormatRecursor, $RecursorGrammar
 }]
 
 PackageScoped[{recursorChildren, recursorBindings, recursorRebuild, recursorSubtree}]
 
-Var::usage = "Var denotes the input natural number of a Recursor program."
+Var::usage = "Var denotes the input natural number of a Recursor program, or the value bound by the nearest enclosing Let."
 Acc::usage = "Acc denotes the nearest enclosing accumulator, bound by Iter, Rec or WhileLoop."
 Idx::usage = "Idx denotes the nearest enclosing index, bound by Rec or CoRec."
 Const::usage = "Const[n] denotes the nonnegative integer n."
@@ -18,12 +18,14 @@ Add::usage = "Add[a, b] adds two natural numbers."
 Mul::usage = "Mul[a, b] multiplies two natural numbers. Both arguments are evaluated."
 Monus::usage = "Monus[a, b] gives Max[a - b, 0]. Both arguments are evaluated."
 Rem::usage = "Rem[a, b] gives the remainder of a divided by b, or a when b is zero."
+Quot::usage = "Quot[a, b] gives the integer quotient of a by b, or zero when b is zero. Both arguments are evaluated."
 Ifz::usage = "Ifz[c, z, p] evaluates z when c is zero and p otherwise. Only the selected branch is evaluated."
 Iter::usage = "Iter[count, base, step] applies step count times, binding Acc to the running value."
 Rec::usage = "Rec[count, base, step] iterates with Acc and the zero-based index Idx bound in step."
 CoRec::usage = "CoRec[count, step] computes indices zero through count, binding Idx and CGet in step. It does not bind Acc."
 CGet::usage = "CGet[j] reads an earlier value in the nearest enclosing CoRec. Uncomputed indices give zero."
 WhileLoop::usage = "WhileLoop[base, condition, step] starts at base and repeats step while condition is nonzero. Acc is bound in condition and step."
+Let::usage = "Let[value, body] evaluates body with Var bound to value. Acc, Idx and CGet keep their enclosing bindings."
 RecursorExpressionQ::usage = "RecursorExpressionQ[e] tests the syntax of a Recursor expression, including exact arities and natural-number constants."
 RecursorProgramQ::usage = "RecursorProgramQ[p] tests whether p is a well-formed Recursor program with no unbound Acc, Idx or CGet."
 RecursorFreeVariables::usage = "RecursorFreeVariables[e] lists the unbound accumulator, index and history symbols in e. Var is the program input."
@@ -35,14 +37,14 @@ $RecursorGrammar::usage = "$RecursorGrammar gives each syntax head's arity. Var,
 
 $RecursorGrammar = <|
 	"Acc" -> 0, "Add" -> 2, "CGet" -> 1, "CoRec" -> 2, "Const" -> 1,
-	"Half" -> 1, "Idx" -> 0, "Ifz" -> 3, "Iter" -> 3, "Monus" -> 2,
-	"Mul" -> 2, "Pred" -> 1, "Rec" -> 3, "Rem" -> 2, "Succ" -> 1,
-	"Var" -> 0, "WhileLoop" -> 3
+	"Half" -> 1, "Idx" -> 0, "Ifz" -> 3, "Iter" -> 3, "Let" -> 2,
+	"Monus" -> 2, "Mul" -> 2, "Pred" -> 1, "Quot" -> 2, "Rec" -> 3,
+	"Rem" -> 2, "Succ" -> 1, "Var" -> 0, "WhileLoop" -> 3
 |>
 
 RecursorExpressionQ[Var | Acc | Idx] := True
 RecursorExpressionQ[Const[n_Integer?NonNegative]] := True
-RecursorExpressionQ[e : (Succ | Pred | Half | CGet | Add | Mul | Monus | Rem | CoRec | Ifz | Iter | Rec | WhileLoop)[___]] :=
+RecursorExpressionQ[e : (Succ | Pred | Half | CGet | Add | Mul | Monus | Rem | Quot | CoRec | Let | Ifz | Iter | Rec | WhileLoop)[___]] :=
 	Length[e] === Lookup[$RecursorGrammar, SymbolName[Head[e]]] && AllTrue[List @@ e, RecursorExpressionQ]
 RecursorExpressionQ[___] := False
 
@@ -106,4 +108,4 @@ FormatRecursor[e : Var | Acc | Idx] := SymbolName[e]
 FormatRecursor[Const[n_Integer?NonNegative]] := "Const[" <> IntegerString[n] <> "]"
 FormatRecursor[e_?RecursorExpressionQ] := SymbolName[Head[e]] <> "[" <> StringRiffle[FormatRecursor /@ recursorChildren[e], ", "] <> "]"
 
-Protect[Var, Acc, Idx, Const, Succ, Pred, Half, Add, Mul, Monus, Rem, Ifz, Iter, Rec, CoRec, CGet, WhileLoop]
+Protect[Var, Acc, Idx, Const, Succ, Pred, Half, Add, Mul, Monus, Rem, Quot, Ifz, Iter, Rec, CoRec, CGet, WhileLoop, Let]

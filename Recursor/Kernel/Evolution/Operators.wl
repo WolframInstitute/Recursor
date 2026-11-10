@@ -16,7 +16,7 @@ generate[depth_, bindings_, maximumConstant_, includeWhile_, budget_] := Module[
 	leaves = Join[{Var, Const[RandomInteger[maximumConstant]]}, Intersection[bindings, {Acc, Idx}]];
 	If[depth === 0 || budget === 1 || RandomReal[] < 0.3,
 		RandomChoice[leaves],
-		operators = Join[{Succ, Pred, Half, Add, Mul, Monus, Rem, Ifz, Iter, Rec, CoRec},
+		operators = Join[{Succ, Pred, Half, Add, Mul, Monus, Rem, Quot, Ifz, Iter, Rec, CoRec, Let},
 			If[MemberQ[bindings, CGet], {CGet}, {}], If[includeWhile, {WhileLoop}, {}]];
 		operators = Select[operators, Lookup[$RecursorGrammar, SymbolName[#]] < budget &];
 		operator = RandomChoice[operators];
@@ -73,6 +73,7 @@ SimplifyRecursor[program_?RecursorProgramQ] := FixedPoint[
 		Mul[Const[a_], Const[b_]] :> Const[a * b],
 		Monus[Const[a_], Const[b_]] :> Const[Max[a - b, 0]],
 		Rem[Const[a_], Const[b_]] :> Const[If[b === 0, a, Mod[a, b]]],
+		Quot[Const[a_], Const[b_]] :> Const[If[b === 0, 0, Quotient[a, b]]],
 		Add[x_, Const[0]] :> x,
 		Add[Const[0], x_] :> x,
 		Mul[x_, Const[1]] :> x,
@@ -83,6 +84,11 @@ SimplifyRecursor[program_?RecursorProgramQ] := FixedPoint[
 		Monus[x_?boundedQ, x_] :> Const[0],
 		Rem[x_, Const[0]] :> x,
 		Rem[x_?boundedQ, Const[1]] :> Const[0],
+		Quot[x_, Const[1]] :> x,
+		Quot[x_?boundedQ, Const[0]] :> Const[0],
+		Let[value_, Var] :> value,
+		Let[Var, body_] :> body,
+		Let[value_?boundedQ, body_] /; FreeQ[body, Var] :> body,
 		Ifz[Const[0], zero_, _] :> zero,
 		Ifz[Const[n_Integer?Positive], _, positive_] :> positive,
 		Iter[Const[0], base_, _] :> base,

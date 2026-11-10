@@ -67,6 +67,13 @@ interpret[Rem[a_, b_], environment_] := With[{
 },
 	If[divisor === 0, dividend, Mod[dividend, divisor]]
 ]
+interpret[Quot[a_, b_], environment_] := With[{
+	dividend = recursorEvaluateNode[a, environment], divisor = recursorEvaluateNode[b, environment]
+},
+	If[divisor === 0, 0, Quotient[dividend, divisor]]
+]
+interpret[Let[value_, body_], environment_] :=
+	recursorEvaluateNode[body, Append[environment, "Input" -> recursorEvaluateNode[value, environment]]]
 interpret[Ifz[condition_, zero_, positive_], environment_] :=
 	recursorEvaluateNode[If[recursorEvaluateNode[condition, environment] === 0, zero, positive], environment]
 
