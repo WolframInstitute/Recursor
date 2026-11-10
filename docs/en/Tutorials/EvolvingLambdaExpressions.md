@@ -73,10 +73,10 @@ factorial = RecursorExamples["Factorial"]
 ```
 
 Highlight the syntax positions where Acc is in scope. Only the step subtree
-is highlighted; the count and initial value lie outside this binding:
+keeps its colors; the count and initial value lie outside this binding:
 
 ```wl
-HighlightGraph[RecursorProgramTree[factorial], MapIndexed[If[MemberQ[#1["Bindings"], Acc], First[#2], Nothing] &, RecursorSites[factorial]]]
+HighlightGraph[RecursorProgramTree[factorial], MapIndexed[If[MemberQ[#1["Bindings"], Acc], First[#2], Nothing] &, RecursorSites[factorial]], GraphHighlightStyle -> "DehighlightGray"]
 ```
 
 The generator, mutation and crossover functions use these binding rules.

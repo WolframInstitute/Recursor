@@ -1,10 +1,6 @@
 name: Release
 
 on:
-  workflow_run:
-    workflows: [CI]
-    types: [completed]
-    branches: [main]
   push:
     tags: ['v[0-9]+.[0-9]+.[0-9]+']
   workflow_dispatch:
@@ -29,7 +25,6 @@ defaults:
 jobs:
   verify:
     name: Require a verified release commit
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     outputs:
@@ -51,50 +46,22 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ inputs.tag || github.ref_name }}
           REF: ${{ github.ref }}
-          CI_RUN: ${{ github.event.workflow_run.id }}
         run: |
           echo 'ready=false' >> "$GITHUB_OUTPUT"
           if [ "$GITHUB_EVENT_NAME" = workflow_dispatch ] && [ "$REF" != refs/heads/main ]; then
             echo '::error::Dispatch releases from main.'
             exit 1
           fi
-          if [ "$GITHUB_EVENT_NAME" = workflow_run ]; then
-            [[ "$CI_RUN" =~ ^[0-9]+$ ]] || { echo '::error::The completed CI run is missing.'; exit 1; }
-            commit=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$CI_RUN" --jq \
-              'select(.path == ".github/workflows/ci.yml" and .head_branch == "main" and .status == "completed" and .conclusion == "success" and (.event == "push" or .event == "workflow_dispatch") and .head_repository.full_name == .repository.full_name) | .head_sha')
-            [[ "$commit" =~ ^[0-9a-f]{40}$ ]] || { echo '::error::Require successful CI from this repository on main.'; exit 1; }
-            if [ "$commit" != "$(git rev-parse origin/main)" ]; then
-              echo 'A newer main commit exists; its CI run will handle publication.'
-              exit 0
-            fi
-            version=$(git show "$commit:Recursor/PacletInfo.wl" | sed -n 's/^[[:space:]]*"Version" -> "\([^"]*\)",/\1/p')
-            TAG="v$version"
-            run="$CI_RUN"
-          else
-            [[ "$TAG" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]] || { echo '::error::Use an existing vX.Y.Z tag.'; exit 1; }
-            commit=$(git rev-parse --verify "refs/tags/$TAG^{commit}")
-            version=$(git show "$commit:Recursor/PacletInfo.wl" | sed -n 's/^[[:space:]]*"Version" -> "\([^"]*\)",/\1/p')
-            run=$(gh run list --workflow ci.yml --branch main --commit "$commit" --status success \
-              --limit 20 --json databaseId,event \
-              --jq '[.[] | select(.event == "push" or .event == "workflow_dispatch")][0].databaseId')
-          fi
-          [[ "$TAG" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]] || { echo '::error::Use a vX.Y.Z release tag.'; exit 1; }
+          [[ "$TAG" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]] || { echo '::error::Use an existing vX.Y.Z tag.'; exit 1; }
+          commit=$(git rev-parse --verify "refs/tags/$TAG^{commit}")
+          version=$(git show "$commit:Recursor/PacletInfo.wl" | sed -n 's/^[[:space:]]*"Version" -> "\([^"]*\)",/\1/p')
+          run=$(gh run list --workflow ci.yml --branch main --commit "$commit" --status success \
+            --limit 20 --json databaseId,event \
+            --jq '[.[] | select(.event == "push" or .event == "workflow_dispatch")][0].databaseId')
           git merge-base --is-ancestor "$commit" origin/main || { echo '::error::The tag must point to a commit on main.'; exit 1; }
           test "$TAG" = "v$version" || { echo '::error::The tag must match PacletInfo.wl.'; exit 1; }
           git cat-file -e "$commit:docs/releases/$version.md" || { echo '::error::The tagged commit needs matching release notes.'; exit 1; }
           [[ "$run" =~ ^[0-9]+$ ]] || { echo '::error::Complete CI on main for this exact commit before releasing.'; exit 1; }
-          if [ "$GITHUB_EVENT_NAME" = workflow_run ] && git show-ref --verify --quiet "refs/tags/$TAG"; then
-            if [ "$(git rev-parse "refs/tags/$TAG^{commit}")" != "$commit" ]; then
-              echo "Version $version already has a tag. Bump the version and add release notes for a new release."
-              exit 0
-            fi
-            released=$(gh api "repos/$GITHUB_REPOSITORY/releases" --paginate \
-              --jq ".[] | select(.tag_name == \"$TAG\" and .draft == false) | .tag_name")
-            if [ -n "$released" ]; then
-              echo "Release $TAG is already published."
-              exit 0
-            fi
-          fi
           {
             echo 'ready=true'
             echo "tag=$TAG"
@@ -235,12 +202,6 @@ jobs:
           VERSION: ${{ needs.verify.outputs.version }}
           COMMIT: ${{ needs.verify.outputs.commit }}
         run: |
-          existing=$(gh api "repos/$GH_REPO/git/matching-refs/tags/$TAG" \
-            --jq ".[] | select(.ref == \"refs/tags/$TAG\") | .ref")
-          if [ -z "$existing" ]; then
-            gh api --method POST "repos/$GH_REPO/git/refs" \
-              -f "ref=refs/tags/$TAG" -f "sha=$COMMIT" >/dev/null
-          fi
           test "$(gh api "repos/$GH_REPO/commits/$TAG" --jq .sha)" = "$COMMIT" || { echo '::error::The release tag points to another commit.'; exit 1; }
           cd dist
           assets=("WolframInstitute__Recursor-$VERSION.paclet" pacletpage-build.tar.gz build.json SHA256SUMS)

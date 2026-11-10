@@ -67,7 +67,7 @@ Equal scores need not mean equal programs. Inspect the best syntax tree from
 each run:
 
 ```wl
-GraphicsGrid[Partition[MapIndexed[RecursorProgramTree[#1["Program"], PlotLabel -> Row[{"Seed ", 100 + First[#2]}]] &, runs], 3]]
+Grid[Partition[MapIndexed[Labeled[RecursorProgramTree[#1["Program"]], Row[{"Seed ", 100 + First[#2]}], Top] &, runs], 3]]
 ```
 
 ## Beyond the training range

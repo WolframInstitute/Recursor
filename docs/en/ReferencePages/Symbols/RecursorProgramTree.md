@@ -17,10 +17,11 @@ RelatedTutorials: [ArithmeticPatterns]
 
 ## Details & Options
 
-- Accepts TreeGraph options and inherits its presentation defaults, including `ImageSize -> Automatic`.
-- `VertexLabels -> Automatic` labels vertices with syntax constructors, constants and variable names. Use `VertexLabels -> None` to omit them.
-- `GraphRoot -> Automatic` uses the program's root expression, vertex 1.
-- Constants and variable atoms are leaves. Repeated subexpressions have separate vertices.
+- Each node is a box with the name of its constructor, constant or variable. Its color gives its kind: loops, arithmetic, choice and binding, or inputs and constants.
+- The root is at the top. With `ImageSize -> Automatic` the picture is as wide as its tree, up to a limit, so names have the same size in every tree.
+- The result is a graph. Its vertices number the nodes in the order of [RecursorSites](). Constants and variable atoms are leaves. Repeated subexpressions have separate vertices.
+- Accepts TreeGraph options. A value for `VertexStyle`, `VertexLabelStyle`, `EdgeStyle`, `EdgeShapeFunction`, `PlotRange` or `ImageSize` replaces that part of the design.
+- A value for `VertexLabels`, `VertexShapeFunction`, `GraphLayout`, `VertexCoordinates` or `GraphRoot` gives the TreeGraph drawing instead. `VertexLabels -> None` omits the names.
 
 ## Basic Examples
 
@@ -28,6 +29,22 @@ Evaluate a small example:
 
 ```wl
 RecursorProgramTree[RecursorExamples["Factorial"]]
+```
+
+## Options
+
+Give every node one color:
+
+```wl
+RecursorProgramTree[RecursorExamples["Factorial"], VertexStyle -> LightGray]
+```
+
+---
+
+Choose another layout, which gives the TreeGraph drawing:
+
+```wl
+RecursorProgramTree[RecursorExamples["Factorial"], GraphLayout -> "RadialEmbedding"]
 ```
 
 ## Applications

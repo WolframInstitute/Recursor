@@ -1,5 +1,37 @@
 # Verification record
 
+## Update for 0.2.1
+
+Checked on 2026-11-10 with Wolfram Language 15.0 on macOS ARM64, after
+redesigning RecursorProgramTree, adding the resource page description and
+image, and changing releases to start from a pushed tag. The records for
+0.2.0 and 0.1.0 follow unchanged.
+
+- `make check` covers 29 source and test files and 48 exported symbols with
+  reference pages.
+- `make test` passed all 249 tests in eleven files. Four new tests cover the
+  tree design: the options it resolves, a width that follows the tree up to a
+  limit, boxes that do not overlap on a level, and the parts an option
+  replaces. Two earlier tests were adapted: names now sit at the center of
+  their boxes, and only the options the design leaves alone are compared
+  with TreeGraph's. The tests of SetOptions, explicit precedence, the syntax
+  root and edge directions pass unchanged.
+- `make check-proofs` passed as for 0.2.0. The Lean sources are unchanged.
+- `make check-publish` built all 67 documentation pages and the archive, once
+  from an empty cache. It read `docs/Hero.png` and asked the publisher for
+  the Basic Description through the replacement that publication uses.
+- The new tree was rendered in light and dark appearances: directly, inside
+  GraphicsRow, GraphicsGrid and HighlightGraph, and from the saved output
+  cells of rebuilt reference and tutorial pages.
+- `make hero` drew each of the five designs of `docs/Hero.wl`.
+- The release workflow parses as YAML and its shell blocks pass `bash -n`.
+  actionlint and ShellCheck run in hosted CI.
+
+Not exercised locally: publication. The description rows and the image reach
+the resource page only when a release publishes, so their layout on the live
+page is still to be seen. The saved outputs of the walkthrough and results
+notebooks predate the new tree.
+
 ## Update for 0.2.0
 
 Checked on 2026-11-10 with Wolfram Language 15.0 on macOS ARM64, after adding

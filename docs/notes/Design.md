@@ -42,6 +42,15 @@ and a paclet, documentation and test layout adapted from Ruliology.
   node, every further two bits one more. Initial terms read from data then
   pay for what they say, and a recurrence with several large seeds no longer
   beats a short closed program. RecursorNodeCount is unchanged.
+- Draw syntax trees with a design of their own, the one exception to native
+  visualization defaults. Names are the content of a syntax tree, so each
+  node is a box holding its name instead of a dot with a label beside it,
+  and color separates loops, arithmetic, choice and binding, and inputs and
+  constants. Every subtree is as wide as its boxes, so no two boxes meet,
+  and the picture is as wide as its tree, so names keep one size from tree
+  to tree. The result stays a TreeGraph: an explicit option replaces its
+  part of the design, and a layout, root, labels or shapes of the caller's
+  choosing bring back the TreeGraph drawing.
 
 Turing completeness concerns unbounded semantics. Physical resources still
 bound real runs. Counter translation favors a simple proof over performance;

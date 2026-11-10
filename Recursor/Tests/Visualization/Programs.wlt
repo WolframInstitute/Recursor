@@ -52,10 +52,12 @@ VerificationTest[
 ]
 
 VerificationTest[
-	Module[{graphOptions = {ImageSize, AspectRatio, ImagePadding, EdgeStyle, VertexStyle, GraphLayout}, plotOptions = {ImageSize, AspectRatio, ImagePadding, PlotRange}},
+	Module[{graphOptions = {ImageSize, AspectRatio, ImagePadding, EdgeStyle, VertexStyle, GraphLayout}, plotOptions = {ImageSize, AspectRatio, ImagePadding, PlotRange},
+			treeOptions = {AspectRatio, ImagePadding, GraphLayout}},
 		And[
-			visualizationOptionValues[TreeGraph, Options[RecursorProgramTree[Mul[Const[3], Var]]], graphOptions] ===
-				visualizationOptionValues[TreeGraph, Options[TreeGraph[Range[3], {1 -> 2, 1 -> 3}]], graphOptions],
+			(* the syntax tree has a design of its own; what the design leaves alone stays native *)
+			visualizationOptionValues[TreeGraph, Options[RecursorProgramTree[Mul[Const[3], Var]]], treeOptions] ===
+				visualizationOptionValues[TreeGraph, Options[TreeGraph[Range[3], {1 -> 2, 1 -> 3}]], treeOptions],
 			visualizationOptionValues[Graph, Options[RecursorGenealogyGraph[visualizationResult]], graphOptions] ===
 				visualizationOptionValues[Graph, Options[Graph[Range[3], {1 -> 2, 1 -> 3, 2 -> 3}]], graphOptions],
 			visualizationOptionValues[Graphics, Options[RecursorEvolutionPlot[visualizationResult]], plotOptions] ===
@@ -66,10 +68,54 @@ VerificationTest[
 
 VerificationTest[
 	{
-		Sort[Cases[Options[RecursorProgramTree[Mul[Const[3], Var]], VertexLabels], Rule[_, value_String] :> value, Infinity]],
+		Sort[Cases[Options[RecursorProgramTree[Mul[Const[3], Var]], VertexLabels], Placed[value_String, Center] :> value, Infinity]],
 		visualizationOptionValues[TreeGraph, Options[RecursorProgramTree[Var, VertexLabels -> None]], VertexLabels] ===
 			visualizationOptionValues[Graph, Options[Graph[{1}, {}, VertexLabels -> None]], VertexLabels]
 	}, {{"3", "Mul", "Var"}, True}, TestID -> "syntax-labels-are-automatic-and-overridable"
+]
+
+VerificationTest[
+	With[{options = Options[RecursorProgramTree[Mul[Const[3], Var]]]},
+		{
+			MatchQ[Flatten[{visualizationOptionValues[TreeGraph, options, VertexShapeFunction]}], {_Function}],
+			Flatten[{visualizationOptionValues[TreeGraph, options, EdgeShapeFunction]}],
+			Length[visualizationOptionValues[TreeGraph, options, VertexStyle]],
+			NumericQ[visualizationOptionValues[TreeGraph, options, ImageSize]]
+		}
+	],
+	{True, {"Line"}, 3, True}, TestID -> "syntax-tree-design-resolves-automatic-options"
+]
+
+VerificationTest[
+	With[{width = Function[program, visualizationOptionValues[TreeGraph, Options[RecursorProgramTree[program]], ImageSize]]},
+		{
+			width[Var] < width[Mul[Var, Var]] < width[Add[Mul[Var, Var], Mul[Var, Var]]],
+			width[Nest[Add[#, #] &, Var, 7]] == width[Nest[Add[#, #] &, Var, 8]]
+		}
+	],
+	{True, True}, TestID -> "syntax-tree-width-follows-the-tree-up-to-a-limit"
+]
+
+VerificationTest[
+	Module[{graph = RecursorProgramTree[RecursorExamples["Prime"]], coordinates, widths, levels},
+		coordinates = VertexCoordinates /. AbsoluteOptions[graph, VertexCoordinates];
+		widths = Cases[Options[graph, VertexLabels], Placed[name_String, Center] :> 0.56 StringLength[name] + 1., Infinity];
+		levels = GatherBy[SortBy[Transpose[{coordinates, widths}], First], #[[1, 2]] &];
+		{Length[widths] === VertexCount[graph], AllTrue[levels, Function[level,
+			AllTrue[Partition[level, 2, 1], #[[2, 1, 1]] - #[[1, 1, 1]] >= (#[[1, 2]] + #[[2, 2]])/2 &]]]}
+	],
+	{True, True}, TestID -> "syntax-tree-boxes-on-a-level-do-not-overlap"
+]
+
+VerificationTest[
+	{
+		Flatten[visualizationOptionValues[TreeGraph, Options[RecursorProgramTree[Mul[Var, Var], VertexStyle -> Red, EdgeStyle -> Blue, ImageSize -> 200]], {VertexStyle, EdgeStyle, ImageSize}]],
+		(* a layout, a root, labels or shapes of the caller's choosing give the native drawing *)
+		Map[Flatten[visualizationOptionValues[TreeGraph, Options[RecursorProgramTree[Mul[Var, Var], #]], {VertexShapeFunction, VertexStyle, ImageSize}]] &,
+			{GraphLayout -> "RadialEmbedding", GraphRoot -> 2, VertexLabels -> "Name", VertexShapeFunction -> "Square"}]
+	},
+	{{Red, Blue, 200}, {{Automatic, Automatic, Automatic}, {Automatic, Automatic, Automatic}, {Automatic, Automatic, Automatic}, {"Square", Automatic, Automatic}}},
+	TestID -> "syntax-tree-design-parts-are-replaceable"
 ]
 
 VerificationTest[

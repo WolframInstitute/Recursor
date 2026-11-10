@@ -1,7 +1,7 @@
 WOLFRAMSCRIPT ?= wolframscript
 
 .DEFAULT_GOAL := check
-.PHONY: check check-proofs test notebooks check-publish publish all
+.PHONY: check check-proofs test notebooks hero check-publish publish all
 
 check:
 	$(WOLFRAMSCRIPT) -file scripts/check.wls
@@ -14,6 +14,11 @@ test:
 
 notebooks:
 	$(WOLFRAMSCRIPT) -file scripts/docs.wls build
+
+# Redraw docs/Hero.png, the resource page image, from docs/Hero.wl. HERO names its design.
+HERO ?= 1
+hero:
+	$(WOLFRAMSCRIPT) -file scripts/docs.wls hero $(HERO)
 
 check-publish:
 	$(WOLFRAMSCRIPT) -file scripts/docs.wls check

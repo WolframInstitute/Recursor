@@ -13,6 +13,19 @@ WolframVersion: 15.0+
 Categories: [Core Language & Structure]
 ---
 
+## Basic Description
+
+Recursor is a small language of programs on natural numbers. Evaluate programs
+under explicit budgets, compile them to lambda terms, find them from the terms
+of a sequence and evolve them.
+
+### Language
+
+- Arithmetic: Succ, Pred, Half, Add, Mul, Monus, Quot and Rem
+- Recursion: Rec, Iter and CoRec, with unbounded WhileLoop
+- Choice and binding: Ifz, Let and CGet
+- Universality: a Lean proof gives every partial recursive function a program
+
 ## Details & Options
 
 - A compact natural-number DSL with bounded recursion and unbounded iteration.
@@ -22,10 +35,6 @@ Categories: [Core Language & Structure]
 - Evaluation limits return structured failures.
 - A Lean proof translates mathlib partial-recursive codes to closed DSL programs with the same partial denotation.
 - Documentation is authored in Markdown and built with PacletPage.
-
-## Usage
-
-[EvaluateRecursor]() evaluates a program on a natural-number input.
 
 ## Basic Examples
 

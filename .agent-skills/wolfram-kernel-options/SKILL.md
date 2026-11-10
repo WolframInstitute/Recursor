@@ -28,6 +28,13 @@ the implementation as well as the Options declaration.
   Automatic to program-specific labels, a syntax root or data coordinates only
   when needed to explain the result. Document such behavior and allow callers
   to override it, including disabling labels with None.
+- RecursorProgramTree is the one exception, at the user's request. With its
+  label, shape, layout and root options left Automatic it draws a design of
+  its own: named boxes colored by kind, a tidy layout, and a picture as wide
+  as its tree up to a limit. Options[RecursorProgramTree] still equal
+  TreeGraph's, explicit and SetOptions values take precedence, and whatever
+  the design does not set stays native. Do not extend this to other functions
+  without the same request.
 - Preserve computational parameters, resource budgets and necessary dialog
   geometry. They are not interchangeable with visualization defaults. Do not
   change them as a side effect of a presentation-options audit.

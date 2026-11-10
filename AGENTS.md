@@ -14,14 +14,18 @@ arguments remain unevaluated; predicates return booleans.
 
 Follow [the kernel-options skill](.agent-skills/wolfram-kernel-options/SKILL.md)
 for function defaults and option forwarding. Use native visualization defaults,
-Automatic image sizing, and consistent SetOptions behavior.
+Automatic image sizing, and consistent SetOptions behavior. RecursorProgramTree
+alone has a design of its own: left Automatic, its options resolve to named
+boxes colored by kind in a tidy layout, and explicit options replace its parts.
 
 Change the grammar, binding rules, interpreter, compiler, generators and
 documentation together. Test strictness and divergence when changing the
 compiler or simplifier. A timeout does not prove nontermination.
 
 Documentation sources are Markdown in docs/en. PacletPage builds notebooks
-and publishes the resource and its site. Use double-backtick Markdown spans
+and publishes the resource and its site. The resource page shows the Basic
+Description of Recursor/ResourceDefinition.md beside docs/Hero.png, which
+`make hero` redraws from docs/Hero.wl. Use double-backtick Markdown spans
 around context names. Never maintain generated notebooks by hand.
 
 Run `make check` and `make test` for implementation changes. Run
@@ -37,9 +41,9 @@ installer downloads. Pin external build dependencies. Preserve test and proof
 reports, verify the installed archive, and reuse the exact CI artifact for
 release. Publish through PacletPage before creating the GitHub release. Require
 successful CI for the tag's exact commit. See docs/workflows.md.
-After successful CI, automatically publish a new version on main from that
-run's verified artifact. Create its tag only after cloud publication succeeds;
-skip completed releases and never move an existing version tag.
+Release by pushing a `vX.Y.Z` tag for a commit on main whose CI has passed; the
+release reuses that run's verified artifact. Pushing to main publishes nothing.
+Never move an existing version tag.
 
 Keep LICENSE and Recursor/Assets/LICENSE identical so the repository and
 distributed paclet carry the same MIT license. Commit focused, verified changes.

@@ -11,7 +11,7 @@ desktop Wolfram installers.
 | --- | --- | --- |
 | [Repository checks](../.github/workflows/pull-request.yml) | Pull requests; called by CI | Source whitespace, proof pins, license and workflow syntax |
 | [CI](../.github/workflows/ci.yml) | Push to `main`; manual dispatch from `main` | Wolfram tests, Lean proofs, documentation, archive contents and installation |
-| [Release](../.github/workflows/release.yml) | Successful CI on `main`; `vX.Y.Z` tag; manual retry | Exact successful CI commit, PacletPage publication, then GitHub release |
+| [Release](../.github/workflows/release.yml) | Pushed `vX.Y.Z` tag; manual retry | Exact successful CI commit, PacletPage publication, then GitHub release |
 
 CI runs `make check`, `make test`, `make check-proofs` and `make check-publish`.
 The proof check builds both Lean modules, audits twelve theorem declarations
@@ -81,30 +81,45 @@ Commit the version in `Recursor/PacletInfo.wl` and matching notes in
 git push origin main
 ```
 
-Successful CI starts Release automatically for the current `main` commit.
-Failed CI does not publish. A superseded CI run is skipped, as is a version
-already tagged at another commit or already released. For subsequent
-releases, bump the version and add its release notes before pushing.
+Pushing to `main` runs CI and publishes nothing. When CI has passed for that
+commit, tag it and push the tag:
+
+```sh
+git tag vX.Y.Z
+git push origin vX.Y.Z
+```
+
+The tag starts Release. It requires the tag to match the version in
+`Recursor/PacletInfo.wl`, to point to a commit on `main` with release notes,
+and to have a successful CI run for that exact commit. A tag pushed before CI
+has passed fails this check; rerun the failed **Release** run once CI is green.
 
 The release workflow downloads that commit's `Recursor-verified` CI artifact,
 checks its provenance and digests, and restores the PacletPage build. It
 publishes the resource and documentation, checks the live site, then creates
-the matching version tag and GitHub release with the same archive. The tag
-points to the verified commit and is never moved. Publication does not submit
-to the Wolfram Paclet Repository.
+the GitHub release with the same archive. It never creates or moves a tag.
+Publication does not submit to the Wolfram Paclet Repository.
 
 GitHub assets include the `.paclet`, `SHA256SUMS`, `build.json` and
 `pacletpage-build.tar.gz`. A retry accepts identical assets and refuses to
 replace changed ones. Retry a failed **Release** run to retain its original
-CI artifact. If the tag exists, a manual **Release** dispatch from `main` is
-also available. Existing manually pushed version tags still require successful
-CI for their exact commit. CI artifacts expire after 30 days.
-
-Automatic publication uses GitHub's
-[`workflow_run` event](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#workflow_run).
-The gate checks the CI workflow path, repository, branch, completion status
-and commit before exposing publication credentials.
+CI artifact. A manual **Release** dispatch from `main` for an existing tag is
+also available. CI artifacts expire after 30 days.
 
 Use `make check-publish` for a local dry run. `make publish` requires the
 verified archive and its corresponding build, checks both before publication,
 and disables rebuilding. Do not reuse a published version for another commit.
+
+## Resource page
+
+The resource page opens with the Basic Description of
+`Recursor/ResourceDefinition.md` beside the image `docs/Hero.png`. The
+description holds paragraphs, level-3 headings and lists whose items read
+`Label: detail`, all in plain text. Publication renders the headings and rows
+itself, because the stock page keeps only the prose. `make check-publish`
+checks that rendering and writes it to `build/resource-description.html`.
+
+`make hero` redraws the image from `docs/Hero.wl`, which computes each picture
+with the paclet or from `docs/notes/data/OEISCorpusV2Hero.json.gz`. The file
+has five designs; `HERO` in the Makefile names the one in use. Commit the
+redrawn image with the change that prompted it.
