@@ -63,8 +63,11 @@ the kernel knows by its MathID. With it the kernel runs offline, uses no
 service credits and has no shared kernel slots to run out of. In a Linux
 container the MathID comes from the machine-id and the host name, so CI fixes
 both: the machine-id in `.github/actions/setup-recursor` and the host name
-`recursor-ci` in the container options of `ci.yml` and `release.yml`.
+`ruliology-ci` in the container options of `ci.yml` and `release.yml`.
 Changing either changes the MathID, and the line then needs a new password.
+Both values are those of the Ruliology repository, so the two containers have
+one MathID and the mathpass issued for Ruliology's CI licenses this one too.
+An activation key gives a password for one MathID only.
 To set the license up:
 
 1. Start CI by hand and read the step *Install the license and start a
@@ -82,7 +85,7 @@ To set the license up:
    four parts. Store it base64-encoded, so that the tabs survive:
 
    ```sh
-   printf 'recursor-ci\t%s\t%s\t%s\n' '<MathID>' '<activation key>' '<password>' > .mathpass
+   printf 'ruliology-ci\t%s\t%s\t%s\n' '<MathID>' '<activation key>' '<password>' > .mathpass
    base64 < .mathpass | tr -d '\n' | gh secret set WOLFRAM_MATHPASS_B64 --repo WolframInstitute/Recursor
    ```
 

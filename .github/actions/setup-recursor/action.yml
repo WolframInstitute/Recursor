@@ -34,7 +34,7 @@ runs:
         # container the MathID comes from the machine-id and the host name, so both are fixed:
         # the machine-id here and the host name in the job's container options. Changing
         # either changes the MathID, and the mathpass then needs a new password.
-        WOLFRAM_MACHINE_ID: 311c97ac42db54ecf0c6e2f5a8a4f488
+        WOLFRAM_MACHINE_ID: d488304148cea918bb642ebe9924d65d
       run: |
         # Without a license the kernel names the machine in its activation prompt, which it
         # prints only to a terminal. The empty lines answer the prompt's questions.
