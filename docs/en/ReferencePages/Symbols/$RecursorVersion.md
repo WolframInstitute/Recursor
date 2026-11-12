@@ -17,7 +17,7 @@ RelatedTutorials: [ArithmeticPatterns]
 
 ## Details & Options
 
-- Version is 0.2.1 for this release.
+- Version is 0.3.0 for this release.
 
 ## Basic Examples
 

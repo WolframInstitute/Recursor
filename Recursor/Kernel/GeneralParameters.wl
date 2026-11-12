@@ -3,7 +3,7 @@ PackageExported[{$RecursorVersion, RecursorExamples}]
 $RecursorVersion::usage = "$RecursorVersion is the version of the loaded Recursor paclet."
 RecursorExamples::usage = "RecursorExamples[] gives named example programs. RecursorExamples[name] gives one program."
 
-$RecursorVersion = "0.2.1"
+$RecursorVersion = "0.3.0"
 
 (* Zero exactly when its input has two divisors. *)
 compositeTest[] := Let[

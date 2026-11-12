@@ -17,10 +17,11 @@ Deterministic search for Recursor programs that match examples.
 
 ## Functions
 
-- `SynthesizeRecursor` finds the cheapest program matching examples
+- `SynthesizeRecursor` finds a program from examples and tests it on examples it was not shown
 
 ### Checking a result
 
 - `EvaluateRecursor` computes later terms of a synthesized program
 - `ScoreRecursor` counts exact matches on further examples
 - `RecursorNodeCount` counts the syntax nodes of a result
+- `TranslateRecursor` writes a result as a Wolfram Language function

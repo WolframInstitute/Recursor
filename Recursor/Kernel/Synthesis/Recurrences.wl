@@ -1,4 +1,4 @@
-PackageScoped[{synthesisRecurrences, synthesisSolvers}]
+PackageScoped[{synthesisRecurrences, synthesisSolvers, synthesisShiftInput, synthesisStepSeeds, synthesisRecurrenceProgram}]
 
 (* Recurrences are checked against the data itself: a step is evaluated on
    the recorded earlier terms at every position, so no candidate program has
@@ -11,6 +11,7 @@ atMost[x_, m_] := Switch[m, 0, x, 1, Pred[x], _, Monus[x, Const[m]]]
 
 shiftInput[program_, 0] := program
 shiftInput[program_, shift_] := Let[Monus[Var, Const[shift]], program]
+synthesisShiftInput[program_, shift_] := shiftInput[program, shift]
 
 (* CoRec[Var, seeds..., step]. A large offset is subtracted from the input
    first, so the history never runs from zero up to the offset. *)
@@ -33,6 +34,8 @@ recurrenceProgram[body_, seeds_, offset_, terms_] := If[stepLag[body] <= 1 && Fr
 	]
 ]
 
+synthesisRecurrenceProgram[arguments___] := recurrenceProgram[arguments]
+
 seedCost[terms_, seeds_] := Total[synthesisConstantCost /@ Take[terms, seeds]]
 
 (* Value of a step at zero-based position j, or Missing when it reads a term
@@ -53,6 +56,8 @@ stepSeeds[body_, offset_, terms_] := Module[{least, seeds},
 	seeds
 ]
 
+synthesisStepSeeds[arguments___] := stepSeeds[arguments]
+
 (* Generic environments appended to every step vector. Without them two
    steps that agree on this sequence alone would be merged, and the one
    needing fewer seeds could be lost. *)
@@ -67,7 +72,7 @@ $stepHalved = {3, 1, 0, 4, 2, 9, 1, 6, 17, 2, 11, 40, 7, 0, 5, 28}
 synthesisRecurrences[offset_Integer, terms_List, maximum_Integer, maximumConstant_Integer, deadline_] := Module[{
 	length = Length[terms], positions, leaves, found
 },
-	If[length < 6, Return[None]];
+	If[length < 6, Return[{}]];
 	positions = Range[3, length - 1];
 	leaves = Join[
 		{{Idx, Join[offset + positions, $stepIndex]}},
@@ -75,18 +80,20 @@ synthesisRecurrences[offset_Integer, terms_List, maximum_Integer, maximumConstan
 		If[offset <= 1, {{synthesisHalved, Join[terms[[Quotient[offset + positions, 2] - offset + 1]], $stepHalved]}}, {}],
 		Table[{Const[c], ConstantArray[c, Length[positions] + 16]}, {c, 0, maximumConstant}]
 	];
+	(* A step must reproduce more terms than it takes as seeds, by two at least:
+	   otherwise the seeds explain the data and the step explains little. *)
 	found = synthesisClasses[leaves, terms[[positions + 1]], maximum, deadline, None, False,
 		Function[{body, cost},
 			If[FreeQ[body, synthesisEarlier | synthesisHalved], None,
 				With[{seeds = stepSeeds[body, offset, terms]},
-					<|"Cost" -> cost + seedCost[terms, seeds] + 1, "Expression" -> body, "Seeds" -> seeds|>
+					If[length - seeds < seeds + 2, None,
+						<|"Cost" -> cost + seedCost[terms, seeds] + 1, "Expression" -> body, "Seeds" -> seeds|>
+					]
 				]
 			]
 		]
-	]["Best"];
-	If[found === None, None,
-		<|"Program" -> recurrenceProgram[found["Expression"], found["Seeds"], offset, terms], "Cost" -> found["Cost"], "Method" -> "Recurrence"|>
-	]
+	]["Matches"];
+	Map[<|"Program" -> recurrenceProgram[#["Expression"], #["Seeds"], offset, terms], "Cost" -> #["Cost"], "Method" -> "Recurrence"|> &, found]
 ]
 
 signedSum[{}, _] := $Failed
@@ -151,8 +158,8 @@ recurrenceShapes[length_] := SortBy[
    linear recurrence with constant coefficients; order one is hypergeometric.
    The null space is exact, and at least two spare equations confirm it. *)
 polynomialRecurrence[offset_, terms_, shape_] := Module[{
-	r = shape["Order"], d = shape["Degree"], seeds, rows, null, vector, coefficient, constant = 0, at = 0, leading, positive = {}, negative = {},
-	cost, numerator, denominator, body, take
+	r = shape["Order"], d = shape["Degree"], seeds, rows, null, vector, parts, coefficient, constant = 0, leading, positive = {}, negative = {},
+	cost, numerator, denominator, body
 },
 	seeds = r + shape["Skip"];
 	rows = Table[
@@ -169,11 +176,12 @@ polynomialRecurrence[offset_, terms_, shape_] := Module[{
 	If[Length[null] =!= 1, Return[{}]];
 	vector = First[null] (LCM @@ Denominator[First[null]]);
 	vector = vector / (GCD @@ vector);
-	take[] := vector[[++at]];
-	coefficient = Association[Table[k -> Association[Table[e -> take[], {e, d, 0, -1}]], {k, r, 1, -1}]];
-	If[shape["Constant"], constant = take[]];
-	coefficient[0] = Association[Table[e -> take[], {e, d, 0, -1}]];
-	leading[i_] := Sum[coefficient[0][e] i^e, {e, 0, d}];
+	(* the vector holds the coefficients of a(i-r) .. a(i-1) by falling degree, the constant, then those of a(i) *)
+	parts = TakeList[vector, {r (d + 1), Boole[shape["Constant"]], d + 1}];
+	coefficient = Association[MapThread[#1 -> AssociationThread[Range[d, 0, -1], #2] &, {Range[r, 1, -1], Partition[parts[[1]], d + 1]}]];
+	If[shape["Constant"], constant = First[parts[[2]]]];
+	coefficient[0] = AssociationThread[Range[d, 0, -1], parts[[3]]];
+	leading = Function[i, Sum[coefficient[0][e] i^e, {e, 0, d}]];
 	If[leading[offset + seeds] < 0, coefficient = Map[-# &, coefficient, {2}]; constant = -constant];
 	If[! AllTrue[Range[offset + seeds, offset + Length[terms] - 1], leading[#] > 0 &], Return[{}]];
 	cost = 1 + seedCost[terms, seeds];

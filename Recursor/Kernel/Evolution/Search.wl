@@ -2,11 +2,12 @@ PackageExported[{ScoreRecursor, EvolveRecursor}]
 
 ScoreRecursor::usage = "ScoreRecursor[p, {{input, output}, ...}] counts exact matches. Evaluations that exhaust a resource limit score zero."
 EvolveRecursor::usage = "EvolveRecursor[examples] searches for a closed program matching input-output examples. \
-The result records fitness, population and genealogy. Solved means a fit to these examples."
+The result records fitness, population and genealogy. Solved means a fit to these examples. \
+Method -> \"Guided\" chooses each variation from the values the examples require."
 
 Options[ScoreRecursor] = {"MaxSteps" -> 10000, "TimeLimit" -> 0.2, "MemoryLimit" -> 67108864}
-Options[EvolveRecursor] = Join[Options[ScoreRecursor], Options[RandomRecursor], {
-	"PopulationSize" -> 40, "MaxGenerations" -> 30, "EliteCount" -> 2, "TournamentSize" -> 3,
+Options[EvolveRecursor] = Join[{Method -> Automatic}, Options[ScoreRecursor], Options[RandomRecursor], {
+	"LibraryCost" -> 6, "PopulationSize" -> 40, "MaxGenerations" -> 30, "EliteCount" -> 2, "TournamentSize" -> 3,
 	"CrossoverRate" -> 0.8, "MutationRate" -> 0.3, "InitialDepth" -> 2, "MutationDepth" -> 3,
 	"InitialPopulation" -> {}, "RandomSeed" -> Automatic, "StopOnSolve" -> True,
 	"Proposer" -> None, "ProposalCount" -> 4, "StagnationPatience" -> 4
@@ -33,8 +34,11 @@ EvolveRecursor[examples_?examplesQ, opts : OptionsPattern[]] := Enclose @ Module
 	initialDepth = OptionValue["InitialDepth"], mutationDepth = OptionValue["MutationDepth"], seeds = OptionValue["InitialPopulation"],
 	maximumNodes = OptionValue["MaxNodes"], seed = OptionValue["RandomSeed"], stop = TrueQ[OptionValue["StopOnSolve"]],
 	proposer = OptionValue["Proposer"], proposalCount = OptionValue["ProposalCount"], patience = OptionValue["StagnationPatience"],
+	method = Replace[OptionValue[Method], Automatic -> "Tournament"], libraryCost = OptionValue["LibraryCost"],
 	randomOptions, scoreOptions, score, record, next, breed, run, nextIdentifier = 0
 },
+	ConfirmAssert[MatchQ[method, "Tournament" | "Guided"], "Method must be Automatic, \"Tournament\" or \"Guided\"."];
+	ConfirmAssert[MatchQ[libraryCost, _Integer?Positive], "LibraryCost must be a positive integer."];
 	ConfirmAssert[MatchQ[populationSize, _Integer?Positive] && MatchQ[generations, _Integer?NonNegative], "PopulationSize and MaxGenerations are invalid."];
 	ConfirmAssert[MatchQ[elites, _Integer?NonNegative] && elites <= populationSize, "EliteCount must lie between zero and PopulationSize."];
 	ConfirmAssert[MatchQ[tournamentSize, _Integer?Positive], "TournamentSize must be positive."];
@@ -93,5 +97,15 @@ EvolveRecursor[examples_?examplesQ, opts : OptionsPattern[]] := Enclose @ Module
 			"Genealogy" -> Catenate[Lookup[states, "Born"]]
 		|>
 	];
-	If[seed === Automatic, run[], BlockRandom[SeedRandom[seed]; run[]]]
+	(* the guided search has variation of its own; it shares the budget, the seeds and the scoring limits *)
+	If[method === "Guided",
+		run[] := guidedEvolution[examples, <|"PopulationSize" -> populationSize, "MaxGenerations" -> generations, "EliteCount" -> elites,
+			"MaxNodes" -> maximumNodes, "MaxConstant" -> OptionValue["MaxConstant"], "LibraryCost" -> libraryCost, "StopOnSolve" -> stop,
+			"InitialPopulation" -> seeds, "ScoreOptions" -> Join[scoreOptions, Options[ScoreRecursor]]|>]
+	];
+	(* the local functions hold the scores of every program met; removing them frees that memory *)
+	With[{result = If[seed === Automatic, run[], BlockRandom[SeedRandom[seed]; run[]]]},
+		Remove[score, record, next, breed, run];
+		result
+	]
 ]

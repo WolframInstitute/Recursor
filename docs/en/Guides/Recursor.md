@@ -37,6 +37,7 @@ A deterministic synthesizer finds programs from the terms of a sequence.
 - `ToRecursor` translate a counter machine into DSL syntax
 - `CompileRecursor` construct a closed lambda term
 - `NormalizeRecursor` normalize a compiled function
+- `TranslateRecursor` give a Wolfram Language function with the same values
 
 ### [Evolution](paclet:WolframInstitute/Recursor/guide/Evolution)
 
@@ -49,7 +50,7 @@ A deterministic synthesizer finds programs from the terms of a sequence.
 
 ### [Synthesis](paclet:WolframInstitute/Recursor/guide/Synthesis)
 
-- `SynthesizeRecursor` find the cheapest program matching examples
+- `SynthesizeRecursor` find a program from examples and test it on held-out ones
 
 ### [Visualization](paclet:WolframInstitute/Recursor/guide/Visualization)
 

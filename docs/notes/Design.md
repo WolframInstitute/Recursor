@@ -42,6 +42,52 @@ and a paclet, documentation and test layout adapted from Ruliology.
   node, every further two bits one more. Initial terms read from data then
   pay for what they say, and a recurrence with several large seeds no longer
   beats a short closed program. RecursorNodeCount is unchanged.
+- Count a synthesized program as solved only on evidence that it generalizes.
+  Fitting the examples is not that evidence. The search therefore sees three
+  quarters of the examples and is tested on the rest, and the examples must
+  hold at least 24 bits more information than the program (a value counts by
+  its distance from the one before, a unit of cost counts 2.5 bits). Both
+  conditions were set on a development sample and measured on 1,000 other
+  sequences of the OEIS, twenty terms each. Of the programs that reproduced
+  the terms they were found from, 58% failed on later terms. Of those that
+  also reproduced the held-out terms, 22% did. Of the 87 solved programs with
+  later terms on record, none did; on 2,000 further sequences 4 of 165 did.
+  A program that fits without that evidence is returned, not solved.
+  [The measurements](OEISSynthesisAndEvolution.md) give the details.
+- Require four held-out examples for Solved. Evidence in bits cannot show
+  that a sequence leaves a simple rule after the terms given, and many do:
+  from eight terms a quarter of the solved programs failed later, whatever
+  their evidence. The share that continue rises with the terms, 93% from
+  twelve and 95% from sixteen, so Solved starts at sixteen examples.
+- Write the synthesizer as array arithmetic. Loop bodies of one shape advance
+  together as rows of one matrix, the terms of sums and products are
+  evaluated bottom-up from values already known, and segment totals are
+  matrix operations. A search takes about two seconds where the first
+  version took five. Local functions that refer to one another are removed
+  when a search ends: left alone they kept its tables alive, some fifty
+  megabytes per call, which exhausted the memory of a machine during the
+  measurements.
+- Offer guided variation in EvolveRecursor. Blind mutation and crossover
+  sample a few hundred programs. Method -> "Guided" runs a parent backwards
+  from the examples to the values one of its parts must have, and takes that
+  part from a library of small programs enumerated once. It also evolves
+  recurrence steps against the recorded earlier outputs. With the budget of
+  the corpus experiment it predicted seven times as many sequences. The
+  default method is unchanged, so seeded searches give what they gave.
+- Compose programs in the synthesizer, working backwards from the examples.
+  Sums, products and counts over a loop index are evaluated for all index
+  pairs at once, so thousands of loops cost a few array operations. The n-th
+  number with a property, counting functions, partial sums, differences and
+  inner functions are found by asking which stored class the examples
+  require, a lookup instead of an enumeration of every composition. Two
+  enumerated parts joined at the root are found by lookup too, which doubles
+  the cost that enumeration reaches. Costs count the choices of the search,
+  not the nodes of a fixed wrapper, so they stay comparable across methods.
+- Translate programs to Wolfram Language in two steps. A literal translation
+  follows the interpreter construct by construct and is correct by
+  construction. Nicer forms (sums, products, counts, comparisons, known
+  functions) are rewrites of it, each kept only if it gives the values of the
+  program on the tested inputs. A wrong rewrite is dropped, never returned.
 - Draw syntax trees with a design of their own, the one exception to native
   visualization defaults. Names are the content of a syntax tree, so each
   node is a box holding its name instead of a dot with a label beside it,

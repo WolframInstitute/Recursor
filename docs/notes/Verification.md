@@ -1,5 +1,41 @@
 # Verification record
 
+## Update for 0.3.0
+
+Checked on 2026-11-12 with Wolfram Language 15.0 on macOS ARM64, after
+extending SynthesizeRecursor, adding the guided method of EvolveRecursor and
+adding TranslateRecursor. The records for earlier versions follow unchanged.
+
+- `make check` covers 35 source and test files and 49 exported symbols with
+  reference pages.
+- `make test` passed all 289 tests in thirteen files. The 38 synthesis tests
+  cover the held-out examples, the evidence, the four held-out examples that
+  Solved requires, sums, searches, counting functions, compositions and
+  joined parts. Eleven tests cover the guided method: every backward rule is
+  compared with the interpreter on random arguments, and searches are checked
+  for their result, their record and their reproducibility. Thirteen tests
+  cover the translator. Two tests check that repeated searches leave no
+  local symbols behind.
+- `make check-proofs` passed as for 0.2.0. The Lean sources are unchanged.
+- `make check-publish` built all 68 documentation pages and the archive.
+- SynthesizeRecursor was rewritten for speed after its measurements. On
+  twelve sequences the rewritten search returns the same program and method
+  as the first version, in 25 seconds where that took 61, and memory in use
+  is the same after forty calls as after eight.
+- TranslateRecursor was run on 300 random programs. The literal and the
+  rewritten translation were produced for each, and no rewritten function
+  disagreed with the interpreter on five inputs beyond the tested ones.
+- The guided method of the paclet was compared with the experiment code it
+  came from on sixty sequences outside the reported samples: each fitted 44.
+- [The measurements](OEISSynthesisAndEvolution.md) ran every program with
+  EvaluateRecursor. The rerun of corpus v1 with its own source gave the
+  recorded program in all 900 runs compared.
+
+Not exercised locally: publication. One measurement run exhausted the
+machine's memory before the leak in SynthesizeRecursor was found; its result
+files were intact and the run was resumed. The saved outputs of the
+walkthrough and the earlier results notebooks predate this version.
+
 ## Update for 0.2.1
 
 Checked on 2026-11-10 with Wolfram Language 15.0 on macOS ARM64, after

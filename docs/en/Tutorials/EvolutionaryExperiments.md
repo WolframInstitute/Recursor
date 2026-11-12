@@ -80,6 +80,36 @@ holdout experiment, not general equivalence:
 MatrixPlot[Table[With[{value=EvaluateRecursor[result["Program"],n,"MaxSteps"->5000]}, If[IntegerQ[value],Abs[value-n^2],Indeterminate] ],{result,runs},{n,0,8}], FrameLabel->{"Seed","Input"}, FrameTicks->{Table[{k,k+100},{k,1,6}],Table[{n+1,n},{n,0,8}]}, PlotLegends->Automatic]
 ```
 
+## Guided variation
+
+Mutation and crossover change a program without looking at the examples.
+Method -> "Guided" works backwards from them: it picks a part of a program,
+finds the values that part must have for the outputs to come out right, and
+takes the small program with those values from a library.
+
+Evolve the Lucas numbers from eight terms with each method and the same seed:
+
+```wl
+searches = AssociationMap[EvolveRecursor[Table[{n, LucasL[n]}, {n, 0, 7}], Method -> #, "StopOnSolve" -> False, "RandomSeed" -> 5] &, {"Tournament", "Guided"}];
+ListStepPlot[Lookup[Values[searches], "FitnessHistory"], DataRange -> {0, 30}, PlotLegends -> Keys[searches], AxesLabel -> {"Generation", "Exact matches"}]
+```
+
+The guided search returns a recurrence with its two initial terms:
+
+```wl
+RecursorProgramTree[searches["Guided"]["Program"]]
+```
+
+Test each program on the eight terms after the ones given:
+
+```wl
+Map[Table[EvaluateRecursor[#["Program"], n, "MaxSteps" -> 100000], {n, 8, 15}] === LucasL[Range[8, 15]] &, searches]
+```
+
+A guided search fits most sequences it is given. A fit is not yet a rule:
+[SynthesizeRecursor](paclet:WolframInstitute/Recursor/ref/SynthesizeRecursor)
+tests a program on terms it has not seen and reports the evidence.
+
 ## Ancestry at a readable scale
 
 A smaller run makes individual parent-child relationships visible. Keep all

@@ -20,3 +20,4 @@ Compilation tools for the Recursor natural-number language.
 - `ToRecursor` translates a counter machine
 - `CompileRecursor` gives a closed lambda term
 - `NormalizeRecursor` normalizes its compiled function
+- `TranslateRecursor` gives a Wolfram Language function

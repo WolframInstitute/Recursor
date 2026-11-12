@@ -3,7 +3,7 @@ PacletObject[<|
 	"Description" -> "A universal natural-number language for program synthesis and evolution",
 	"Creator" -> "Wolfram Institute",
 	"PublisherID" -> "WolframInstitute",
-	"Version" -> "0.2.1",
+	"Version" -> "0.3.0",
 	"WolframVersion" -> "15.0+",
 	"PrimaryContext" -> "WolframInstitute`Recursor`",
 	"Keywords" -> {"computability", "domain-specific language", "genetic programming", "integer sequences", "lambda calculus", "program synthesis"},
@@ -56,6 +56,7 @@ PacletObject[<|
 				"WolframInstitute`Recursor`Succ",
 				"WolframInstitute`Recursor`SynthesizeRecursor",
 				"WolframInstitute`Recursor`ToRecursor",
+				"WolframInstitute`Recursor`TranslateRecursor",
 				"WolframInstitute`Recursor`Var",
 				"WolframInstitute`Recursor`WhileLoop"
 			}

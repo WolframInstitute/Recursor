@@ -13,6 +13,8 @@ RelatedTutorials: [EvolutionaryExperiments, MeasuringOEISSequenceDiscovery]
 
 <code>[EvolveRecursor]()[*examples*]</code> evolves programs against input-output pairs.
 
+<code>[EvolveRecursor]()[*examples*, Method -> "Guided"]</code> chooses each variation from the values the examples require.
+
 <!-- #| annotation: This API operates on Recursor syntax and its declared evaluation semantics; standard plotting and arithmetic remain built-in operations. -->
 
 ## Details & Options
@@ -23,12 +25,17 @@ RelatedTutorials: [EvolutionaryExperiments, MeasuringOEISSequenceDiscovery]
 - Generation options and scoring limits are inherited from RandomRecursor and ScoreRecursor.
 - "Proposer" defaults to None. A callback receives (best program, examples, requested count) and returns programs or source strings. Source is parsed and all candidates are checked. "ProposalCount" defaults to 4; "StagnationPatience" to 4 generations. No service is contacted by default.
 - Each individual records ID, Program, Parents, Generation, Score and Size. Both crossover parents are retained. The population size stays fixed.
+- Method -> Automatic is the search by tournament selection, crossover and mutation. Method -> "Guided" keeps the budget, the seeds and the scoring limits and replaces the variation. It enumerates a library of the distinct small programs once. A variation picks a node of a parent, works backwards from the outputs to the values that node must have, and puts the library program that fits most of them in its place. Parents are chosen by lexicase selection: the examples are taken in a random order and the programs that miss one are dropped.
+- The guided method spends half of its generations on closed programs and half on the step of a recurrence, judged against the earlier outputs in the examples. That half needs consecutive inputs and at least six examples. Of two programs with the same fitness the cheaper is returned; a recurrence costs its step and its initial outputs.
+- The guided method does not call "Proposer" and does not use the tournament, crossover and mutation options. With "StopOnSolve" -> False it goes on to look for a smaller program after a fit. A fit is not a prediction: on OEIS sequences one guided fit in twenty continued its sequence.
 
 
 The following options are available:
 
 | | | |
 | --- | --- | --- |
+| Method | Automatic | Automatic or "Tournament" for selection, crossover and mutation; "Guided" for variation that works backwards from the examples. |
+| "LibraryCost" | 6 | Largest program in the library of the guided method. |
 | "PopulationSize" | 40 | Number of individuals retained per generation. |
 | "MaxGenerations" | 30 | Maximum breeding generations after generation zero. |
 | "EliteCount" | 2 | Individuals carried into the next generation. |
@@ -80,6 +87,27 @@ Inject a deterministic local proposal after zero stalled generations:
 
 ```wl
 KeyTake[EvolveRecursor[{{0, 7}, {1, 8}}, "PopulationSize" -> 3, "EliteCount" -> 1, "MaxGenerations" -> 1, "InitialPopulation" -> {Var, Const[0], Const[1]}, "RandomSeed" -> 3, "StagnationPatience" -> 0, "ProposalCount" -> 1, "Proposer" -> Function[{program, examples, count}, {"Add[Var, Const[7]]"}] ], {"Program", "Solved", "Fitness"}]
+```
+
+---
+
+Guided variation finds the recurrence of the Fibonacci numbers from eight terms:
+
+```wl
+guided = EvolveRecursor[Table[{n, Fibonacci[n]}, {n, 0, 7}], Method -> "Guided", "StopOnSolve" -> False, "RandomSeed" -> 7];
+FormatRecursor[guided["Program"]]
+```
+
+The program continues the sequence:
+
+```wl
+Table[EvaluateRecursor[guided["Program"], n], {n, 8, 15}]
+```
+
+Blind variation with the same budget and seed:
+
+```wl
+KeyTake[EvolveRecursor[Table[{n, Fibonacci[n]}, {n, 0, 7}], "StopOnSolve" -> False, "RandomSeed" -> 7], {"Solved", "Fitness"}]
 ```
 
 ## Applications

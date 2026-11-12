@@ -91,7 +91,7 @@ glyphTree[expr_, {w_, h_}] := Module[{layout = treeLayout[expr, 1 &], sx, sy, r,
 (* SynthesizeRecursor on sixteen terms of the binary digit count, checked on 240 further terms. *)
 synthesis[] := synthesis[] = Module[{given = DigitCount[Range[0, 15], 2, 1], found, values},
 	found = SynthesizeRecursor[given];
-	If[! TrueQ[found["Solved"]], fail["no program for the binary digit count"]];
+	If[MissingQ[found["Program"]], fail["no program for the binary digit count"]];
 	values = Table[EvaluateRecursor[found["Program"], n], {n, 0, 255}];
 	If[values =!= DigitCount[Range[0, 255], 2, 1], fail["the synthesized program differs on later terms"]];
 	<|"Given" -> given, "Program" -> found["Program"], "Values" -> values|>

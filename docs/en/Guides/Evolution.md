@@ -18,7 +18,7 @@ Evolution tools for the Recursor natural-number language.
 ## Functions
 
 - `CrossoverRecursor` combines two programs
-- `EvolveRecursor` evolves programs against input-output pairs
+- `EvolveRecursor` evolves programs against input-output pairs, by blind or by guided variation
 - `MutateRecursor` replaces one random subtree
 - `RandomRecursor` generates a closed program
 - `ScoreRecursor` counts exact matches
