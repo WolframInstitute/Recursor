@@ -18,7 +18,7 @@ RelatedTutorials: [FormalVerification, VisualizingLambdaCompilation]
 - In a desktop notebook, use [SetupRecursor]() to review and install libraries individually.
 - Supported names are "Lambda", "LeanLink" and "MathlibLink".
 - Results are an association indexed by library name. Successful paclet installations return PacletObject; the MathlibLink setup returns its PacletObject after checking the shared mathlib installation. Failures include diagnostic details and, when setup is required, a setup link.
-- Ready installations are kept. Duplicate names are processed once. Unknown names and invalid argument shapes remain unevaluated without starting an installation.
+- Ready installations are kept. Duplicate names are processed once. Unknown names and invalid argument shapes give a Failure with the tag "InvalidArguments" without starting an installation.
 - When both proof libraries are selected, MathlibLink prepares the Lean toolchain before checking LeanLink. Results retain the requested library order.
 - Lambda supplies lambda-calculus diagrams. LeanLink supplies the native Lean bridge. MathlibLink supplies the pinned mathematical library and a bridge to its declarations.
 - MathlibLink prepares its runtime locally, installing missing elan, Git and curl tools automatically. It installs the pinned Lean toolchain without changing the global default and prepares the full mathlib library.
@@ -54,7 +54,7 @@ InstallRecursorLibraries[{"Lambda"}]
 
 ## Possible Issues
 
-Unknown libraries remain unevaluated:
+Unknown libraries give a Failure:
 
 ```wl
 InstallRecursorLibraries[{"Unknown"}]

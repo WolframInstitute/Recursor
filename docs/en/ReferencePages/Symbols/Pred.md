@@ -48,7 +48,7 @@ RecursorProgramTree[Pred[Var]]
 Plot saturation at the lower boundary:
 
 ```wl
-ListLinePlot[Table[EvaluateRecursor[Iter[Const[4],Var,Pred[Acc]], n], {n, 0, 12}], DataRange -> {0, 12}, AxesLabel -> {"Input", "Output"}, PlotRange -> All ]
+ListLinePlot[Table[EvaluateRecursor[Iter[Const[4],Var,Pred[Acc]], n], {n, 0, 12}], DataRange -> {0, 12}, Frame -> True, FrameLabel -> {"Input", "Output"}, PlotRange -> All ]
 ```
 
 ---

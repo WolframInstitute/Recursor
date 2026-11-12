@@ -35,7 +35,7 @@ RecursorEvolutionPlot[EvolveRecursor[{{0, 7}, {1, 8}}, "PopulationSize" -> 4, "M
 Compare two search seeds:
 
 ```wl
-ListLinePlot[Table[EvolveRecursor[{{0,7},{1,8},{2,9}}, "PopulationSize"->6,"MaxGenerations"->4,"StopOnSolve"->False,"RandomSeed"->seed,"IncludeWhile"->False]["FitnessHistory"], {seed,{41,42}}], DataRange->{0,4}, PlotLegends->{"Seed 41","Seed 42"}, AxesLabel->{"Generation","Exact matches"} ]
+ListLinePlot[Table[EvolveRecursor[{{0,7},{1,8},{2,9}}, "PopulationSize"->6,"MaxGenerations"->4,"StopOnSolve"->False,"RandomSeed"->seed,"IncludeWhile"->False]["FitnessHistory"], {seed,{41,42}}], DataRange->{0,4}, PlotLegends->{"Seed 41","Seed 42"}, Frame->True, FrameLabel->{"Generation","Exact matches"} ]
 ```
 
 ---

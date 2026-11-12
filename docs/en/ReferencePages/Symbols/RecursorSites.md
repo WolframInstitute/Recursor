@@ -33,7 +33,7 @@ RecursorSites[Succ[Var]]
 Measure available bindings at each recursion site:
 
 ```wl
-BarChart[Length /@ Lookup[RecursorSites[RecursorExamples["Factorial"]],"Bindings"], AxesLabel->{"Site","Available bindings"} ]
+BarChart[Length /@ Lookup[RecursorSites[RecursorExamples["Factorial"]],"Bindings"], Frame->True, FrameLabel->{"Site","Available bindings"} ]
 ```
 
 ---

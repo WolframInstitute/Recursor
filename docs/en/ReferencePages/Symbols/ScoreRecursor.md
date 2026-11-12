@@ -51,7 +51,7 @@ ScoreRecursor[WhileLoop[Var, Acc, Pred[Acc]], {{2, 0}, {20, 0}}, "MaxSteps" -> 1
 Compare candidate fits to a square target:
 
 ```wl
-BarChart[ScoreRecursor[#,Table[{n,n^2},{n,0,5}]] & /@ {Var,Add[Var,Var],Mul[Var,Var]}, ChartLabels->{"Identity","Double","Square"}, AxesLabel->{None,"Exact matches"} ]
+BarChart[ScoreRecursor[#,Table[{n,n^2},{n,0,5}]] & /@ {Var,Add[Var,Var],Mul[Var,Var]}, ChartLabels->{"Identity","Double","Square"}, Frame->True, FrameLabel->{None,"Exact matches"} ]
 ```
 
 ---
@@ -59,5 +59,5 @@ BarChart[ScoreRecursor[#,Table[{n,n^2},{n,0,5}]] & /@ {Var,Add[Var,Var],Mul[Var,
 See the behaviors underlying those scores:
 
 ```wl
-ListLinePlot[Table[EvaluateRecursor[p,n],{p,{Var,Add[Var,Var],Mul[Var,Var]}},{n,0,5}], DataRange->{0,5}, PlotLegends->{"Identity","Double","Square"}, AxesLabel->{"Input","Output"} ]
+ListLinePlot[Table[EvaluateRecursor[p,n],{p,{Var,Add[Var,Var],Mul[Var,Var]}},{n,0,5}], DataRange->{0,5}, PlotLegends->{"Identity","Double","Square"}, Frame->True, FrameLabel->{"Input","Output"} ]
 ```

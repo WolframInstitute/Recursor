@@ -31,7 +31,7 @@ used by Ruliology's register-machine tools.
 Translate a one-instruction increment machine and plot its outputs:
 
 ```wl
-With[{program = ToRecursor[{{1, 0, {2}}}]}, ListPlot[Table[{n, EvaluateRecursor[program, n]}, {n, 0, 3}], AxesLabel -> {"Input", "Output"}]]
+With[{program = ToRecursor[{{1, 0, {2}}}]}, ListPlot[Table[{n, EvaluateRecursor[program, n]}, {n, 0, 3}], Frame -> True, FrameLabel -> {"Input", "Output"}]]
 ```
 
 This program increments its input and halts. The translation contains only
@@ -101,7 +101,7 @@ successorTwice = ToRecursor[{"Compose", "Successor", "Successor"}, "PartialRecur
 Compare the translated function with its expected values:
 
 ```wl
-ListLinePlot[Table[EvaluateRecursor[successorTwice, n], {n, 0, 8}], DataRange -> {0, 8}, AxesLabel -> {"Input", "Output"}]
+ListLinePlot[Table[EvaluateRecursor[successorTwice, n], {n, 0, 8}], DataRange -> {0, 8}, Frame -> True, FrameLabel -> {"Input", "Output"}]
 ```
 
 Primitive recursion uses input pair(a,n). The base receives a; each step

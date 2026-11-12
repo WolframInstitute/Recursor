@@ -1,15 +1,17 @@
 (* Desktop setup dialog for the optional library registry. *)
 
 PackageExported[SetupRecursor]
-PackageScoped[librarySetupOnLoad]
+PackageScoped[{librarySetupOnLoad, librarySetupDesktopQ, librarySetupRemember, librarySetupCommand, $librarySetupDialog, $librarySetupPreference}]
 
 SetupRecursor::usage = "SetupRecursor[] opens a dialog to review, install, or uninstall optional libraries in a desktop notebook."
 General::recursorlib = "Optional libraries are available. Run SetupRecursor[] to review and install."
-librarySetupOnLoad::usage = "librarySetupOnLoad[] issues a setup message for missing optional libraries in a desktop notebook unless setup was dismissed."
+librarySetupOnLoad::usage = "librarySetupOnLoad[] issues a setup message for missing optional libraries in a desktop notebook unless setup was \
+dismissed."
 librarySetupDesktopQ::usage = "librarySetupDesktopQ[] tests whether this is an interactive desktop kernel."
 librarySetupMissing::usage = "librarySetupMissing[] gives the registry entries for missing libraries."
 librarySetupRemember::usage = "librarySetupRemember[] remembers that the user has dismissed library setup."
-librarySetupCommand::usage = "librarySetupCommand[name, action] gives a library's install or uninstall command as plain text."
+librarySetupCommand::usage = "librarySetupCommand[name] gives a library's install command as plain text.\n\
+librarySetupCommand[name, action] gives the command for the action \"Install\" or \"Uninstall\"."
 $librarySetupDialog::usage = "$librarySetupDialog is the open library setup dialog."
 $librarySetupPreference::usage = "$librarySetupPreference is the local preference key for library setup."
 
@@ -34,7 +36,8 @@ librarySetupMissing[] := Select[$libraryRegistry, PacletFind[#["Paclet"]] === {}
 librarySetupOnLoad[] := If[And[
 	librarySetupDesktopQ[],
 	! TrueQ[PersistentSymbol[$librarySetupPreference, "Local"]]
-], If[librarySetupMissing[] =!= <||>, Message[General::recursorlib]]]
+], If[librarySetupMissing[] =!= <||>, Message[General::recursorlib]]
+]
 
 SetupRecursor[] := If[
 	! librarySetupDesktopQ[],
@@ -42,7 +45,8 @@ SetupRecursor[] := If[
 	With[{libraries = $libraryRegistry}, Which[
 		libraries === <||>, Null,
 		ValueQ[$librarySetupDialog] && MemberQ[Notebooks[], $librarySetupDialog],
-			SetSelectedNotebook[$librarySetupDialog]; Null,
+			SetSelectedNotebook[$librarySetupDialog];
+			Null,
 		True,
 			$librarySetupDialog = CreateDialog[
 				DynamicModule[{statuses = AssociationMap[libraryStatus, Keys[libraries]],
@@ -66,8 +70,10 @@ SetupRecursor[] := If[
 									], Spacer[16]]],
 									Dynamic[Refresh[If[KeyExistsQ[errors, label],
 										Style[Pane[errors[label], 396], If[statuses[label] === "Failed", StandardRed,
-											LightDarkSwitched[GrayLevel[0.35], GrayLevel[0.7]]], Small],
-										Spacer[{0, 0}]], TrackedSymbols :> {errors, statuses}]]
+											LightDarkSwitched[GrayLevel[0.35], GrayLevel[0.7]]
+										], Small],
+										Spacer[{0, 0}]
+									], TrackedSymbols :> {errors, statuses}]]
 								}, Alignment -> Left, Spacings -> 0.5], 416, Alignment -> {Left, Top}],
 								Pane[Column[{
 									Dynamic[If[busy && active === label,
@@ -90,26 +96,32 @@ SetupRecursor[] := If[
 											statuses = Append[statuses, label -> If[uninstall, "Uninstalling...", "Preparing..."]];
 											WithCleanup[
 												FinishDynamic[];
-												With[{result = If[uninstall,
-													Quiet[libraryUninstall[label]],
-													Block[{
-														$libraryProgressFunction = Function[{stage, fraction},
-															statuses = Append[statuses, label -> stage];
-															progress = Append[progress, label -> If[NumberQ[fraction], Clip[fraction, {0, 1}], None]];
-															FinishDynamic[]
-														],
-														libraryCancelledQ = Function[Null, cancelled], $ProgressReporting = False
-													}, Lookup[Quiet[InstallRecursorLibraries[{label}]], label]]
-												]}, Which[
-													FailureQ[result],
-														errors = Append[errors, label -> ToString[result["Message"]]];
-														statuses = Append[statuses, label -> Switch[First[result],
-															"LibraryInstallCancelled", "Cancelled", "LibrarySetupRequired", "Needs setup", _, "Failed"]],
-													uninstall,
-														errors = Append[errors, label -> "Uninstalled. Restart the kernel to clear any loaded library code."];
-														statuses = Append[statuses, label -> libraryStatus[label]],
-													True, statuses = Append[statuses, label -> "Ready"]
-												]],
+												(* The libraries are external code, so every message of the action is quieted. *)
+												Module[{result},
+													result = If[uninstall,
+														Quiet[libraryUninstall[label], All],
+														Block[{
+															$libraryProgressFunction = Function[{stage, fraction},
+																statuses = Append[statuses, label -> stage];
+																progress = Append[progress, label -> If[NumberQ[fraction], Clip[fraction, {0, 1}], None]];
+																FinishDynamic[]
+															],
+															$libraryCancellationFunction = Function[Null, cancelled], $ProgressReporting = False
+														}, Lookup[Quiet[InstallRecursorLibraries[{label}], All], label]
+														]
+													];
+													Which[
+														FailureQ[result],
+															errors = Append[errors, label -> ToString[result["Message"]]];
+															statuses = Append[statuses, label -> Switch[First[result],
+																"LibraryInstallCancelled", "Cancelled", "LibrarySetupRequired", "Needs setup", _, "Failed"
+															]],
+														uninstall,
+															errors = Append[errors, label -> "Uninstalled. Restart the kernel to clear any loaded library code."];
+															statuses = Append[statuses, label -> libraryStatus[label]],
+														True, statuses = Append[statuses, label -> "Ready"]
+													]
+												],
 												(* A bridge can install another listed library or depend on one that was removed. *)
 												installed = AssociationMap[PacletFind[libraries[#]["Paclet"]] =!= {} &, Keys[libraries]];
 												Scan[Function[name,
@@ -131,12 +143,13 @@ SetupRecursor[] := If[
 									],
 									Button[Dynamic[Which[copied === label, "Copied", installed[label], "Copy uninstall command", True, "Copy install command"],
 										TrackedSymbols :> {installed, copied}],
-										CopyToClipboard[librarySetupCommand[label, If[installed[label], "Uninstall", "Install"]]]; copied = label,
+										CopyToClipboard[librarySetupCommand[label, If[installed[label], "Uninstall", "Install"]]];
+										copied = label,
 										Appearance -> "Frameless", BaseStyle -> "Hyperlink", Method -> "Preemptive",
 										Enabled -> Dynamic[Refresh[! busy && (installed[label] || statuses[label] =!= "Unsupported"), TrackedSymbols :> {busy, installed, statuses}]]
 									]
 								}, Alignment -> Right, Spacings -> 0.8], 180, Alignment -> {Right, Top}]
-							}], libraries],
+						}], libraries],
 							Alignment -> {{Left, Right}, Top}, Spacings -> {1, 1.5}], TrackedSymbols :> {installed}],
 							ImageSize -> {616, UpTo[320]}, Scrollbars -> {False, Automatic},
 							AppearanceElements -> None, Alignment -> {Left, Top}]},
@@ -148,11 +161,14 @@ SetupRecursor[] := If[
 							}, Dynamic[Refresh[busy && MemberQ[{"Preparing...", "Downloading...", "Retrying..."}, Lookup[statuses, active, None]],
 								TrackedSymbols :> {busy, active, statuses}]]],
 							Spacer[12],
-							DefaultButton["Close", cancelled = True; librarySetupRemember[]; DialogReturn[],
+							DefaultButton["Close",
+								cancelled = True;
+								librarySetupRemember[];
+								DialogReturn[],
 								ImageSize -> {90, Automatic}, Method -> "Preemptive"]
 						}], 600, Alignment -> Right]}
 					}, Alignment -> Left, Spacings -> {0, 1.3},
-						Dividers -> {None, {False, False, GrayLevel[0.85], False}}],
+						Dividers -> {None, {False, False, LightDarkSwitched[GrayLevel[0.85], GrayLevel[0.35]], False}}],
 						FrameStyle -> None, FrameMargins -> {{16, 0}, {16, 16}}],
 					Deinitialization :> (cancelled = True)
 				],
@@ -160,5 +176,7 @@ SetupRecursor[] := If[
 				NotebookEventActions -> {"WindowClose" :> librarySetupRemember[], PassEventsDown -> True}
 			];
 			Null
-	]]
+	]
+	]
 ]
+SetupRecursor[___] := invalidArgumentsFailure[SetupRecursor]

@@ -1,11 +1,23 @@
+(* ::Package:: *)
+
+(* ::Section:: *)
+(*PackageExported*)
+
 PackageExported[{$RecursorVersion, RecursorExamples}]
+
+(* ::Section:: *)
+(*Usage Messages*)
 
 $RecursorVersion::usage = "$RecursorVersion is the version of the loaded Recursor paclet."
 RecursorExamples::usage = "RecursorExamples[] gives named example programs. RecursorExamples[name] gives one program."
 
+compositeTest::usage = "compositeTest[] gives a program that is zero exactly when its input has two divisors, which is when it is prime."
+
+(* ::Section:: *)
+(*Function Definitions*)
+
 $RecursorVersion = "0.3.0"
 
-(* Zero exactly when its input has two divisors. *)
 compositeTest[] := Let[
 	Rec[Var, Const[0], Ifz[Rem[Var, Succ[Idx]], Succ[Acc], Acc]],
 	Add[Monus[Var, Const[2]], Monus[Const[2], Var]]
@@ -26,3 +38,4 @@ RecursorExamples[] := <|
 |>
 
 RecursorExamples[name_String] := Lookup[RecursorExamples[], name, Missing["UnknownExample", name]]
+RecursorExamples[___] := invalidArgumentsFailure[RecursorExamples]

@@ -72,5 +72,5 @@ are described in [Formal Verification](../en/Tutorials/FormalVerification.md).
 These checks concern the formal models; they do not silently certify the
 Wolfram runtime or lambda backend.
 
-The maintained scripts remain check.wls, test.wls and docs.wls. All setup and
+The maintained scripts remain check.wls, test.wls, docs.wls and style.wls. All setup and
 proof-check logic lives in the paclet, and caches remain outside its archive.

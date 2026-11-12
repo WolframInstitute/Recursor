@@ -32,7 +32,7 @@ RecursorNodeCount[WhileLoop[Var, Acc, Pred[Acc]]]
 Compare structural sizes of example programs:
 
 ```wl
-BarChart[RecursorNodeCount /@ Lookup[RecursorExamples[],{"Square","Factorial","Fibonacci","PopulationCount"}], ChartLabels->{"Square","Factorial","Fibonacci","Popcount"}, AxesLabel->{None,"Nodes"} ]
+BarChart[RecursorNodeCount /@ Lookup[RecursorExamples[],{"Square","Factorial","Fibonacci","PopulationCount"}], ChartLabels->{"Square","Factorial","Fibonacci","Popcount"}, Frame->True, FrameLabel->{None,"Nodes"} ]
 ```
 
 ---

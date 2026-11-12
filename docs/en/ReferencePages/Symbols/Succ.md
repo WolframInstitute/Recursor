@@ -48,7 +48,7 @@ RecursorProgramTree[Succ[Var]]
 Generate an affine recurrence:
 
 ```wl
-ListLinePlot[Table[EvaluateRecursor[Iter[Var,Const[1],Succ[Acc]], n], {n, 0, 12}], DataRange -> {0, 12}, AxesLabel -> {"Input", "Output"}, PlotRange -> All ]
+ListLinePlot[Table[EvaluateRecursor[Iter[Var,Const[1],Succ[Acc]], n], {n, 0, 12}], DataRange -> {0, 12}, Frame -> True, FrameLabel -> {"Input", "Output"}, PlotRange -> All ]
 ```
 
 ---

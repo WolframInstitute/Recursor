@@ -48,7 +48,7 @@ RecursorProgramTree[Iter[Var,Const[0],Add[Acc,Const[3]]]]
 Accumulate a triangular-number sequence:
 
 ```wl
-ListLinePlot[Table[EvaluateRecursor[Rec[Var,Const[0],Add[Acc,Succ[Idx]]], n], {n, 0, 12}], DataRange -> {0, 12}, AxesLabel -> {"Input", "Output"}, PlotRange -> All ]
+ListLinePlot[Table[EvaluateRecursor[Rec[Var,Const[0],Add[Acc,Succ[Idx]]], n], {n, 0, 12}], DataRange -> {0, 12}, Frame -> True, FrameLabel -> {"Input", "Output"}, PlotRange -> All ]
 ```
 
 ---
@@ -56,5 +56,5 @@ ListLinePlot[Table[EvaluateRecursor[Rec[Var,Const[0],Add[Acc,Succ[Idx]]], n], {n
 Compare accumulation with the closed formula:
 
 ```wl
-ListLinePlot[{Table[EvaluateRecursor[Rec[Var,Const[0],Add[Acc,Succ[Idx]]], n], {n, 0, 10}], Range[0,10] (Range[0,10]+1)/2}, DataRange -> {0, 10}, PlotLegends -> {"Recursor", "Reference"}, AxesLabel -> {"Input", "Output"}, PlotRange -> All ]
+ListLinePlot[{Table[EvaluateRecursor[Rec[Var,Const[0],Add[Acc,Succ[Idx]]], n], {n, 0, 10}], Range[0,10] (Range[0,10]+1)/2}, DataRange -> {0, 10}, PlotLegends -> {"Recursor", "Reference"}, Frame -> True, FrameLabel -> {"Input", "Output"}, PlotRange -> All ]
 ```

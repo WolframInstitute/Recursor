@@ -4,18 +4,31 @@
 
 Checked on 2026-11-12 with Wolfram Language 15.0 on macOS ARM64, after
 extending SynthesizeRecursor, adding the guided method of EvolveRecursor and
-adding TranslateRecursor. The records for earlier versions follow unchanged.
+adding TranslateRecursor, and after converting every Wolfram Language file to
+the [coding guides](../coding-guides/README.md). The records for earlier
+versions follow unchanged.
 
-- `make check` covers 35 source and test files and 49 exported symbols with
-  reference pages.
-- `make test` passed all 289 tests in thirteen files. The 38 synthesis tests
-  cover the held-out examples, the evidence, the four held-out examples that
-  Solved requires, sums, searches, counting functions, compositions and
-  joined parts. Eleven tests cover the guided method: every backward rule is
-  compared with the interpreter on random arguments, and searches are checked
-  for their result, their record and their reproducibility. Thirteen tests
-  cover the translator. Two tests check that repeated searches leave no
-  local symbols behind.
+- `make check` covers 36 source and test files and 49 exported symbols with
+  reference pages. Its style check passes 48 files with no issue and 42
+  waivers, each with its reason.
+- `make test` passed all 333 tests in thirteen files, and the 52 tests of the
+  style check. The 40 synthesis tests cover the held-out examples, the
+  evidence, the four held-out examples that Solved requires, sums, searches,
+  counting functions, compositions and joined parts. Twelve tests cover the
+  guided method: every backward rule is compared with the interpreter on
+  random arguments, and searches are checked for their result, their record
+  and their reproducibility. Sixteen tests cover the translator. Three tests
+  check that repeated searches leave no local symbols behind. Every public
+  function has a test of its catch-all.
+- The conversion to the guides was checked against the code before it.
+  SynthesizeRecursor gave the same result association on 14 sequences and
+  on 37 more under four option sets, in the same time and memory.
+  EvolveRecursor gave the same programs, histories and genealogies for the
+  same seeds with both methods, and the variation operators the same
+  programs. EvaluateRecursor gave the same values and failures on 19 cases;
+  long loops take 2 to 5 percent longer and a call 3 percent less.
+  TranslateRecursor gave the same functions and messages on 1,700 random
+  programs.
 - `make check-proofs` passed as for 0.2.0. The Lean sources are unchanged.
 - `make check-publish` built all 68 documentation pages and the archive.
 - SynthesizeRecursor was rewritten for speed after its measurements. On

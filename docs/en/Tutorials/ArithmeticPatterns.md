@@ -28,7 +28,7 @@ The recursion index supplies the next factor and the accumulator holds the
 product already computed. Compare outputs with the built-in factorial:
 
 ```wl
-ListLogPlot[{Table[EvaluateRecursor[RecursorExamples["Factorial"],n],{n,0,10}],Factorial[Range[0,10]]}, DataRange->{0,10}, PlotLegends->{"Recursor","Factorial"}, AxesLabel->{"Input","Factorial"}]
+ListLogPlot[{Table[EvaluateRecursor[RecursorExamples["Factorial"],n],{n,0,10}],Factorial[Range[0,10]]}, DataRange->{0,10}, PlotLegends->{"Recursor","Factorial"}, Frame->True, FrameLabel->{"Input","Factorial"}]
 ```
 
 ## Reusing history
@@ -38,7 +38,7 @@ CoRec makes these values available through CGet. Compare the two sequence
 computations on inputs zero through fourteen:
 
 ```wl
-ListLinePlot[{Table[EvaluateRecursor[RecursorExamples["Fibonacci"],n],{n,0,14}],Fibonacci[Range[0,14]]}, DataRange->{0,14}, PlotLegends->{"Recursor","Fibonacci"}, AxesLabel->{"Input","Value"}]
+ListLinePlot[{Table[EvaluateRecursor[RecursorExamples["Fibonacci"],n],{n,0,14}],Fibonacci[Range[0,14]]}, DataRange->{0,14}, PlotLegends->{"Recursor","Fibonacci"}, Frame->True, FrameLabel->{"Input","Value"}]
 ```
 
 Draw the history dependencies for indices zero through eight. An edge points
@@ -58,7 +58,7 @@ ArrayPlot[Transpose[IntegerDigits[Range[0,63],2,6]], FrameLabel->{"Bit position"
 Compare the corresponding counts of one-digits:
 
 ```wl
-ListLinePlot[{Table[EvaluateRecursor[RecursorExamples["PopulationCount"],n],{n,0,63}],DigitCount[Range[0,63],2,1]}, DataRange->{0,63}, PlotLegends->{"Recursor","DigitCount"}, AxesLabel->{"Input","One-digits"}, PlotRange->All]
+ListLinePlot[{Table[EvaluateRecursor[RecursorExamples["PopulationCount"],n],{n,0,63}],DigitCount[Range[0,63],2,1]}, DataRange->{0,63}, PlotLegends->{"Recursor","DigitCount"}, Frame->True, FrameLabel->{"Input","One-digits"}, PlotRange->All]
 ```
 
 The halving lookup organizes inputs into a tree. Draw the history dependency
@@ -81,7 +81,7 @@ Iterating multiplication by two modulo seven gives a finite orbit. The input
 now specifies how many updates to apply to the initial value one:
 
 ```wl
-ListStepPlot[Table[EvaluateRecursor[Iter[Var,Const[1],Rem[Mul[Const[2],Acc],Const[7]]],n],{n,0,24}], DataRange->{0,24}, AxesLabel->{"Updates","Residue"}, PlotRange->{0,7}]
+ListStepPlot[Table[EvaluateRecursor[Iter[Var,Const[1],Rem[Mul[Const[2],Acc],Const[7]]],n],{n,0,24}], DataRange->{0,24}, Frame->True, FrameLabel->{"Updates","Residue"}, PlotRange->{0,7}]
 ```
 
 Draw every possible one-step transition modulo seven. The trajectory above
@@ -98,7 +98,7 @@ The source trees are small even when the values grow rapidly. Compare their
 node counts; this counts syntax, not arithmetic cost or memory use:
 
 ```wl
-BarChart[RecursorNodeCount /@ Lookup[RecursorExamples[],{"Square","Factorial","Fibonacci","PopulationCount"}], ChartLabels->{"Square","Factorial","Fibonacci","Popcount"}, AxesLabel->{None,"Syntax nodes"}]
+BarChart[RecursorNodeCount /@ Lookup[RecursorExamples[],{"Square","Factorial","Fibonacci","PopulationCount"}], ChartLabels->{"Square","Factorial","Fibonacci","Popcount"}, Frame->True, FrameLabel->{None,"Syntax nodes"}]
 ```
 
 Bounded recursion is sufficient for these finite arithmetic constructions.

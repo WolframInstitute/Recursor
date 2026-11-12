@@ -44,7 +44,7 @@ RecursorExamples["PopulationCount"]
 Compare two sequence programs:
 
 ```wl
-ListLinePlot[Table[EvaluateRecursor[RecursorExamples[name],n], {name,{"Fibonacci","PopulationCount"}},{n,0,12}], DataRange->{0,12}, PlotLegends->{"Fibonacci","Population count"}, AxesLabel->{"Input","Output"} ]
+ListLinePlot[Table[EvaluateRecursor[RecursorExamples[name],n], {name,{"Fibonacci","PopulationCount"}},{n,0,12}], DataRange->{0,12}, PlotLegends->{"Fibonacci","Population count"}, Frame->True, FrameLabel->{"Input","Output"} ]
 ```
 
 ---

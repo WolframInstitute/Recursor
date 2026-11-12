@@ -57,7 +57,7 @@ Table[EvaluateRecursor[ToRecursor[{"Compose", "Successor", "Successor"}, "Partia
 Compare translated increment and decrement machines:
 
 ```wl
-ListLinePlot[Table[EvaluateRecursor[ToRecursor[machine],n], {machine,{{{1,0,{2}}},{{1,1,{2},{2}}}}},{n,0,4}], DataRange->{0,4}, PlotLegends->{"Increment","Decrement"}, AxesLabel->{"Input","Register 1"} ]
+ListLinePlot[Table[EvaluateRecursor[ToRecursor[machine],n], {machine,{{{1,0,{2}}},{{1,1,{2},{2}}}}},{n,0,4}], DataRange->{0,4}, PlotLegends->{"Increment","Decrement"}, Frame->True, FrameLabel->{"Input","Register 1"} ]
 ```
 
 ---
@@ -65,7 +65,7 @@ ListLinePlot[Table[EvaluateRecursor[ToRecursor[machine],n], {machine,{{{1,0,{2}}
 Measure expansion as the instruction list grows:
 
 ```wl
-BarChart[Table[RecursorNodeCount[ToRecursor[Table[{1,0,{i+1}},{i,1,m}]]],{m,1,5}], ChartLabels->Range[5], AxesLabel->{"Instructions","DSL nodes"} ]
+BarChart[Table[RecursorNodeCount[ToRecursor[Table[{1,0,{i+1}},{i,1,m}]]],{m,1,5}], ChartLabels->Range[5], Frame->True, FrameLabel->{"Instructions","DSL nodes"} ]
 ```
 
 ---
@@ -77,7 +77,7 @@ RecursorNodeCount /@ (projections = ToRecursor[#, "PartialRecursive"] & /@ {"Lef
 ```
 
 ```wl
-ListLinePlot[Table[EvaluateRecursor[#, n] & /@ projections, {n, 0, 24}], AxesLabel -> {"Left", "Right"}]
+ListLinePlot[Table[EvaluateRecursor[#, n] & /@ projections, {n, 0, 24}], Frame -> True, FrameLabel -> {"Left", "Right"}]
 ```
 
 ## Possible Issues

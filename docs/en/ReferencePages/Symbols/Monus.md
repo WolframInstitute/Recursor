@@ -48,7 +48,7 @@ RecursorProgramTree[Monus[Var,Const[3]]]
 Plot a clipped ramp:
 
 ```wl
-ListLinePlot[Table[EvaluateRecursor[Monus[Var,Const[6]], n], {n, 0, 12}], DataRange -> {0, 12}, AxesLabel -> {"Input", "Output"}, PlotRange -> All ]
+ListLinePlot[Table[EvaluateRecursor[Monus[Var,Const[6]], n], {n, 0, 12}], DataRange -> {0, 12}, Frame -> True, FrameLabel -> {"Input", "Output"}, PlotRange -> All ]
 ```
 
 ---
@@ -56,5 +56,5 @@ ListLinePlot[Table[EvaluateRecursor[Monus[Var,Const[6]], n], {n, 0, 12}], DataRa
 Construct distance from a fixed point:
 
 ```wl
-ListLinePlot[Table[EvaluateRecursor[Add[Monus[Var,Const[6]],Monus[Const[6],Var]], n], {n, 0, 12}], DataRange -> {0, 12}, AxesLabel -> {"Input", "Output"}, PlotRange -> All ]
+ListLinePlot[Table[EvaluateRecursor[Add[Monus[Var,Const[6]],Monus[Const[6],Var]], n], {n, 0, 12}], DataRange -> {0, 12}, Frame -> True, FrameLabel -> {"Input", "Output"}, PlotRange -> All ]
 ```

@@ -48,7 +48,7 @@ RecursorProgramTree[Iter[Var,Const[1],Mul[Const[2],Acc]]]
 Construct powers of two:
 
 ```wl
-ListLinePlot[{Table[EvaluateRecursor[RecursorExamples["PowerOfTwo"], n], {n, 0, 10}], 2^Range[0,10]}, DataRange -> {0, 10}, PlotLegends -> {"Recursor", "Reference"}, AxesLabel -> {"Input", "Output"}, PlotRange -> All ]
+ListLinePlot[{Table[EvaluateRecursor[RecursorExamples["PowerOfTwo"], n], {n, 0, 10}], 2^Range[0,10]}, DataRange -> {0, 10}, PlotLegends -> {"Recursor", "Reference"}, Frame -> True, FrameLabel -> {"Input", "Output"}, PlotRange -> All ]
 ```
 
 ---
@@ -56,5 +56,5 @@ ListLinePlot[{Table[EvaluateRecursor[RecursorExamples["PowerOfTwo"], n], {n, 0, 
 Observe periodic modular doubling:
 
 ```wl
-ListLinePlot[Table[EvaluateRecursor[Iter[Var,Const[1],Rem[Mul[Const[2],Acc],Const[7]]], n], {n, 0, 24}], DataRange -> {0, 24}, AxesLabel -> {"Input", "Output"}, PlotRange -> All ]
+ListLinePlot[Table[EvaluateRecursor[Iter[Var,Const[1],Rem[Mul[Const[2],Acc],Const[7]]], n], {n, 0, 24}], DataRange -> {0, 24}, Frame -> True, FrameLabel -> {"Input", "Output"}, PlotRange -> All ]
 ```

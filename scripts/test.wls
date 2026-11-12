@@ -4,8 +4,16 @@ repository = DirectoryName[DirectoryName[$InputFileName]];
 name = FileNameTake[repository];
 SetDirectory[repository];
 PacletDirectoryLoad[FileNameJoin[{repository, name}]];
-If[! TrueQ[Check[Needs["WolframInstitute`" <> name <> "`"]; True, False]], Exit[1]];
-files = If[Length[$ScriptCommandLine] > 1, Rest[$ScriptCommandLine], FileNames["*.wlt", FileNameJoin[{repository, name, "Tests"}], Infinity]];
+loaded = Check[
+	Needs["WolframInstitute`" <> name <> "`"];
+	True,
+	False
+];
+If[! TrueQ[loaded], Exit[1]];
+files = If[Length[$ScriptCommandLine] > 1,
+	Rest[$ScriptCommandLine],
+	Join[FileNames["*.wlt", FileNameJoin[{repository, name, "Tests"}], Infinity], FileNames["*.wlt", FileNameJoin[{repository, "scripts", "style", "tests"}]]]
+];
 reports = TestReport /@ files;
 Scan[Function[report,
 	Print[report["TestsSucceededCount"], " passed; ", report["TestsFailedCount"], " failed"];

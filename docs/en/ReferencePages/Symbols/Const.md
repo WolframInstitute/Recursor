@@ -48,7 +48,7 @@ RecursorProgramTree[Const[7]]
 Control the slope through a constant multiplier:
 
 ```wl
-ListLinePlot[Table[EvaluateRecursor[Mul[Const[3],Var], n], {n, 0, 12}], DataRange -> {0, 12}, AxesLabel -> {"Input", "Output"}, PlotRange -> All ]
+ListLinePlot[Table[EvaluateRecursor[Mul[Const[3],Var], n], {n, 0, 12}], DataRange -> {0, 12}, Frame -> True, FrameLabel -> {"Input", "Output"}, PlotRange -> All ]
 ```
 
 ---
@@ -56,5 +56,5 @@ ListLinePlot[Table[EvaluateRecursor[Mul[Const[3],Var], n], {n, 0, 12}], DataRang
 Set a threshold in a piecewise program:
 
 ```wl
-ListLinePlot[Table[EvaluateRecursor[Ifz[Monus[Var,Const[6]],Const[2],Const[8]], n], {n, 0, 12}], DataRange -> {0, 12}, AxesLabel -> {"Input", "Output"}, PlotRange -> All ]
+ListLinePlot[Table[EvaluateRecursor[Ifz[Monus[Var,Const[6]],Const[2],Const[8]], n], {n, 0, 12}], DataRange -> {0, 12}, Frame -> True, FrameLabel -> {"Input", "Output"}, PlotRange -> All ]
 ```

@@ -61,7 +61,7 @@ SeedRandom[42]
 Measure offspring sizes across repeated crosses:
 
 ```wl
-Histogram[Table[RecursorNodeCount[CrossoverRecursor[RecursorExamples["Factorial"],RecursorExamples["Fibonacci"]]],{40}], AxesLabel->{"Nodes","Offspring"} ]
+Histogram[Table[RecursorNodeCount[CrossoverRecursor[RecursorExamples["Factorial"],RecursorExamples["Fibonacci"]]],{40}], Frame->True, FrameLabel->{"Nodes","Offspring"} ]
 ```
 
 ---

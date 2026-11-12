@@ -48,7 +48,7 @@ RecursorProgramTree[Mul[Var,Var]]
 Compare a square program with arithmetic:
 
 ```wl
-ListLinePlot[{Table[EvaluateRecursor[Mul[Var,Var], n], {n, 0, 10}], Range[0,10]^2}, DataRange -> {0, 10}, PlotLegends -> {"Recursor", "Reference"}, AxesLabel -> {"Input", "Output"}, PlotRange -> All ]
+ListLinePlot[{Table[EvaluateRecursor[Mul[Var,Var], n], {n, 0, 10}], Range[0,10]^2}, DataRange -> {0, 10}, PlotLegends -> {"Recursor", "Reference"}, Frame -> True, FrameLabel -> {"Input", "Output"}, PlotRange -> All ]
 ```
 
 ---
@@ -56,5 +56,5 @@ ListLinePlot[{Table[EvaluateRecursor[Mul[Var,Var], n], {n, 0, 10}], Range[0,10]^
 Measure factorial growth:
 
 ```wl
-ListLogPlot[Table[EvaluateRecursor[RecursorExamples["Factorial"], n], {n,0,10}], DataRange -> {0,10}, AxesLabel -> {"Input", "Factorial"} ]
+ListLogPlot[Table[EvaluateRecursor[RecursorExamples["Factorial"], n], {n,0,10}], DataRange -> {0,10}, Frame -> True, FrameLabel -> {"Input", "Factorial"} ]
 ```

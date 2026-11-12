@@ -48,7 +48,7 @@ RecursorProgramTree[Half[Var]]
 Plot integer division as a staircase:
 
 ```wl
-ListLinePlot[Table[EvaluateRecursor[Half[Var], n], {n, 0, 24}], DataRange -> {0, 24}, AxesLabel -> {"Input", "Output"}, PlotRange -> All ]
+ListLinePlot[Table[EvaluateRecursor[Half[Var], n], {n, 0, 24}], DataRange -> {0, 24}, Frame -> True, FrameLabel -> {"Input", "Output"}, PlotRange -> All ]
 ```
 
 ---
@@ -56,5 +56,5 @@ ListLinePlot[Table[EvaluateRecursor[Half[Var], n], {n, 0, 24}], DataRange -> {0,
 Follow repeated binary shifts from 255:
 
 ```wl
-ListStepPlot[NestList[EvaluateRecursor[Half[Var], #] &, 255, 9], DataRange -> {0,9}, AxesLabel -> {"Update", "Value"}, PlotRange -> All ]
+ListStepPlot[NestList[EvaluateRecursor[Half[Var], #] &, 255, 9], DataRange -> {0,9}, Frame -> True, FrameLabel -> {"Update", "Value"}, PlotRange -> All ]
 ```

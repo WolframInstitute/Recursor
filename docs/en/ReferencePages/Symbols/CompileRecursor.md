@@ -35,7 +35,7 @@ CompileRecursor[Var]
 Measure compiled expression sizes:
 
 ```wl
-BarChart[LeafCount[CompileRecursor[#]] & /@ {Var,Succ[Var],Mul[Var,Var],WhileLoop[Var,Acc,Pred[Acc]]}, ChartLabels->{"Input","Successor","Square","Countdown"}, AxesLabel->{None,"Lambda leaves"} ]
+BarChart[LeafCount[CompileRecursor[#]] & /@ {Var,Succ[Var],Mul[Var,Var],WhileLoop[Var,Acc,Pred[Acc]]}, ChartLabels->{"Input","Successor","Square","Countdown"}, Frame->True, FrameLabel->{None,"Lambda leaves"} ]
 ```
 
 ---
@@ -43,7 +43,7 @@ BarChart[LeafCount[CompileRecursor[#]] & /@ {Var,Succ[Var],Mul[Var,Var],WhileLoo
 Compare the two evaluation methods on a small square:
 
 ```wl
-ListLinePlot[Table[EvaluateRecursor[Mul[Var,Var],n,Method->method], {method,{"Interpreter","Lambda"}},{n,0,4}], DataRange->{0,4}, PlotLegends->{"Interpreter","Lambda"}, AxesLabel->{"Input","Output"} ]
+ListLinePlot[Table[EvaluateRecursor[Mul[Var,Var],n,Method->method], {method,{"Interpreter","Lambda"}},{n,0,4}], DataRange->{0,4}, PlotLegends->{"Interpreter","Lambda"}, Frame->True, FrameLabel->{"Input","Output"} ]
 ```
 
 ---

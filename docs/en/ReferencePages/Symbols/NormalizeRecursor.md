@@ -59,7 +59,7 @@ NormalizeRecursor[Var, "TimeLimit" -> 1, "MemoryLimit" -> 67108864]
 Measure simplification of compiled constant functions:
 
 ```wl
-BarChart[Table[{LeafCount[CompileRecursor[p]],LeafCount[NormalizeRecursor[p]]}, {p,{Const[2],Succ[Const[1]],Add[Const[1],Const[1]]}}],  ChartLegends->{"Compiled","Normal"}, ChartLabels->{{"Constant","Successor","Addition"},None}, AxesLabel->{None,"Leaves"} ]
+BarChart[Table[{LeafCount[CompileRecursor[p]],LeafCount[NormalizeRecursor[p]]}, {p,{Const[2],Succ[Const[1]],Add[Const[1],Const[1]]}}],  ChartLegends->{"Compiled","Normal"}, ChartLabels->{{"Constant","Successor","Addition"},None}, Frame->True, FrameLabel->{None,"Leaves"} ]
 ```
 
 ---

@@ -1,12 +1,31 @@
+PacletDirectoryLoad[DirectoryName[$TestFileName, 3]]
 Needs["WolframInstitute`Recursor`"]
 
 (* Resolve the dynamic library rows without a front end. *)
-setupResolveRows[boxes_] := boxes /. Cases[boxes,
-	dynamic : HoldPattern[DynamicBox[ToBoxes[grid_Grid, StandardForm], ___]] :>
-		With[{rendered = ToBoxes[grid]}, dynamic -> rendered], Infinity]
+setupResolveRows[boxes_] := boxes /. Cases[
+	boxes,
+	dynamic : HoldPattern[DynamicBox[ToBoxes[grid_Grid, StandardForm], ___]] :> With[{rendered = ToBoxes[grid]}, dynamic -> rendered],
+	Infinity
+]
 
 setupDialogBoxes[boxes_] := ReleaseHold @ First @ Cases[boxes,
 	DynamicModuleBox[variables_, __] :> HoldComplete[Block[variables, setupResolveRows[boxes]]], {0, Infinity}]
+
+(* Give {result, count} for a held body, where count is the number of bytes the body wrote to the standard output.
+   A printed notice would be counted there. *)
+SetAttributes[setupWithOutput, HoldFirst]
+setupWithOutput[body_] := Module[{file = CreateFile[], stream, result},
+	stream = OpenWrite[file];
+	result = WithCleanup[Block[{$Output = {stream}}, body], Close[stream]];
+	WithCleanup[{result, FileByteCount[file]}, DeleteFile[file]]
+]
+
+VerificationTest[
+	SetupRecursor["Lambda"]["Tag"],
+	"InvalidArguments",
+	{SetupRecursor::args},
+	TestID -> "SetupRecursor-invalid-arguments-give-Failure"
+]
 
 VerificationTest[
 	Block[{$Notebooks = False}, MatchQ[SetupRecursor[], Failure["NotebookRequired", _Association]]],
@@ -15,23 +34,25 @@ VerificationTest[
 ]
 
 VerificationTest[
-	Block[{$Notebooks = False, PersistentSymbol = (Throw["Unexpected read"] &),
-		Print = (Throw["Unexpected notice"] &), Message = (Throw["Unexpected message"] &),
-		SetupRecursor = (Throw["Unexpected dialog"] &)},
-		Catch[WolframInstitute`Recursor`PackageScope`librarySetupOnLoad[]]
+	setupWithOutput[
+		Block[{$Notebooks = False, PersistentSymbol = (Throw["Unexpected read", "Unexpected"] &),
+			Message = (Throw["Unexpected message", "Unexpected"] &),
+			SetupRecursor = (Throw["Unexpected dialog", "Unexpected"] &)},
+			Catch[WolframInstitute`Recursor`PackageScope`librarySetupOnLoad[], "Unexpected"]
+		]
 	],
-	Null,
+	{Null, 0},
 	TestID -> "Setup-headless-load-has-no-notice-panel-or-preference-access"
 ]
 
 VerificationTest[
 	Block[{$Notebooks = True, $CloudEvaluation = False, $BatchInput = False, $KernelID = 0, Environment = ("false" &)},
 		{
-			WolframInstitute`Recursor`Libraries`Setup`Private`librarySetupDesktopQ[],
-			Block[{$CloudEvaluation = True}, WolframInstitute`Recursor`Libraries`Setup`Private`librarySetupDesktopQ[]],
-			Block[{$BatchInput = True}, WolframInstitute`Recursor`Libraries`Setup`Private`librarySetupDesktopQ[]],
-			Block[{$KernelID = 1}, WolframInstitute`Recursor`Libraries`Setup`Private`librarySetupDesktopQ[]],
-			Block[{Environment = ("true" &)}, WolframInstitute`Recursor`Libraries`Setup`Private`librarySetupDesktopQ[]]
+			WolframInstitute`Recursor`PackageScope`librarySetupDesktopQ[],
+			Block[{$CloudEvaluation = True}, WolframInstitute`Recursor`PackageScope`librarySetupDesktopQ[]],
+			Block[{$BatchInput = True}, WolframInstitute`Recursor`PackageScope`librarySetupDesktopQ[]],
+			Block[{$KernelID = 1}, WolframInstitute`Recursor`PackageScope`librarySetupDesktopQ[]],
+			Block[{Environment = ("true" &)}, WolframInstitute`Recursor`PackageScope`librarySetupDesktopQ[]]
 		}
 	],
 	{True, False, False, False, False},
@@ -39,93 +60,109 @@ VerificationTest[
 ]
 
 VerificationTest[
-	Block[{
-		WolframInstitute`Recursor`Libraries`Setup`Private`librarySetupDesktopQ = (True &),
-		PersistentSymbol = (Missing["NotFound"] &), PacletFind = ({} &),
-		SetupRecursor = (Throw["Unexpected dialog"] &), PacletInstall = (Throw["Unexpected installation"] &),
-		Print = (Throw["Unexpected print"] &)
-	}, Catch[Check[WolframInstitute`Recursor`PackageScope`librarySetupOnLoad[], "Setup message", General::recursorlib]]],
-	"Setup message",
+	setupWithOutput[
+		Block[{
+			WolframInstitute`Recursor`PackageScope`librarySetupDesktopQ = (True &),
+			PersistentSymbol = (Missing["NotFound"] &), PacletFind = ({} &),
+			SetupRecursor = (Throw["Unexpected dialog", "Unexpected"] &), PacletInstall = (Throw["Unexpected installation", "Unexpected"] &)
+		}, Catch[Check[WolframInstitute`Recursor`PackageScope`librarySetupOnLoad[], "Setup message", General::recursorlib], "Unexpected"]
+		]
+	],
+	{"Setup message", 0},
 	{General::recursorlib},
 	TestID -> "Setup-load-issues-standard-message-without-opening-or-installing"
 ]
 
 VerificationTest[
-	Block[{
-		WolframInstitute`Recursor`Libraries`Setup`Private`librarySetupDesktopQ = (True &),
-		WolframInstitute`Recursor`PackageScope`$libraryRegistry = AssociationMap[<|"Paclet" -> #|> &,
-			{"First", "Installed", "Second"}],
-		PersistentSymbol = (False &), PacletFind = (If[# === "Installed", {installedPaclet}, {}] &),
-		SetupRecursor = (Throw["Unexpected dialog"] &), PacletInstall = (Throw["Unexpected installation"] &),
-		Print = (Throw["Unexpected print"] &)
-	},
-		Catch[{
-			Check[Quiet[WolframInstitute`Recursor`PackageScope`librarySetupOnLoad[], General::recursorlib], "Unexpected message"],
-			General::recursorlib
-		}]
+	setupWithOutput[
+		Block[{
+			WolframInstitute`Recursor`PackageScope`librarySetupDesktopQ = (True &),
+			WolframInstitute`Recursor`PackageScope`$libraryRegistry = AssociationMap[<|"Paclet" -> #|> &,
+				{"First", "Installed", "Second"}],
+			PersistentSymbol = (False &), PacletFind = (If[# === "Installed", {installedPaclet}, {}] &),
+			SetupRecursor = (Throw["Unexpected dialog", "Unexpected"] &), PacletInstall = (Throw["Unexpected installation", "Unexpected"] &)
+		},
+			Catch[{
+				Check[Quiet[WolframInstitute`Recursor`PackageScope`librarySetupOnLoad[], General::recursorlib], "Unexpected message"],
+				General::recursorlib
+			}, "Unexpected"]
+		]
 	],
-	{Null, "Optional libraries are available. Run SetupRecursor[] to review and install."},
+	{{Null, "Optional libraries are available. Run SetupRecursor[] to review and install."}, 0},
 	TestID -> "Setup-message-is-generic-and-can-be-quieted"
 ]
 
 VerificationTest[
-	Block[{
-		WolframInstitute`Recursor`Libraries`Setup`Private`librarySetupDesktopQ = (True &),
-		PersistentSymbol = (True &), PacletFind = (Throw["Unexpected scan"] &),
-		Print = (Throw["Unexpected notice"] &), Message = (Throw["Unexpected message"] &), SetupRecursor = (Throw["Unexpected dialog"] &)
-	}, Catch[WolframInstitute`Recursor`PackageScope`librarySetupOnLoad[]]],
-	Null,
+	setupWithOutput[
+		Block[{
+			WolframInstitute`Recursor`PackageScope`librarySetupDesktopQ = (True &),
+			PersistentSymbol = (True &), PacletFind = (Throw["Unexpected scan", "Unexpected"] &),
+			Message = (Throw["Unexpected message", "Unexpected"] &), SetupRecursor = (Throw["Unexpected dialog", "Unexpected"] &)
+		}, Catch[WolframInstitute`Recursor`PackageScope`librarySetupOnLoad[], "Unexpected"]
+		]
+	],
+	{Null, 0},
 	TestID -> "Setup-not-offered-after-dismissal"
 ]
 
 VerificationTest[
-	Block[{
-		WolframInstitute`Recursor`Libraries`Setup`Private`librarySetupDesktopQ = (True &),
-		PersistentSymbol = (False &), PacletFind = ({installedPaclet} &),
-		Print = (Throw["Unexpected notice"] &), Message = (Throw["Unexpected message"] &), CreateDialog = (Throw["Unexpected dialog"] &)
-	}, Catch[WolframInstitute`Recursor`PackageScope`librarySetupOnLoad[]]],
-	Null,
+	setupWithOutput[
+		Block[{
+			WolframInstitute`Recursor`PackageScope`librarySetupDesktopQ = (True &),
+			PersistentSymbol = (False &), PacletFind = ({installedPaclet} &),
+			Message = (Throw["Unexpected message", "Unexpected"] &), CreateDialog = (Throw["Unexpected dialog", "Unexpected"] &)
+		}, Catch[WolframInstitute`Recursor`PackageScope`librarySetupOnLoad[], "Unexpected"]
+		]
+	],
+	{Null, 0},
 	TestID -> "Setup-not-offered-when-installed"
 ]
 
 VerificationTest[
 	Block[{
-		WolframInstitute`Recursor`Libraries`Setup`Private`librarySetupDesktopQ = (True &),
+		WolframInstitute`Recursor`PackageScope`librarySetupDesktopQ = (True &),
 		WolframInstitute`Recursor`PackageScope`$libraryRegistry = <||>,
-		PacletFind = ({installedPaclet} &), NotebookRead = (Throw["Unexpected dialog read"] &),
-		CreateDialog = (Throw["Unexpected dialog"] &)
-	}, Catch[SetupRecursor[]]],
+		PacletFind = ({installedPaclet} &), NotebookRead = (Throw["Unexpected dialog read", "Unexpected"] &),
+		CreateDialog = (Throw["Unexpected dialog", "Unexpected"] &)
+	}, Catch[SetupRecursor[], "Unexpected"]
+	],
 	Null,
 	TestID -> "Setup-stays-hidden-with-an-empty-registry"
 ]
 
 VerificationTest[
 	Block[{
-		WolframInstitute`Recursor`Libraries`Setup`Private`librarySetupDesktopQ = (True &),
-		WolframInstitute`Recursor`Libraries`Setup`Private`$librarySetupDialog,
+		WolframInstitute`Recursor`PackageScope`librarySetupDesktopQ = (True &),
+		WolframInstitute`Recursor`PackageScope`$librarySetupDialog,
 		WolframInstitute`Recursor`PackageScope`$libraryRegistry = AssociationMap[Function[name,
 			Join[WolframInstitute`Recursor`PackageScope`$libraryRegistry["Lambda"], <|
 				"Paclet" -> name, "Platforms" -> If[name === "UnsupportedLibrary", {}, {$SystemID}],
 				"MinimumVersion" -> "1.2.5"
 			|>]],
 			{"MissingLibrary", "ReadyLibrary", "BrokenLibrary", "UnsupportedLibrary"}],
-		WolframInstitute`Recursor`Libraries`Installation`Private`versionAtLeastQ = (True &),
-		WolframInstitute`Recursor`Libraries`Installation`Private`libraryLoadQ = (True &),
+		WolframInstitute`Recursor`PackageScope`versionAtLeastQ = (True &),
+		WolframInstitute`Recursor`PackageScope`libraryLoadQ = (True &),
 		WolframInstitute`Recursor`PackageScope`libraryReadyQ = (# === "ReadyLibrary" &),
 		PacletFind = Function[name, If[name === "MissingLibrary", {}, {installedPaclet}]],
-		PacletInstall = (Throw["Unexpected installation"] &),
+		PacletInstall = (Throw["Unexpected installation", "Unexpected"] &),
 		CreateDialog = Function[{content, title, events}, setupDialogBoxes[ToBoxes[content]]]
 	}, Catch[
 		SetupRecursor[];
-		With[{boxes = WolframInstitute`Recursor`Libraries`Setup`Private`$librarySetupDialog},
+		With[{boxes = WolframInstitute`Recursor`PackageScope`$librarySetupDialog},
 			ReleaseHold @ First @ Cases[boxes, DynamicModuleBox[variables_, __] :> HoldComplete[Block[variables, {
 				Count[boxes, _CheckboxBox, Infinity],
-				Cases[boxes, DynamicBox[ToBoxes[value_, StandardForm], ___] /;
-					! FreeQ[HoldComplete[value], _ProgressIndicator] :> value, Infinity],
-				Cases[boxes, ButtonBox[DynamicBox[ToBoxes[label_, StandardForm], ___], ___, Enabled -> Dynamic[enabled_], ___] /;
-					! FreeQ[HoldComplete[label], "Uninstall"] :> {label, enabled}, Infinity]
-			}]], {0, Infinity}]
-	]]],
+				Cases[boxes, DynamicBox[ToBoxes[value_, StandardForm], ___] /; ! FreeQ[HoldComplete[value], _ProgressIndicator] :> value, Infinity],
+				Cases[
+					boxes,
+					ButtonBox[DynamicBox[ToBoxes[label_, StandardForm], ___], ___, Enabled -> Dynamic[enabled_], ___] /; ! FreeQ[HoldComplete[label], "Uninstall"] :> {label, enabled},
+					Infinity
+				]
+			}
+			]], {0, Infinity}]
+		],
+		"Unexpected"
+	]
+	],
 	{0, {"Not installed", "Ready", "Needs setup", "Unsupported"},
 		{{"Install", True}, {"Uninstall", True}, {"Uninstall", True}, {"Uninstall", True}}},
 	TestID -> "Setup-offers-uninstall-for-ready-unusable-and-unsupported-installed-libraries"
@@ -134,8 +171,8 @@ VerificationTest[
 VerificationTest[
 	With[{key = "RecursorTest/" <> CreateUUID[]},
 		WithCleanup[
-			Block[{WolframInstitute`Recursor`Libraries`Setup`Private`$librarySetupPreference = key},
-				WolframInstitute`Recursor`Libraries`Setup`Private`librarySetupRemember[];
+			Block[{WolframInstitute`Recursor`PackageScope`$librarySetupPreference = key},
+				WolframInstitute`Recursor`PackageScope`librarySetupRemember[];
 				PersistentSymbol[key, "Local"]
 			],
 			Remove[PersistentSymbol[key, "Local"]]
@@ -148,49 +185,55 @@ VerificationTest[
 VerificationTest[
 	With[{key = "RecursorTest/" <> CreateUUID[]}, WithCleanup[
 		Block[{
-			WolframInstitute`Recursor`Libraries`Setup`Private`$librarySetupPreference = key,
-			WolframInstitute`Recursor`Libraries`Setup`Private`librarySetupDesktopQ = (True &),
+			WolframInstitute`Recursor`PackageScope`$librarySetupPreference = key,
+			WolframInstitute`Recursor`PackageScope`librarySetupDesktopQ = (True &),
 			PacletFind = ({} &), Message = ("Offered" &)
 		},
-			WolframInstitute`Recursor`Libraries`Setup`Private`librarySetupRemember[];
+			WolframInstitute`Recursor`PackageScope`librarySetupRemember[];
 			{WolframInstitute`Recursor`PackageScope`librarySetupOnLoad[],
 				PersistentSymbol[key, "Local"] = False;
 				WolframInstitute`Recursor`PackageScope`librarySetupOnLoad[]}
 		],
 		Remove[PersistentSymbol[key, "Local"]]
-	]],
+	]
+	],
 	{Null, "Offered"},
 	TestID -> "Setup-dismissal-persists-until-preference-reset"
 ]
 
 VerificationTest[
 	Module[{selection}, Block[{
-		WolframInstitute`Recursor`Libraries`Setup`Private`librarySetupDesktopQ = (True &),
-		WolframInstitute`Recursor`Libraries`Setup`Private`$librarySetupDialog = setupCell,
+		WolframInstitute`Recursor`PackageScope`librarySetupDesktopQ = (True &),
+		WolframInstitute`Recursor`PackageScope`$librarySetupDialog = setupCell,
 		PacletFind = ({} &), Notebooks = ({setupCell} &),
-		SetSelectedNotebook = Function[notebook, selection = notebook; Null],
-		CreateDialog = (Throw["Unexpected dialog"] &)
-	}, Catch[{SetupRecursor[], selection, WolframInstitute`Recursor`Libraries`Setup`Private`$librarySetupDialog}]]],
+		SetSelectedNotebook = Function[notebook,
+			selection = notebook;
+			Null],
+		CreateDialog = (Throw["Unexpected dialog", "Unexpected"] &)
+	}, Catch[{SetupRecursor[], selection, WolframInstitute`Recursor`PackageScope`$librarySetupDialog}, "Unexpected"]
+	]
+	],
 	{Null, setupCell, setupCell},
 	TestID -> "Setup-reuses-open-dialog"
 ]
 
 VerificationTest[
 	Block[{
-		WolframInstitute`Recursor`Libraries`Setup`Private`librarySetupDesktopQ = (True &),
-		WolframInstitute`Recursor`Libraries`Setup`Private`$librarySetupDialog = oldCell,
-		PacletFind = ({} &), PersistentSymbol = (Throw["Unexpected preference read"] &),
+		WolframInstitute`Recursor`PackageScope`librarySetupDesktopQ = (True &),
+		WolframInstitute`Recursor`PackageScope`$librarySetupDialog = oldCell,
+		PacletFind = ({} &), PersistentSymbol = (Throw["Unexpected preference read", "Unexpected"] &),
 		Notebooks = ({} &),
 		WolframInstitute`Recursor`PackageScope`libraryStatus = ("Not installed" &),
 		CreateDialog = Function[{content, title, events}, title]
-	}, {SetupRecursor[], WolframInstitute`Recursor`Libraries`Setup`Private`$librarySetupDialog}],
+	}, {SetupRecursor[], WolframInstitute`Recursor`PackageScope`$librarySetupDialog}
+	],
 	{Null, WindowTitle -> "Recursor: Optional libraries"},
 	TestID -> "Setup-reopens-closed-dialog-without-preference-check"
 ]
 
 VerificationTest[
 	Block[{$ContextPath = {"System`"}},
-		WolframInstitute`Recursor`Libraries`Setup`Private`librarySetupCommand["Lambda"]
+		WolframInstitute`Recursor`PackageScope`librarySetupCommand["Lambda"]
 	],
 	"InstallRecursorLibraries[{\"Lambda\"}]",
 	TestID -> "Setup-command-is-short-quoted-text"
@@ -198,31 +241,33 @@ VerificationTest[
 
 VerificationTest[
 	Block[{$ContextPath = {"System`"}}, {
-		WolframInstitute`Recursor`Libraries`Setup`Private`librarySetupCommand["MathlibLink", "Install"],
-		WolframInstitute`Recursor`Libraries`Setup`Private`librarySetupCommand["MathlibLink", "Uninstall"]
-	}],
+		WolframInstitute`Recursor`PackageScope`librarySetupCommand["MathlibLink", "Install"],
+		WolframInstitute`Recursor`PackageScope`librarySetupCommand["MathlibLink", "Uninstall"]
+	}
+	],
 	{"InstallRecursorLibraries[{\"MathlibLink\"}]", "PacletUninstall[\"WolframInstitute/MathlibLink\"]"},
 	TestID -> "Setup-MathlibLink-copy-commands-use-shared-installer-and-paclet-name"
 ]
 
 VerificationTest[
-	ToExpression[WolframInstitute`Recursor`Libraries`Setup`Private`librarySetupCommand["A\"B"], InputForm, HoldComplete],
+	ToExpression[WolframInstitute`Recursor`PackageScope`librarySetupCommand["A\"B"], InputForm, HoldComplete],
 	HoldComplete[InstallRecursorLibraries[{"A\"B"}]],
 	TestID -> "Setup-command-escapes-library-name"
 ]
 
 VerificationTest[
 	Table[Block[{
-		WolframInstitute`Recursor`Libraries`Setup`Private`librarySetupDesktopQ = (True &),
-		WolframInstitute`Recursor`Libraries`Setup`Private`$librarySetupDialog,
+		WolframInstitute`Recursor`PackageScope`librarySetupDesktopQ = (True &),
+		WolframInstitute`Recursor`PackageScope`$librarySetupDialog,
 		WolframInstitute`Recursor`PackageScope`$libraryRegistry = AssociationThread[
 			"Library " <> ToString[#] & /@ Range[count],
-			ConstantArray[WolframInstitute`Recursor`PackageScope`$libraryRegistry["Lambda"], count]],
+			ConstantArray[WolframInstitute`Recursor`PackageScope`$libraryRegistry["Lambda"], count]
+		],
 		WolframInstitute`Recursor`PackageScope`libraryStatus = ("Not installed" &),
 		PacletFind = ({} &), CreateDialog = Function[{content, title, events}, setupDialogBoxes[ToBoxes[content]]]
 	},
 		SetupRecursor[];
-		With[{list = First @ Cases[WolframInstitute`Recursor`Libraries`Setup`Private`$librarySetupDialog,
+		With[{list = First @ Cases[WolframInstitute`Recursor`PackageScope`$librarySetupDialog,
 			pane_PaneBox /; MemberQ[List @@ pane, Scrollbars -> {False, Automatic}], Infinity]},
 			{Count[list, HoldPattern[WolframInstitute`Recursor`PackageScope`libraryUninstall[_String]], Infinity],
 				MemberQ[List @@ list, ImageSize -> {_, UpTo[_?NumberQ]}],
@@ -235,7 +280,7 @@ VerificationTest[
 ]
 
 VerificationTest[
-	WolframInstitute`Recursor`Libraries`Setup`Private`librarySetupCommand[#, "Uninstall"] & /@ {"Lambda", "LeanLink", "MathlibLink"},
+	WolframInstitute`Recursor`PackageScope`librarySetupCommand[#, "Uninstall"] & /@ {"Lambda", "LeanLink", "MathlibLink"},
 	{"PacletUninstall[\"Wolfram/Lambda\"]", "PacletUninstall[\"Wolfram/LeanLink\"]", "PacletUninstall[\"WolframInstitute/MathlibLink\"]"},
 	TestID -> "Setup-uninstall-commands-use-the-registered-paclet-names"
 ]
@@ -244,29 +289,30 @@ VerificationTest[
    instructions; statuses are given, so nothing loads *)
 VerificationTest[
 	Block[{
-		WolframInstitute`Recursor`Libraries`Setup`Private`librarySetupDesktopQ = (True &),
-		WolframInstitute`Recursor`Libraries`Setup`Private`$librarySetupDialog,
+		WolframInstitute`Recursor`PackageScope`librarySetupDesktopQ = (True &),
+		WolframInstitute`Recursor`PackageScope`$librarySetupDialog,
 		WolframInstitute`Recursor`PackageScope`libraryStatus = ("Not installed" &),
 		PacletFind = ({} &),
-		PacletInstall = (Throw["Unexpected installation"] &),
+		PacletInstall = (Throw["Unexpected installation", "Unexpected"] &),
 		CreateDialog = Function[{content, title, events}, setupDialogBoxes[ToBoxes[content]]]
 	}, Catch[
 		SetupRecursor[];
-		With[{boxes = WolframInstitute`Recursor`Libraries`Setup`Private`$librarySetupDialog},
+		With[{boxes = WolframInstitute`Recursor`PackageScope`$librarySetupDialog},
 			{
 				Cases[boxes, HoldPattern[WolframInstitute`Recursor`PackageScope`libraryUninstall[name_String]] :> name, Infinity],
 				! FreeQ[boxes, "\"varies; includes runtime\""],
 				! FreeQ[boxes, "https://www.wolframcloud.com/obj/wolframinstitute/MathlibLink/#ref/InstallMathlib"]
 			}
-		]
-	]],
+		], "Unexpected"
+	]
+	],
 	{{"Lambda", "LeanLink", "MathlibLink"}, True, True},
 	TestID -> "Setup-lists-MathlibLink-with-its-download-size-and-instructions"
 ]
 
 VerificationTest[
 	Block[{WolframInstitute`Recursor`PackageScope`$libraryRegistry = <|"Test" -> <|"Paclet" -> "A\"B"|>|>},
-		ToExpression[WolframInstitute`Recursor`Libraries`Setup`Private`librarySetupCommand["Test", "Uninstall"], InputForm, HoldComplete]
+		ToExpression[WolframInstitute`Recursor`PackageScope`librarySetupCommand["Test", "Uninstall"], InputForm, HoldComplete]
 	],
 	HoldComplete[PacletUninstall["A\"B"]],
 	TestID -> "Setup-uninstall-command-escapes-paclet-name"
@@ -274,48 +320,69 @@ VerificationTest[
 
 (* Exercise dialog actions without a front end or real downloads. *)
 SetAttributes[withSetupDialog, HoldAll]
-withSetupDialog[body_, installedNames_ : {}, libraryNames_ : {"First", "Second"}] := Block[{
+withSetupDialog[body_] := withSetupDialog[body, {}, {"First", "Second"}]
+withSetupDialog[body_, installedNames_] := withSetupDialog[body, installedNames, {"First", "Second"}]
+withSetupDialog[body_, installedNames_, libraryNames_] := Block[{
 	setupBoxes, setupRawBoxes, setupEvents, setupClosed = False, setupRemembered = False, setupOpened = 0,
 	setupInstalled = installedNames,
-	WolframInstitute`Recursor`Libraries`Setup`Private`librarySetupDesktopQ = (True &),
-	WolframInstitute`Recursor`Libraries`Setup`Private`librarySetupRemember = Function[Null, setupRemembered = True],
-	WolframInstitute`Recursor`Libraries`Setup`Private`$librarySetupDialog,
+	WolframInstitute`Recursor`PackageScope`librarySetupDesktopQ = (True &),
+	WolframInstitute`Recursor`PackageScope`librarySetupRemember = Function[Null, setupRemembered = True],
+	WolframInstitute`Recursor`PackageScope`$librarySetupDialog,
 	WolframInstitute`Recursor`PackageScope`$libraryRegistry = AssociationMap[
-		Append[WolframInstitute`Recursor`PackageScope`$libraryRegistry["Lambda"], "Paclet" -> #] &, libraryNames],
+		Append[WolframInstitute`Recursor`PackageScope`$libraryRegistry["Lambda"], "Paclet" -> #] &, libraryNames
+	],
 	WolframInstitute`Recursor`PackageScope`libraryStatus = (If[MemberQ[setupInstalled, #], "Ready", "Not installed"] &),
 	PacletFind = (If[MemberQ[setupInstalled, #], {installedPaclet}, {}] &),
-	PacletInstall = (Throw["Unexpected installation"] &), PacletUninstall = (Throw["Unexpected uninstall"] &), Notebooks = ({} &),
+	PacletInstall = (Throw["Unexpected installation", "Unexpected"] &), PacletUninstall = (Throw["Unexpected uninstall", "Unexpected"] &), Notebooks = ({} &),
 	CreateDialog = Function[{content, title, events},
-		setupOpened++; setupRawBoxes = ToBoxes[content]; setupBoxes = setupDialogBoxes[setupRawBoxes]; setupEvents = events; setupNotebook],
-	DialogReturn = Function[Null, setupClosed = True; Null], FinishDynamic = (Null &)
+		setupOpened++;
+		setupRawBoxes = ToBoxes[content];
+		setupBoxes = setupDialogBoxes[setupRawBoxes];
+		setupEvents = events;
+		setupNotebook],
+	DialogReturn = Function[Null,
+		setupClosed = True;
+		Null], FinishDynamic = (Null &)
 },
 	SetupRecursor[];
 	ReleaseHold @ First @ Cases[setupBoxes,
 		DynamicModuleBox[variables_, __] :> HoldComplete[Block[variables, body]], {0, Infinity}]
 ]
 
-setupAction[label_] := First @ Cases[setupBoxes,
-	button_ButtonBox /; StringContainsQ[ToString[First[button], InputForm], label] :>
-		First @ Cases[button, HoldPattern[ButtonFunction :> action_] :> HoldComplete[action], Infinity], Infinity]
+setupButtonFunction[button_ButtonBox] := First @ Cases[button, HoldPattern[ButtonFunction :> action_] :> HoldComplete[action], Infinity]
+
+setupAction[label_] := First @ Cases[
+	setupBoxes,
+	button_ButtonBox /; StringContainsQ[ToString[First[button], InputForm], label] :> setupButtonFunction[button],
+	Infinity
+]
 
 setupStatuses[] := Cases[setupBoxes,
 	DynamicBox[ToBoxes[value_, StandardForm], ___] /; ! FreeQ[HoldComplete[value], _ProgressIndicator] :> value, Infinity]
 
-setupLibraryButtons[] := Cases[setupBoxes,
-	ButtonBox[DynamicBox[ToBoxes[label_, StandardForm], ___], ___, Enabled -> Dynamic[enabled_], ___] /;
-		! FreeQ[HoldComplete[label], "Uninstall"] :> {label, enabled}, Infinity]
+setupLibraryButtons[] := Cases[
+	setupBoxes,
+	ButtonBox[DynamicBox[ToBoxes[label_, StandardForm], ___], ___, Enabled -> Dynamic[enabled_], ___] /; ! FreeQ[HoldComplete[label], "Uninstall"] :> {label, enabled},
+	Infinity
+]
 
-setupCopyButtons[] := Cases[setupBoxes,
-	ButtonBox[DynamicBox[ToBoxes[label_, StandardForm], ___], ___, Appearance -> "Frameless", ___,
-		BaseStyle -> "Hyperlink", ___, Enabled -> Dynamic[enabled_], ___] :> {label, enabled}, Infinity]
+setupCopyButtons[] := Cases[
+	setupBoxes,
+	ButtonBox[DynamicBox[ToBoxes[label_, StandardForm], ___], ___, Appearance -> "Frameless", ___, BaseStyle -> "Hyperlink", ___, Enabled -> Dynamic[enabled_], ___] :> {label, enabled},
+	Infinity
+]
 
-setupLibraryAction[name_] := First @ Cases[setupBoxes,
-	button_ButtonBox /; ! FreeQ[button, HoldPattern[WolframInstitute`Recursor`PackageScope`libraryUninstall[name]]] :>
-		First @ Cases[button, HoldPattern[ButtonFunction :> action_] :> HoldComplete[action], Infinity], Infinity]
+setupLibraryAction[name_] := First @ Cases[
+	setupBoxes,
+	button_ButtonBox /; ! FreeQ[button, HoldPattern[WolframInstitute`Recursor`PackageScope`libraryUninstall[name]]] :> setupButtonFunction[button],
+	Infinity
+]
 
-setupCopyAction[name_] := First @ Cases[setupBoxes,
-	button_ButtonBox /; ! FreeQ[button, HoldPattern[WolframInstitute`Recursor`Libraries`Setup`Private`librarySetupCommand[name, _]]] :>
-		First @ Cases[button, HoldPattern[ButtonFunction :> action_] :> HoldComplete[action], Infinity], Infinity]
+setupCopyAction[name_] := First @ Cases[
+	setupBoxes,
+	button_ButtonBox /; ! FreeQ[button, HoldPattern[WolframInstitute`Recursor`PackageScope`librarySetupCommand[name, _]]] :> setupButtonFunction[button],
+	Infinity
+]
 
 setupCancelVisible[] := First @ Cases[setupBoxes, PaneSelectorBox[_, Dynamic[value_, ___], ___] :> value, Infinity]
 
@@ -323,7 +390,8 @@ VerificationTest[
 	withSetupDialog[Module[{downloads = {}, during, afterFirst},
 		Block[{InstallRecursorLibraries = Function[names,
 			during = {setupLibraryButtons[], setupCopyButtons[]};
-			downloads = Join[downloads, names]; setupInstalled = Union[setupInstalled, names];
+			downloads = Join[downloads, names];
+			setupInstalled = Union[setupInstalled, names];
 			AssociationMap[installedPaclet &, names]
 		]},
 			ReleaseHold[setupLibraryAction["First"]];
@@ -341,12 +409,16 @@ VerificationTest[
 VerificationTest[
 	withSetupDialog[Module[{removed = {}, during, after},
 		Block[{PacletUninstall = Function[name,
-			removed = Append[removed, name]; during = {setupLibraryButtons[], setupCopyButtons[]};
-			setupInstalled = DeleteCases[setupInstalled, name]; Null
-		]}, ReleaseHold[setupLibraryAction["First"]]];
+			removed = Append[removed, name];
+			during = {setupLibraryButtons[], setupCopyButtons[]};
+			setupInstalled = DeleteCases[setupInstalled, name];
+			Null
+		]}, ReleaseHold[setupLibraryAction["First"]]
+		];
 		after = {setupStatuses[], setupLibraryButtons[], setupClosed};
 		Block[{InstallRecursorLibraries = Function[names,
-			setupInstalled = Union[setupInstalled, names]; AssociationMap[installedPaclet &, names]]},
+			setupInstalled = Union[setupInstalled, names];
+			AssociationMap[installedPaclet &, names]]},
 			ReleaseHold[setupLibraryAction["First"]]
 		];
 		{removed, during, after, setupInstalled, setupClosed}
@@ -359,7 +431,9 @@ VerificationTest[
 
 VerificationTest[
 	withSetupDialog[
-		Block[{PacletUninstall = Function[name, setupInstalled = DeleteCases[setupInstalled, name]; Null]},
+		Block[{PacletUninstall = Function[name,
+			setupInstalled = DeleteCases[setupInstalled, name];
+			Null]},
 			ReleaseHold[setupLibraryAction["Second"]]
 		];
 		setupBoxes = setupResolveRows[setupRawBoxes];
@@ -374,7 +448,8 @@ VerificationTest[
 VerificationTest[
 	withSetupDialog[
 		Block[{InstallRecursorLibraries = Function[names,
-			setupInstalled = Union[setupInstalled, names]; AssociationMap[installedPaclet &, names]]},
+			setupInstalled = Union[setupInstalled, names];
+			AssociationMap[installedPaclet &, names]]},
 			ReleaseHold[setupLibraryAction["First"]]
 		];
 		setupBoxes = setupResolveRows[setupRawBoxes];
@@ -389,7 +464,9 @@ VerificationTest[
 	withSetupDialog[Module[{afterFailure},
 		Block[{PacletUninstall = ($Failed &)}, ReleaseHold[setupLibraryAction["First"]]];
 		afterFailure = {setupStatuses[], setupLibraryButtons[], setupClosed};
-		Block[{PacletUninstall = Function[name, setupInstalled = DeleteCases[setupInstalled, name]; Null]},
+		Block[{PacletUninstall = Function[name,
+			setupInstalled = DeleteCases[setupInstalled, name];
+			Null]},
 			ReleaseHold[setupLibraryAction["First"]]
 		];
 		{afterFailure, setupInstalled, setupLibraryButtons[], setupClosed}
@@ -402,7 +479,8 @@ VerificationTest[
 VerificationTest[
 	Table[withSetupDialog[
 		Block[{PacletUninstall = Function[name,
-			If[removed, setupInstalled = DeleteCases[setupInstalled, name]]; Abort[]]},
+			If[removed, setupInstalled = DeleteCases[setupInstalled, name]];
+			Abort[]]},
 			CheckAbort[ReleaseHold[setupLibraryAction["First"]], Null]
 		];
 		{setupStatuses[], setupLibraryButtons[], setupClosed}, {"First", "Second"}
@@ -419,7 +497,8 @@ VerificationTest[
 		Block[{InstallRecursorLibraries = Function[names,
 			setupInstalled = Union[setupInstalled, names];
 			AssociationMap[Failure["Test", <|"MessageTemplate" -> "Installation could not finish."|>] &, names]
-		]}, ReleaseHold[setupLibraryAction["First"]]];
+		]}, ReleaseHold[setupLibraryAction["First"]]
+		];
 		{setupStatuses[], setupLibraryButtons[], setupCopyButtons[], setupClosed}
 	],
 	{{"Failed", "Not installed"}, {{"Uninstall", True}, {"Install", True}},
@@ -430,7 +509,8 @@ VerificationTest[
 VerificationTest[
 	withSetupDialog[{
 		Count[setupBoxes, _CheckboxBox, Infinity], setupLibraryButtons[],
-		ReleaseHold[setupAction["Close"]]; {setupClosed, setupRemembered}
+		ReleaseHold[setupAction["Close"]];
+		{setupClosed, setupRemembered}
 	}],
 	{0, {{"Install", True}, {"Install", True}}, {True, True}},
 	TestID -> "Setup-has-individual-actions-and-closes-only-when-requested"
@@ -450,13 +530,18 @@ VerificationTest[
 		before = setupCopyButtons[];
 		Block[{CopyToClipboard = Function[text, copied = Append[copied, text]],
 			InstallRecursorLibraries = Function[names,
-				setupInstalled = Union[setupInstalled, names]; AssociationMap[installedPaclet &, names]],
-			PacletUninstall = Function[name, setupInstalled = DeleteCases[setupInstalled, name]; Null]
+				setupInstalled = Union[setupInstalled, names];
+				AssociationMap[installedPaclet &, names]],
+			PacletUninstall = Function[name,
+				setupInstalled = DeleteCases[setupInstalled, name];
+				Null]
 		},
 			ReleaseHold[setupCopyAction["First"]];
-			ReleaseHold[setupLibraryAction["First"]]; afterInstall = setupCopyButtons[];
+			ReleaseHold[setupLibraryAction["First"]];
+			afterInstall = setupCopyButtons[];
 			ReleaseHold[setupCopyAction["First"]];
-			ReleaseHold[setupLibraryAction["First"]]; afterRemoval = setupCopyButtons[];
+			ReleaseHold[setupLibraryAction["First"]];
+			afterRemoval = setupCopyButtons[];
 			ReleaseHold[setupCopyAction["First"]]
 		];
 		{before, afterInstall, afterRemoval, copied, setupCopyButtons[], setupClosed}
@@ -485,7 +570,8 @@ VerificationTest[
 			downloads = Join[downloads, names];
 			If[failed,
 				AssociationMap[Failure["Test", <|"MessageTemplate" -> "Test download failed."|>] &, names],
-				setupInstalled = Union[setupInstalled, names]; AssociationMap[installedPaclet &, names]
+				setupInstalled = Union[setupInstalled, names];
+				AssociationMap[installedPaclet &, names]
 			]
 		]},
 			ReleaseHold[setupLibraryAction["Second"]];
@@ -521,8 +607,10 @@ VerificationTest[
 			WolframInstitute`Recursor`PackageScope`$libraryProgressFunction["Installing...", None];
 			samples = Append[samples, setupStatuses[]];
 			cancellation = Append[cancellation, setupCancelVisible[]];
-			setupInstalled = Union[setupInstalled, names]; AssociationMap[installedPaclet &, names]
-		]}, ReleaseHold[setupLibraryAction["First"]]];
+			setupInstalled = Union[setupInstalled, names];
+			AssociationMap[installedPaclet &, names]
+		]}, ReleaseHold[setupLibraryAction["First"]]
+		];
 		{Cases[samples, Column[{label_, _ProgressIndicator}, ___] :> label, Infinity], reporting, cancellation, setupStatuses[], setupClosed}
 	]],
 	{{Row[{"Downloading ", 25, "%"}], "Installing..."}, False, {False, True, False}, {"Ready", "Not installed"}, False},
@@ -537,7 +625,8 @@ VerificationTest[
 			If[cancel, ReleaseHold[setupAction["Cancel download"]]];
 			If[WolframInstitute`Recursor`PackageScope`libraryCancelledQ[],
 				AssociationMap[Failure["LibraryInstallCancelled", <|"MessageTemplate" -> "Installation cancelled."|>] &, names],
-				setupInstalled = Union[setupInstalled, names]; AssociationMap[installedPaclet &, names]
+				setupInstalled = Union[setupInstalled, names];
+				AssociationMap[installedPaclet &, names]
 			]
 		]},
 			ReleaseHold[setupLibraryAction["First"]];
@@ -559,7 +648,8 @@ VerificationTest[
 			ReleaseHold[setupAction["Close"]];
 			cancelled = WolframInstitute`Recursor`PackageScope`libraryCancelledQ[];
 			AssociationMap[Failure["LibraryInstallCancelled", <|"MessageTemplate" -> "Installation cancelled."|>] &, names]
-		]}, ReleaseHold[setupLibraryAction["First"]]];
+		]}, ReleaseHold[setupLibraryAction["First"]]
+		];
 		{cancelled, setupClosed, setupRemembered}
 	]],
 	{True, True, True},
@@ -571,7 +661,8 @@ VerificationTest[
 		Block[{InstallRecursorLibraries = Function[names,
 			setupInstalled = Union[setupInstalled, names];
 			AssociationMap[Failure["LibrarySetupRequired", <|"MessageTemplate" -> "Install the required toolchain."|>] &, names]
-		]}, ReleaseHold[setupLibraryAction["First"]]];
+		]}, ReleaseHold[setupLibraryAction["First"]]
+		];
 		{setupStatuses[], setupLibraryButtons[], setupCopyButtons[], setupClosed}
 	],
 	{{"Needs setup", "Not installed"}, {{"Uninstall", True}, {"Install", True}},
@@ -582,7 +673,8 @@ VerificationTest[
 VerificationTest[
 	withSetupDialog[
 		Block[{InstallRecursorLibraries = Function[names,
-			setupInstalled = Union[setupInstalled, names, {"LeanLink"}]; AssociationMap[installedPaclet &, names]]},
+			setupInstalled = Union[setupInstalled, names, {"LeanLink"}];
+			AssociationMap[installedPaclet &, names]]},
 			ReleaseHold[setupLibraryAction["MathlibLink"]]
 		];
 		{setupStatuses[], setupLibraryButtons[], setupClosed}, {}, {"LeanLink", "MathlibLink"}
@@ -599,8 +691,11 @@ VerificationTest[
 				name === "MathlibLink" && ! MemberQ[setupInstalled, "LeanLink"], "Needs setup",
 				True, "Ready"
 			]],
-			PacletUninstall = Function[name, setupInstalled = DeleteCases[setupInstalled, name]; Null]
-		}, ReleaseHold[setupLibraryAction["LeanLink"]]];
+			PacletUninstall = Function[name,
+				setupInstalled = DeleteCases[setupInstalled, name];
+				Null]
+		}, ReleaseHold[setupLibraryAction["LeanLink"]]
+		];
 		{setupStatuses[], setupLibraryButtons[], setupClosed}, {"LeanLink", "MathlibLink"}, {"LeanLink", "MathlibLink"}
 	],
 	{{"Not installed", "Needs setup"}, {{"Install", True}, {"Uninstall", True}}, False},

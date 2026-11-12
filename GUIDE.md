@@ -1,10 +1,26 @@
 # Code and documentation conventions
 
+The [coding guides](docs/coding-guides/README.md) are the standard for every
+Wolfram Language file here: the kernel, the tests and the scripts. Read the
+coding guide before writing code. `make style` checks the rules a program can
+decide and `make style-fix` applies the mechanical fixes; the
+[coding guides page](docs/coding-guides/README.md#how-the-rules-are-enforced)
+lists the rules and explains how to waive one with a reason. Fix the code instead of waiving a rule
+whenever the rule fits.
+
 Kernel code follows Wolfram Language conventions: StructuredPackageFormat,
 one public context, private helpers, tab indentation, complete API names,
 specific patterns and structured failures. Syntax nodes retain their original
-compact spellings. Wrong-type function inputs stay unevaluated; predicates
-are boolean. Evaluation limits do not decide termination.
+compact spellings and stay unevaluated. Every public function ends with a
+catch-all that gives `Failure["InvalidArguments", ...]` for wrong-type
+inputs. Predicates are boolean. Evaluation limits do not decide termination.
+
+Plotting implementations follow the
+[visualization guide](docs/coding-guides/WOLFRAMVISUALIZATION.md): a frame
+and frame labels for quantitative axes, Standard colors for data and
+`LightDarkSwitched` pairs for other colors, and no pinned white or black
+background. A `Manipulate` follows the
+[Manipulate guide](docs/coding-guides/MANIPULATEFUNCTIONCREATION.md).
 
 Kernel function defaults and option forwarding follow
 [wolfram-kernel-options](.agent-skills/wolfram-kernel-options/SKILL.md).
@@ -44,8 +60,8 @@ Prefer the visualization functions' defaults and concise inputs. Follow
 
 Use `make check`, `make test`, `make notebooks` and `make check-publish`.
 Temporary experiment and rendering code belongs under build, not additional
-permanent scripts. The only maintained scripts are check.wls, test.wls and
-docs.wls. `make publish` is the separate cloud release action.
+permanent scripts. The only maintained scripts are check.wls, test.wls,
+docs.wls and style.wls with its package in scripts/style. `make publish` is the separate cloud release action.
 
 Computational walkthroughs use standard Input cells and section groups.
 Follow [wolfram-example-style](.agent-skills/wolfram-example-style/SKILL.md) for

@@ -7,10 +7,20 @@ operation-first names such as MutateRecursor and EvaluateRecursor. Use noun
 phrases for returned properties and representations, Q for predicates, and
 ToRecursor for conversion. Follow [the naming skill](.agent-skills/wolfram-api-naming/SKILL.md).
 
+Every Wolfram Language file follows the
+[coding guides](docs/coding-guides/README.md): the kernel, the tests and the
+scripts. Read the coding guide before you write code, and follow
+[the code-style skill](.agent-skills/wolfram-code-style/SKILL.md). Run
+`make style-fix` and then `make style` on the files you change; `make check`
+and CI run the same check and refuse code that breaks a rule. Never add a
+file to `scripts/style-legacy.txt`.
+
 Follow the Wolfram Language style in GUIDE.md: tab indentation,
-specific argument patterns, local helpers, no trailing top-level semicolons,
-and Failure values for computations that start but cannot finish. Wrong-shape
-arguments remain unevaluated; predicates return booleans.
+specific argument patterns, file-level helpers, no trailing top-level
+semicolons, and Failure values for computations that start but cannot finish.
+Every public function ends with a catch-all that gives
+`Failure["InvalidArguments", ...]` for wrong-shape arguments; syntax nodes
+stay unevaluated. Predicates return booleans.
 
 Follow [the kernel-options skill](.agent-skills/wolfram-kernel-options/SKILL.md)
 for function defaults and option forwarding. Use native visualization defaults,
@@ -32,7 +42,8 @@ Run `make check` and `make test` for implementation changes. Run
 `make check-publish` for documentation or packaging changes. `make publish`
 writes to the Wolfram Cloud and is a separate release action.
 
-Keep scripts limited to check.wls, test.wls and docs.wls. Put language code in
+Keep scripts limited to check.wls, test.wls, docs.wls and style.wls with its
+package in scripts/style. Put language code in
 the paclet, examples in documentation, and design rationale in docs/notes.
 
 Follow the PARILink and MathlibLink CI/CD arrangement: use the official Linux

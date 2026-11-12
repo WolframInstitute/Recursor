@@ -7,16 +7,19 @@ description: Implement or review options in this paclet's Wolfram kernel functio
 
 Apply this skill when adding or changing public kernel functions or auditing
 their default behavior. The user's policy is to use native Wolfram defaults,
-with Automatic sizing instead of explicit default dimensions. This concerns
-the implementation as well as the Options declaration.
+with Automatic sizing instead of explicit default dimensions, and to follow
+the [visualization guide](../../docs/coding-guides/WOLFRAMVISUALIZATION.md)
+where it sets a rule: a plot with quantitative axes declares `Frame -> True`,
+`Axes -> False` and a `FrameLabel` in its own options, and colors are
+Standard colors or `LightDarkSwitched` pairs. This concerns the
+implementation as well as the Options declaration.
 
 - Inherit options from the built-in function that represents the result, such
   as TreeGraph for a syntax tree or ListLinePlot for a fitness history. Keep
   ImageSize -> Automatic; do not insert fixed widths, heights, or symbolic
   sizes such as Large in the function body as hidden defaults.
 - Apply the same rule to other presentation options: retain the corresponding
-  built-in defaults for padding, aspect ratio, colors, markers, frames and
-  plot ranges. Do not change every value to Automatic: some native defaults
+  built-in defaults for padding, aspect ratio, markers and plot ranges. Do not change every value to Automatic: some native defaults
   are None, False or another meaningful value.
 - Make Options[f] describe the function's actual defaults. Honor both
   SetOptions[f, ...] and explicit call options, with the explicit value taking

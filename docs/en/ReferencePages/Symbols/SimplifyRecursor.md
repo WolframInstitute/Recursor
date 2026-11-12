@@ -42,5 +42,5 @@ GraphicsRow[RecursorProgramTree /@ {Add[Mul[Var,Const[1]],Const[0]],SimplifyRecu
 Check a simplification through behavior curves:
 
 ```wl
-ListLinePlot[Table[EvaluateRecursor[p,n], {p,{Add[Mul[Var,Const[1]],Const[0]],SimplifyRecursor[Add[Mul[Var,Const[1]],Const[0]]]}},{n,0,10}], DataRange->{0,10}, PlotLegends->{"Original","Simplified"}, AxesLabel->{"Input","Output"} ]
+ListLinePlot[Table[EvaluateRecursor[p,n], {p,{Add[Mul[Var,Const[1]],Const[0]],SimplifyRecursor[Add[Mul[Var,Const[1]],Const[0]]]}},{n,0,10}], DataRange->{0,10}, PlotLegends->{"Original","Simplified"}, Frame->True, FrameLabel->{"Input","Output"} ]
 ```

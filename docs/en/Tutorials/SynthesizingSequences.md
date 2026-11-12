@@ -37,7 +37,7 @@ TranslateRecursor[triangular["Program"]]
 A program is a prediction. Compare its later values with the closed formula:
 
 ```wl
-ListLinePlot[{Table[EvaluateRecursor[triangular["Program"], n], {n, 0, 30}], Table[n (n + 1)/2, {n, 0, 30}]}, DataRange -> {0, 30}, PlotLegends -> {"Program", "Formula"}, AxesLabel -> {"Input", "Output"}]
+ListLinePlot[{Table[EvaluateRecursor[triangular["Program"], n], {n, 0, 30}], Table[n (n + 1)/2, {n, 0, 30}]}, DataRange -> {0, 30}, PlotLegends -> {"Program", "Formula"}, Frame -> True, FrameLabel -> {"Input", "Output"}]
 ```
 
 ## What Solved means
@@ -67,7 +67,7 @@ More terms settle it. Plot the evidence against the number of terms, with the
 24 bits that Solved requires:
 
 ```wl
-ListLinePlot[Table[{k, SynthesizeRecursor[DigitCount[Range[0, k - 1], 2, 1]]["Evidence"]}, {k, 16, 64, 8}], GridLines -> {None, {24}}, AxesLabel -> {"Terms", "Evidence"}]
+ListLinePlot[Table[{k, SynthesizeRecursor[DigitCount[Range[0, k - 1], 2, 1]]["Evidence"]}, {k, 16, 64, 8}], GridLines -> {None, {24}}, Frame -> True, FrameLabel -> {"Terms", "Evidence"}]
 ```
 
 A program that fails a held-out term is returned, but not as solved:
@@ -170,7 +170,7 @@ Compare both predictions with the true counts. The program from eight terms
 leaves the sequence soon after them:
 
 ```wl
-ListStepPlot[Append[Table[EvaluateRecursor[counting[k]["Program"], n, "MaxSteps" -> 5000000], {k, {8, 40}}, {n, 1, 60}], PrimePi[Range[60]]], DataRange -> {1, 60}, PlotLegends -> {"From 8 terms", "From 40 terms", "Prime count"}, AxesLabel -> {"Input", "Output"}]
+ListStepPlot[Append[Table[EvaluateRecursor[counting[k]["Program"], n, "MaxSteps" -> 5000000], {k, {8, 40}}, {n, 1, 60}], PrimePi[Range[60]]], DataRange -> {1, 60}, PlotLegends -> {"From 8 terms", "From 40 terms", "Prime count"}, Frame -> True, FrameLabel -> {"Input", "Output"}]
 ```
 
 Solved is strong evidence for a rule, not a proof of it. Many sequences follow

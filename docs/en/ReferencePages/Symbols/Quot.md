@@ -50,7 +50,7 @@ RecursorProgramTree[Quot[Var,Const[3]]]
 Show quotients for divisors one through four:
 
 ```wl
-ListStepPlot[Table[EvaluateRecursor[Quot[Var, Const[d]], n], {d, 1, 4}, {n, 0, 24}], DataRange -> {0, 24}, PlotLegends -> Range[4], AxesLabel -> {"Input", "Quotient"}]
+ListStepPlot[Table[EvaluateRecursor[Quot[Var, Const[d]], n], {d, 1, 4}, {n, 0, 24}], DataRange -> {0, 24}, PlotLegends -> Range[4], Frame -> True, FrameLabel -> {"Input", "Quotient"}]
 ```
 
 ---
@@ -58,7 +58,7 @@ ListStepPlot[Table[EvaluateRecursor[Quot[Var, Const[d]], n], {d, 1, 4}, {n, 0, 2
 Sum decimal digits by reading the result for the quotient by ten:
 
 ```wl
-ListLinePlot[Table[EvaluateRecursor[RecursorExamples["DigitSum"], n], {n, 0, 120}], DataRange -> {0, 120}, AxesLabel -> {"Input", "Digit sum"}]
+ListLinePlot[Table[EvaluateRecursor[RecursorExamples["DigitSum"], n], {n, 0, 120}], DataRange -> {0, 120}, Frame -> True, FrameLabel -> {"Input", "Digit sum"}]
 ```
 
 ## Properties and Relations

@@ -18,7 +18,7 @@ RelatedTutorials: [ArithmeticPatterns]
 ## Details & Options
 
 - e may use only bindings available at path. The result is closed.
-- An invalid path or scope mismatch leaves the call unevaluated.
+- An invalid path or scope mismatch gives a Failure with the tag "InvalidArguments".
 - Subtree insertion can intentionally use the nearest available binder; this is not alpha-renaming of a source program.
 
 ## Basic Examples
@@ -42,7 +42,7 @@ ReplaceRecursorPart[Mul[Var, Var], {}, Succ[Var]]
 Compare a square with a subtree-edited linear program:
 
 ```wl
-ListLinePlot[Table[EvaluateRecursor[p,n], {p,{Mul[Var,Var],ReplaceRecursorPart[Mul[Var,Var],{2},Const[3]]}},{n,0,12}], DataRange->{0,12}, PlotLegends->{"Square","Edited"}, AxesLabel->{"Input","Output"} ]
+ListLinePlot[Table[EvaluateRecursor[p,n], {p,{Mul[Var,Var],ReplaceRecursorPart[Mul[Var,Var],{2},Const[3]]}},{n,0,12}], DataRange->{0,12}, PlotLegends->{"Square","Edited"}, Frame->True, FrameLabel->{"Input","Output"} ]
 ```
 
 ---

@@ -41,5 +41,5 @@ RecursorProgramTree[ParseRecursor[FormatRecursor[RecursorExamples["Factorial"]]]
 Compare serialization lengths of four programs:
 
 ```wl
-BarChart[StringLength[FormatRecursor[#]] & /@ Lookup[RecursorExamples[],{"Square","Factorial","Fibonacci","PopulationCount"}], ChartLabels->{"Square","Factorial","Fibonacci","Popcount"}, AxesLabel->{None,"Characters"} ]
+BarChart[StringLength[FormatRecursor[#]] & /@ Lookup[RecursorExamples[],{"Square","Factorial","Fibonacci","PopulationCount"}], ChartLabels->{"Square","Factorial","Fibonacci","Popcount"}, Frame->True, FrameLabel->{None,"Characters"} ]
 ```

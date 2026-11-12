@@ -17,7 +17,7 @@ RelatedTutorials: [HaltingAndBudgets]
 
 ## Details & Options
 
-- n is a natural number. Invalid programs or input types remain unevaluated.
+- n is a natural number. Invalid programs or input types give a Failure with the tag "InvalidArguments".
 - Method is "Interpreter" (default) or "Lambda". The latter compiles and normalizes a Church-numeral application.
 - "MaxSteps" defaults to 100000 and accepts a nonnegative integer or Infinity. The interpreter counts syntax visits; the lambda machine counts transitions and readback work. Budgets are not comparable between methods.
 - "TimeLimit" defaults to 5 seconds; "MemoryLimit" defaults to 268435456 bytes. Each accepts a positive value (integer bytes) or Infinity.
@@ -79,7 +79,7 @@ EvaluateRecursor[RecursorExamples["Factorial"], 10, "TimeLimit" -> Infinity, "Me
 Compare a computed sequence with an independent reference:
 
 ```wl
-ListLinePlot[{Table[EvaluateRecursor[RecursorExamples["Fibonacci"], n], {n, 0, 10}], Fibonacci[Range[0,10]]}, DataRange -> {0, 10}, PlotLegends -> {"Recursor", "Reference"}, AxesLabel -> {"Input", "Output"}, PlotRange -> All ]
+ListLinePlot[{Table[EvaluateRecursor[RecursorExamples["Fibonacci"], n], {n, 0, 10}], Fibonacci[Range[0,10]]}, DataRange -> {0, 10}, PlotLegends -> {"Recursor", "Reference"}, Frame -> True, FrameLabel -> {"Input", "Output"}, PlotRange -> All ]
 ```
 
 ---

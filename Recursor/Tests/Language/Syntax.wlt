@@ -1,3 +1,4 @@
+PacletDirectoryLoad[DirectoryName[$TestFileName, 3]]
 Needs["WolframInstitute`Recursor`"]
 
 VerificationTest[RecursorProgramQ /@ Values[RecursorExamples[]], ConstantArray[True, 11], TestID -> "example-programs-closed"]
@@ -7,7 +8,8 @@ VerificationTest[RecursorExpressionQ /@ {Acc, Idx, CGet[Const[0]]}, {True, True,
 VerificationTest[RecursorProgramQ /@ {Acc, Idx, CGet[Const[0]]}, {False, False, False}, TestID -> "open-expressions-not-programs"]
 
 VerificationTest[RecursorExpressionQ /@ {Const[-1], Const[1.5], Const[1, 2], Succ[], Add[Var], WhileLoop[Var, Acc], Var[1], 7}, ConstantArray[
-	False, 8], TestID -> "syntax-exact-arities-and-types"]
+	False, 8
+], TestID -> "syntax-exact-arities-and-types"]
 
 VerificationTest[RecursorProgramQ[CoRec[Var, Acc]], False, TestID -> "course-recursion-does-not-bind-accumulator"]
 
@@ -23,21 +25,24 @@ VerificationTest[RecursorNodeCount[Const[1000000]], 1, TestID -> "constant-is-si
 
 VerificationTest[RecursorNodeCount[WhileLoop[Var, Acc, Pred[Acc]]], 5, TestID -> "while-node-count"]
 
-VerificationTest[Lookup[RecursorSites[WhileLoop[Var, Acc, Pred[Acc]]], "Bindings"], {{}, {}, {Acc}, {Acc}, {Acc}}, TestID -> "while-sites-bind-both-children"
-	]
+VerificationTest[Lookup[RecursorSites[WhileLoop[Var, Acc, Pred[Acc]]], "Bindings"], {{}, {}, {Acc}, {Acc}, {Acc}}, TestID -> "while-sites-bind-both-children"]
 
-VerificationTest[ReplaceRecursorPart[WhileLoop[Var, Acc, Pred[Acc]], {3}, Half[Acc]], WhileLoop[Var, Acc, Half[Acc]], TestID -> "scope-correct-replacement"
-	]
+VerificationTest[ReplaceRecursorPart[WhileLoop[Var, Acc, Pred[Acc]], {3}, Half[Acc]], WhileLoop[Var, Acc, Half[Acc]], TestID -> "scope-correct-replacement"]
 
-VerificationTest[Head[ReplaceRecursorPart[Var, {}, Acc]], ReplaceRecursorPart, TestID -> "reject-free-replacement"]
+VerificationTest[ReplaceRecursorPart[Var, {}, Acc]["Tag"], "InvalidArguments", {ReplaceRecursorPart::args}, TestID -> "reject-free-replacement"]
 
-VerificationTest[Head[ReplaceRecursorPart[Var, {1}, Const[0]]], ReplaceRecursorPart, TestID -> "reject-path-inside-leaf"]
+VerificationTest[ReplaceRecursorPart[Var, {1}, Const[0]]["Tag"], "InvalidArguments", {ReplaceRecursorPart::args}, TestID -> "reject-path-inside-leaf"]
 
-VerificationTest[ParseRecursor /@ (FormatRecursor /@ Values[RecursorExamples[]]), Values[RecursorExamples[]], TestID -> "source-round-trip"
-	]
+VerificationTest[ParseRecursor /@ (FormatRecursor /@ Values[RecursorExamples[]]), Values[RecursorExamples[]], TestID -> "source-round-trip"]
 
-VerificationTest[And @@ (FailureQ[ParseRecursor[#]]& /@ {"", "Acc", "Const[-1]", "Const[1+1]", "Add[Var]", "Var;Quit[]", "Global`Var", "Const[1 2]",
-	 "Var[]", "WhileLoop[Var,Idx,Acc]"}), True, TestID -> "parser-rejects-outside-grammar"]
+VerificationTest[
+	AllTrue[
+		{"", "Acc", "Const[-1]", "Const[1+1]", "Add[Var]", "Var;Quit[]", "Global`Var", "Const[1 2]", "Var[]", "WhileLoop[Var,Idx,Acc]"},
+		Function[text, FailureQ[ParseRecursor[text]]]
+	],
+	True,
+	TestID -> "parser-rejects-outside-grammar"
+]
 
 VerificationTest[
 	Block[{probe = 0},
@@ -71,3 +76,27 @@ VerificationTest[Lookup[RecursorSites[Iter[Var, Const[0], Let[Acc, Var]]], "Bind
 VerificationTest[ParseRecursor["Let[Quot[Var, Const[3]], Succ[Var]]"], Let[Quot[Var, Const[3]], Succ[Var]], TestID -> "parser-reads-quotient-and-let"]
 
 VerificationTest[FailureQ[ParseRecursor["Let[Var, Acc]"]], True, TestID -> "parser-rejects-unbound-accumulator-under-let"]
+
+VerificationTest[
+	Map[Function[head, MatchQ[head[], _head]], {Const, Succ, Pred, Half, Add, Mul, Monus, Rem, Quot, Ifz, Iter, Rec, CoRec, CGet, WhileLoop, Let}],
+	ConstantArray[True, 16],
+	TestID -> "syntax-nodes-stay-unevaluated"
+]
+
+VerificationTest[{RecursorExpressionQ[], RecursorExpressionQ[Var, Var], RecursorProgramQ[], RecursorProgramQ[Var, Var]}, {False, False, False, False}, TestID -> "predicates-catch-all"]
+
+VerificationTest[RecursorFreeVariables[7]["Tag"], "InvalidArguments", {RecursorFreeVariables::args}, TestID -> "free-variables-catch-all"]
+
+VerificationTest[RecursorNodeCount[Succ[]]["Tag"], "InvalidArguments", {RecursorNodeCount::args}, TestID -> "node-count-catch-all"]
+
+VerificationTest[RecursorSites[]["Tag"], "InvalidArguments", {RecursorSites::args}, TestID -> "sites-catch-all"]
+
+VerificationTest[ReplaceRecursorPart[Var, {}]["Tag"], "InvalidArguments", {ReplaceRecursorPart::args}, TestID -> "replace-part-catch-all"]
+
+VerificationTest[FormatRecursor["Var"]["Tag"], "InvalidArguments", {FormatRecursor::args}, TestID -> "format-catch-all"]
+
+VerificationTest[ParseRecursor[Var]["Tag"], "InvalidArguments", {ParseRecursor::args}, TestID -> "parse-catch-all"]
+
+VerificationTest[RecursorExamples[1]["Tag"], "InvalidArguments", {RecursorExamples::args}, TestID -> "examples-catch-all"]
+
+VerificationTest[RecursorExamples["NoSuchExample"], Missing["UnknownExample", "NoSuchExample"], TestID -> "unknown-example-is-missing"]

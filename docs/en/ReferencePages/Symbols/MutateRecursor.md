@@ -73,7 +73,7 @@ SeedRandom[42]
 Measure sizes along a sequence of mutations:
 
 ```wl
-ListLinePlot[RecursorNodeCount /@ NestList[MutateRecursor[#,2,"IncludeWhile"->False] &, Mul[Var,Var],20], DataRange->{0,20}, AxesLabel->{"Mutation","Nodes"} ]
+ListLinePlot[RecursorNodeCount /@ NestList[MutateRecursor[#,2,"IncludeWhile"->False] &, Mul[Var,Var],20], DataRange->{0,20}, Frame->True, FrameLabel->{"Mutation","Nodes"} ]
 ```
 
 ---

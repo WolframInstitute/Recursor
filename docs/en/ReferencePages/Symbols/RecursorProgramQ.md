@@ -42,5 +42,5 @@ RecursorProgramTree[First[Select[{Acc,Mul[Var,Var]},RecursorProgramQ]]]
 Run only a validated source proposal:
 
 ```wl
-With[{p=ParseRecursor["Mul[Var,Var]"]}, If[RecursorProgramQ[p], ListLinePlot[Table[EvaluateRecursor[p,n],{n,0,12}], DataRange->{0,12}, AxesLabel->{"Input","Output"}] ]]
+With[{p=ParseRecursor["Mul[Var,Var]"]}, If[RecursorProgramQ[p], ListLinePlot[Table[EvaluateRecursor[p,n],{n,0,12}], DataRange->{0,12}, Frame->True, FrameLabel->{"Input","Output"}] ]]
 ```

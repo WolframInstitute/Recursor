@@ -48,7 +48,7 @@ RecursorProgramTree[Rec[Var,Const[0],Add[Acc,Idx]]]
 Use the recursion index to construct triangular numbers:
 
 ```wl
-ListLinePlot[Table[EvaluateRecursor[Rec[Var,Const[0],Add[Acc,Idx]], n], {n, 0, 12}], DataRange -> {0, 12}, AxesLabel -> {"Input", "Output"}, PlotRange -> All ]
+ListLinePlot[Table[EvaluateRecursor[Rec[Var,Const[0],Add[Acc,Idx]], n], {n, 0, 12}], DataRange -> {0, 12}, Frame -> True, FrameLabel -> {"Input", "Output"}, PlotRange -> All ]
 ```
 
 ---
@@ -56,5 +56,5 @@ ListLinePlot[Table[EvaluateRecursor[Rec[Var,Const[0],Add[Acc,Idx]], n], {n, 0, 1
 Build a factorial from successive indices:
 
 ```wl
-ListLinePlot[{Table[EvaluateRecursor[RecursorExamples["Factorial"], n], {n, 0, 6}], Factorial[Range[0,6]]}, DataRange -> {0, 6}, PlotLegends -> {"Recursor", "Reference"}, AxesLabel -> {"Input", "Output"}, PlotRange -> All ]
+ListLinePlot[{Table[EvaluateRecursor[RecursorExamples["Factorial"], n], {n, 0, 6}], Factorial[Range[0,6]]}, DataRange -> {0, 6}, PlotLegends -> {"Recursor", "Reference"}, Frame -> True, FrameLabel -> {"Input", "Output"}, PlotRange -> All ]
 ```

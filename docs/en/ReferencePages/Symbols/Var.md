@@ -49,7 +49,7 @@ RecursorProgramTree[Var]
 Compare identity evaluation with the input sequence:
 
 ```wl
-ListLinePlot[{Table[EvaluateRecursor[Var, n], {n, 0, 10}], Range[0, 10]}, DataRange -> {0, 10}, PlotLegends -> {"Recursor", "Reference"}, AxesLabel -> {"Input", "Output"}, PlotRange -> All ]
+ListLinePlot[{Table[EvaluateRecursor[Var, n], {n, 0, 10}], Range[0, 10]}, DataRange -> {0, 10}, PlotLegends -> {"Recursor", "Reference"}, Frame -> True, FrameLabel -> {"Input", "Output"}, PlotRange -> All ]
 ```
 
 ---

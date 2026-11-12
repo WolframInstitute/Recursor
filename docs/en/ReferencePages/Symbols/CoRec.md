@@ -48,7 +48,7 @@ RecursorProgramTree[CoRec[Var,Ifz[Idx,Const[0],Succ[CGet[Pred[Idx]]]]]]
 Compare Fibonacci values with the built-in sequence:
 
 ```wl
-ListLinePlot[{Table[EvaluateRecursor[RecursorExamples["Fibonacci"], n], {n, 0, 10}], Fibonacci[Range[0,10]]}, DataRange -> {0, 10}, PlotLegends -> {"Recursor", "Reference"}, AxesLabel -> {"Input", "Output"}, PlotRange -> All ]
+ListLinePlot[{Table[EvaluateRecursor[RecursorExamples["Fibonacci"], n], {n, 0, 10}], Fibonacci[Range[0,10]]}, DataRange -> {0, 10}, PlotLegends -> {"Recursor", "Reference"}, Frame -> True, FrameLabel -> {"Input", "Output"}, PlotRange -> All ]
 ```
 
 ---
@@ -56,5 +56,5 @@ ListLinePlot[{Table[EvaluateRecursor[RecursorExamples["Fibonacci"], n], {n, 0, 1
 Measure the number of binary one-digits:
 
 ```wl
-ListLinePlot[Table[EvaluateRecursor[RecursorExamples["PopulationCount"], n], {n, 0, 31}], DataRange -> {0, 31}, AxesLabel -> {"Input", "Output"}, PlotRange -> All ]
+ListLinePlot[Table[EvaluateRecursor[RecursorExamples["PopulationCount"], n], {n, 0, 31}], DataRange -> {0, 31}, Frame -> True, FrameLabel -> {"Input", "Output"}, PlotRange -> All ]
 ```

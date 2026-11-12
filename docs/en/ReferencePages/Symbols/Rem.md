@@ -56,5 +56,5 @@ ArrayPlot[Table[EvaluateRecursor[Rem[Var,Const[d]], n], {d,1,8}, {n,0,31}], Fram
 Plot a modular doubling orbit:
 
 ```wl
-ListLinePlot[Table[EvaluateRecursor[Iter[Var,Const[1],Rem[Mul[Const[2],Acc],Const[7]]], n], {n, 0, 24}], DataRange -> {0, 24}, AxesLabel -> {"Input", "Output"}, PlotRange -> All ]
+ListLinePlot[Table[EvaluateRecursor[Iter[Var,Const[1],Rem[Mul[Const[2],Acc],Const[7]]], n], {n, 0, 24}], DataRange -> {0, 24}, Frame -> True, FrameLabel -> {"Input", "Output"}, PlotRange -> All ]
 ```

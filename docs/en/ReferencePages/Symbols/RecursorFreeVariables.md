@@ -41,7 +41,7 @@ RecursorFreeVariables[WhileLoop[Acc, Acc, Pred[Acc]]]
 Measure free bindings across factorial subtrees:
 
 ```wl
-With[{sites=RecursorSites[RecursorExamples["Factorial"]]}, BarChart[Length[RecursorFreeVariables[#]] & /@ Lookup[sites,"Expression"], AxesLabel->{"Subtree","Free bindings"}] ]
+With[{sites=RecursorSites[RecursorExamples["Factorial"]]}, BarChart[Length[RecursorFreeVariables[#]] & /@ Lookup[sites,"Expression"], Frame->True, FrameLabel->{"Subtree","Free bindings"}] ]
 ```
 
 ---

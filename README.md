@@ -121,11 +121,13 @@ Needs["WolframInstitute`Recursor`"]
 | `make check` | Check source, metadata and reference coverage |
 | `make check-proofs` | Build and check the Lean proofs |
 | `make test` | Run tests |
+| `make style` | Check the code against the coding guides; `make style-fix` applies the mechanical fixes |
 | `make notebooks` | Build documentation with PacletPage |
 | `make check-publish` | Build the paclet archive without publishing |
 | `make publish` | Publish the paclet and documentation |
 
-See [GUIDE.md](GUIDE.md) for development conventions and
+See [GUIDE.md](GUIDE.md) for development conventions, the
+[coding guides](docs/coding-guides/README.md) for the code rules and
 [API naming](docs/notes/Naming.md) for public-name conventions. The
 [CI and release guide](docs/workflows.md) describes automated checks and publication.
 

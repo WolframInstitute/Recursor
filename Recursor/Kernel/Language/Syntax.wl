@@ -1,3 +1,8 @@
+(* ::Package:: *)
+
+(* ::Section:: *)
+(*PackageExported*)
+
 PackageExported[{
 	Var, Acc, Idx, Const, Succ, Pred, Half, Add, Mul, Monus, Rem, Quot,
 	Ifz, Iter, Rec, CoRec, CGet, WhileLoop, Let,
@@ -5,7 +10,13 @@ PackageExported[{
 	RecursorNodeCount, RecursorSites, ReplaceRecursorPart, FormatRecursor, $RecursorGrammar
 }]
 
+(* ::Section:: *)
+(*PackageScoped*)
+
 PackageScoped[{recursorChildren, recursorBindings, recursorRebuild, recursorSubtree}]
+
+(* ::Section:: *)
+(*Usage Messages*)
 
 Var::usage = "Var denotes the input natural number of a Recursor program, or the value bound by the nearest enclosing Let."
 Acc::usage = "Acc denotes the nearest enclosing accumulator, bound by Iter, Rec or WhileLoop."
@@ -31,9 +42,32 @@ RecursorProgramQ::usage = "RecursorProgramQ[p] tests whether p is a well-formed 
 RecursorFreeVariables::usage = "RecursorFreeVariables[e] lists the unbound accumulator, index and history symbols in e. Var is the program input."
 RecursorNodeCount::usage = "RecursorNodeCount[e] counts syntax nodes, treating Const[n] as one node."
 RecursorSites::usage = "RecursorSites[e] lists associations containing each subtree's Path, Expression and available Bindings."
-ReplaceRecursorPart::usage = "ReplaceRecursorPart[p, path, e] replaces a subtree when e fits the bindings at path and the resulting program is closed."
+ReplaceRecursorPart::usage = "ReplaceRecursorPart[p, path, e] replaces a subtree when e fits the bindings at path and the resulting program is \
+closed."
 FormatRecursor::usage = "FormatRecursor[e] gives portable Recursor source text without Wolfram context prefixes."
 $RecursorGrammar::usage = "$RecursorGrammar gives each syntax head's arity. Var, Acc and Idx are atoms."
+
+$syntaxNode::usage = "$syntaxNode is the pattern of a value that can be a syntax node: a symbol or an expression with arguments. \
+Helpers that run after RecursorExpressionQ take their expressions with it, without testing the syntax again."
+recursorChildren::usage = "recursorChildren[expression] lists the subexpressions of a syntax node. An atom and a constant have none."
+recursorBindings::usage = "recursorBindings[expression, position] lists the symbols among Acc, Idx and CGet that the syntax node binds in \
+its child at position."
+recursorRebuild::usage = "recursorRebuild[expression, children] gives the syntax node with the head of expression and the given children. \
+With no children it gives expression itself."
+recursorSubtree::usage = "recursorSubtree[expression, path] gives the subexpression at path, a list of child positions from the root."
+freeVariables::usage = "freeVariables[expression] lists the symbols among Acc, Idx and CGet that are unbound in expression, which is \
+taken to be well formed."
+subtreeSites::usage = "subtreeSites[expression, path, bindings] lists the sites of expression and of its subexpressions, where expression \
+is at path and has the given bindings available."
+replaceSubtree::usage = "replaceSubtree[expression, path, replacement] gives expression with the subexpression at path replaced."
+replacementFitsQ::usage = "replacementFitsQ[program, path, replacement] gives True when program has a subexpression at path and every \
+unbound symbol of replacement is bound there."
+
+(* ::Section:: *)
+(*Function Definitions*)
+
+(* The syntax nodes Var, Acc, Idx, Const, Succ, Pred, Half, Add, Mul, Monus, Rem, Quot, Ifz, Iter, Rec, CoRec, CGet,
+   WhileLoop and Let are data. They have no definitions and no catch-all, so that a program stays unevaluated. *)
 
 $RecursorGrammar = <|
 	"Acc" -> 0, "Add" -> 2, "CGet" -> 1, "CoRec" -> 2, "Const" -> 1,
@@ -42,17 +76,19 @@ $RecursorGrammar = <|
 	"Rem" -> 2, "Succ" -> 1, "Var" -> 0, "WhileLoop" -> 3
 |>
 
+$syntaxNode = _Symbol | _[___]
+
 RecursorExpressionQ[Var | Acc | Idx] := True
-RecursorExpressionQ[Const[n_Integer?NonNegative]] := True
-RecursorExpressionQ[e : (Succ | Pred | Half | CGet | Add | Mul | Monus | Rem | Quot | CoRec | Let | Ifz | Iter | Rec | WhileLoop)[___]] :=
-	Length[e] === Lookup[$RecursorGrammar, SymbolName[Head[e]]] && AllTrue[List @@ e, RecursorExpressionQ]
+RecursorExpressionQ[Const[_Integer?NonNegative]] := True
+RecursorExpressionQ[expression : (Succ | Pred | Half | CGet | Add | Mul | Monus | Rem | Quot | CoRec | Let | Ifz | Iter | Rec | WhileLoop)[___]] :=
+	Length[expression] === Lookup[$RecursorGrammar, SymbolName[Head[expression]]] && AllTrue[List @@ expression, RecursorExpressionQ]
 RecursorExpressionQ[___] := False
 
-RecursorProgramQ[e_] := RecursorExpressionQ[e] && RecursorFreeVariables[e] === {}
+RecursorProgramQ[expression_?RecursorExpressionQ] := freeVariables[expression] === {}
 RecursorProgramQ[___] := False
 
 recursorChildren[Var | Acc | Idx | Const[_]] := {}
-recursorChildren[e_] := List @@ e
+recursorChildren[expression_] := List @@ expression
 
 recursorBindings[_Iter, 3] := {Acc}
 recursorBindings[_Rec, 3] := {Acc, Idx}
@@ -60,52 +96,59 @@ recursorBindings[_CoRec, 2] := {Idx, CGet}
 recursorBindings[_WhileLoop, 2 | 3] := {Acc}
 recursorBindings[_, _Integer] := {}
 
-recursorRebuild[e_, {}] := e
-recursorRebuild[e_, children_List] := Head[e] @@ children
+recursorRebuild[expression : $syntaxNode, {}] := expression
+recursorRebuild[expression : $syntaxNode, children_List] := Head[expression] @@ children
 
 freeVariables[Acc] := {Acc}
 freeVariables[Idx] := {Idx}
-freeVariables[CGet[e_]] := Union[{CGet}, freeVariables[e]]
-freeVariables[e_] := Union @@ MapIndexed[
-	Function[{child, position}, Complement[freeVariables[child], recursorBindings[e, First[position]]]],
-	recursorChildren[e]
+freeVariables[CGet[index_]] := Union[{CGet}, freeVariables[index]]
+freeVariables[expression_] := Union @@ MapIndexed[
+	Function[{child, position}, Complement[freeVariables[child], recursorBindings[expression, First[position]]]],
+	recursorChildren[expression]
 ]
 
-RecursorFreeVariables[e_?RecursorExpressionQ] := freeVariables[e]
-RecursorNodeCount[e_?RecursorExpressionQ] := 1 + Total[RecursorNodeCount /@ recursorChildren[e]]
+RecursorFreeVariables[expression_?RecursorExpressionQ] := freeVariables[expression]
+RecursorFreeVariables[___] := invalidArgumentsFailure[RecursorFreeVariables]
 
-sites[e_, path_, bindings_] := Prepend[
+RecursorNodeCount[expression_?RecursorExpressionQ] := 1 + Total[RecursorNodeCount /@ recursorChildren[expression]]
+RecursorNodeCount[___] := invalidArgumentsFailure[RecursorNodeCount]
+
+subtreeSites[expression : $syntaxNode, path_List, bindings_List] := Prepend[
 	Catenate @ MapIndexed[
-		Function[{child, position}, sites[child, Append[path, First[position]], Union[bindings, recursorBindings[e, First[position]]]]],
-		recursorChildren[e]
+		Function[{child, position}, subtreeSites[child, Append[path, First[position]], Union[bindings, recursorBindings[expression, First[position]]]]],
+		recursorChildren[expression]
 	],
-	<|"Path" -> path, "Expression" -> e, "Bindings" -> bindings|>
+	<|"Path" -> path, "Expression" -> expression, "Bindings" -> bindings|>
 ]
 
-RecursorSites[e_?RecursorExpressionQ] := sites[e, {}, {}]
+RecursorSites[expression_?RecursorExpressionQ] := subtreeSites[expression, {}, {}]
+RecursorSites[___] := invalidArgumentsFailure[RecursorSites]
 
-recursorSubtree[e_, {}] := e
-recursorSubtree[e_, path_List] := recursorSubtree[Extract[recursorChildren[e], {First[path]}], Rest[path]]
+recursorSubtree[expression : $syntaxNode, {}] := expression
+recursorSubtree[expression : $syntaxNode, path_List] := recursorSubtree[Extract[recursorChildren[expression], {First[path]}], Rest[path]]
 
-replaceSubtree[_, {}, replacement_] := replacement
-replaceSubtree[e_, path_List, replacement_] := recursorRebuild[e,
+replaceSubtree[$syntaxNode, {}, replacement : $syntaxNode] := replacement
+replaceSubtree[expression : $syntaxNode, path_List, replacement : $syntaxNode] := recursorRebuild[expression,
 	MapIndexed[
 		Function[{child, position}, If[First[position] === First[path], replaceSubtree[child, Rest[path], replacement], child]],
-		recursorChildren[e]
+		recursorChildren[expression]
 	]
 ]
 
-replacementFitsQ[program_, path_, replacement_] := With[{
-	site = SelectFirst[RecursorSites[program], Lookup[#, "Path"] === path &, Missing["Path"]]
-},
-	AssociationQ[site] && Complement[RecursorFreeVariables[replacement], site["Bindings"]] === {}
+replacementFitsQ[program : $syntaxNode, path_List, replacement : $syntaxNode] := Module[{site},
+	site = SelectFirst[subtreeSites[program, {}, {}], Function[candidate, candidate["Path"] === path], Missing["Path"]];
+	AssociationQ[site] && Complement[freeVariables[replacement], site["Bindings"]] === {}
 ]
 
+(* A replacement that does not fit, or a path outside the program, is an invalid call: it reaches the catch-all. *)
 ReplaceRecursorPart[program_?RecursorProgramQ, path : {___Integer}, replacement_?RecursorExpressionQ] :=
 	replaceSubtree[program, path, replacement] /; replacementFitsQ[program, path, replacement]
+ReplaceRecursorPart[___] := invalidArgumentsFailure[ReplaceRecursorPart]
 
-FormatRecursor[e : Var | Acc | Idx] := SymbolName[e]
-FormatRecursor[Const[n_Integer?NonNegative]] := "Const[" <> IntegerString[n] <> "]"
-FormatRecursor[e_?RecursorExpressionQ] := SymbolName[Head[e]] <> "[" <> StringRiffle[FormatRecursor /@ recursorChildren[e], ", "] <> "]"
+FormatRecursor[atom : Var | Acc | Idx] := SymbolName[atom]
+FormatRecursor[Const[value_Integer?NonNegative]] := "Const[" <> IntegerString[value] <> "]"
+FormatRecursor[expression_?RecursorExpressionQ] :=
+	SymbolName[Head[expression]] <> "[" <> StringRiffle[FormatRecursor /@ recursorChildren[expression], ", "] <> "]"
+FormatRecursor[___] := invalidArgumentsFailure[FormatRecursor]
 
 Protect[Var, Acc, Idx, Const, Succ, Pred, Half, Add, Mul, Monus, Rem, Quot, Ifz, Iter, Rec, CoRec, CGet, WhileLoop, Let]

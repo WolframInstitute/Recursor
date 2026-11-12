@@ -56,7 +56,7 @@ Compute factorials with primitive recursion and show their growth on a
 logarithmic vertical scale:
 
 ```wl
-ListLogPlot[Table[EvaluateRecursor[Rec[Var, Const[1], Mul[Succ[Idx], Acc]], n], {n, 0, 8}], DataRange -> {0, 8}, AxesLabel -> {"Input", "Factorial"}]
+ListLogPlot[Table[EvaluateRecursor[Rec[Var, Const[1], Mul[Succ[Idx], Acc]], n], {n, 0, 8}], DataRange -> {0, 8}, Frame -> True, FrameLabel -> {"Input", "Factorial"}]
 ```
 
 CoRec[count,step] computes every index from 0 through count, inclusive.
@@ -66,7 +66,7 @@ current or future index. Every intermediate step is evaluated.
 Compute Fibonacci numbers from earlier values:
 
 ```wl
-ListLinePlot[Table[EvaluateRecursor[RecursorExamples["Fibonacci"], n], {n, 0, 10}], DataRange -> {0, 10}, AxesLabel -> {"Input", "Fibonacci"}]
+ListLinePlot[Table[EvaluateRecursor[RecursorExamples["Fibonacci"], n], {n, 0, 10}], DataRange -> {0, 10}, Frame -> True, FrameLabel -> {"Input", "Fibonacci"}]
 ```
 
 ## Lexical scope
@@ -110,7 +110,7 @@ Sum a program over the indices of a loop. The body reads the loop index
 through Let and the running sum through Acc:
 
 ```wl
-ListLinePlot[Table[EvaluateRecursor[Rec[Var, Const[0], Add[Acc, Let[Idx, RecursorExamples["DivisorCount"]]]], n], {n, 0, 40}], DataRange -> {0, 40}, AxesLabel -> {"Input", "Sum of divisor counts"}]
+ListLinePlot[Table[EvaluateRecursor[Rec[Var, Const[0], Add[Acc, Let[Idx, RecursorExamples["DivisorCount"]]]], n], {n, 0, 40}], DataRange -> {0, 40}, Frame -> True, FrameLabel -> {"Input", "Sum of divisor counts"}]
 ```
 
 ## Unbounded iteration

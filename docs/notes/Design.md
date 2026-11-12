@@ -63,10 +63,10 @@ and a paclet, documentation and test layout adapted from Ruliology.
   together as rows of one matrix, the terms of sums and products are
   evaluated bottom-up from values already known, and segment totals are
   matrix operations. A search takes about two seconds where the first
-  version took five. Local functions that refer to one another are removed
-  when a search ends: left alone they kept its tables alive, some fifty
-  megabytes per call, which exhausted the memory of a machine during the
-  measurements.
+  version took five. The helpers of a search are file-level functions: as
+  local functions that refer to one another they kept its tables alive, some
+  fifty megabytes per call, which exhausted the memory of a machine during
+  the measurements.
 - Offer guided variation in EvolveRecursor. Blind mutation and crossover
   sample a few hundred programs. Method -> "Guided" runs a parent backwards
   from the examples to the values one of its parts must have, and takes that
@@ -88,6 +88,13 @@ and a paclet, documentation and test layout adapted from Ruliology.
   construction. Nicer forms (sums, products, counts, comparisons, known
   functions) are rewrites of it, each kept only if it gives the values of the
   program on the tested inputs. A wrong rewrite is dropped, never returned.
+- Follow the [coding guides](../coding-guides/README.md) in every file, and
+  check it. A public function gives `Failure["InvalidArguments", ...]` for
+  arguments of the wrong shape where it used to stay unevaluated: a caller
+  can test one value for every way a call fails, and a mistyped call no
+  longer passes for data. Syntax nodes are data and stay as written. Search
+  helpers are file-level functions that pass their state along, since a
+  function defined inside a Module keeps its memory.
 - Draw syntax trees with a design of their own, the one exception to native
   visualization defaults. Names are the content of a syntax tree, so each
   node is a box holding its name instead of a dot with a label beside it,

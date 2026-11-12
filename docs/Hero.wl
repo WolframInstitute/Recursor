@@ -5,7 +5,10 @@
 Begin["RecursorHero`"];
 Needs["Wolfram`Lambda`"];
 root = DirectoryName[$InputFileName, 2];
-fail[text_] := (Print["ERROR: ", text]; Exit[1]);
+fail[text_] := (
+	Print["ERROR: ", text];
+	Exit[1]
+);
 data = Import[FileNameJoin[{root, "docs", "notes", "data", "OEISCorpusV2Hero.json.gz"}], "RawJSON"];
 If[! AssociationQ[data], fail["cannot read the corpus record"]];
 gallery = Association[#ID -> # & /@ data["Gallery"]];
@@ -19,7 +22,7 @@ muted = GrayLevel[0.45];
 hair = GrayLevel[0.85];
 blue = RGBColor["#2a78d6"];
 (* the colors RecursorProgramTree gives the four kinds of syntax node *)
-families = <|"Loop" -> RGBColor["#2a78d6"], "Arithmetic" -> RGBColor["#eb6834"], "Choice" -> RGBColor["#1baf7a"], "Atom" -> RGBColor["#eda100"]|>;
+families = <|"Loop" -> StandardBlue, "Arithmetic" -> StandardOrange, "Choice" -> StandardGreen, "Atom" -> StandardYellow|>;
 familyNames = <|"Loop" -> "loops", "Arithmetic" -> "arithmetic", "Choice" -> "choice and binding", "Atom" -> "inputs and constants"|>;
 familyMembers = <|"Loop" -> "Rec, Iter, CoRec, WhileLoop", "Arithmetic" -> "Succ, Pred, Half, Add, Mul, Monus, Quot, Rem",
 	"Choice" -> "Ifz, Let, CGet", "Atom" -> "Var, Acc, Idx, 0, 1, 2, \[Ellipsis]"|>;
@@ -27,7 +30,8 @@ styled[s_, size_, color_ : ink, weight_ : Plain] := Style[s, FontFamily -> font,
 grouped[n_Integer] := ToString[NumberForm[n, DigitBlock -> 3, NumberSeparator -> ","]];
 legend[detail_ : False, size_ : 11] := Row[Riffle[KeyValueMap[Function[{key, color}, Row[{
 	Graphics[{color, Disk[]}, ImageSize -> size - 1, BaselinePosition -> Scaled[0.1]], " ", styled[familyNames[key], size],
-	If[detail, styled["  " <> familyMembers[key], size, muted], Nothing]}]], families], Spacer[24]]];
+	If[detail, styled["  " <> familyMembers[key], size, muted], Nothing]
+}]], families], Spacer[24]]];
 note[text_, width_, size_ : 10.5] := Pane[Style[text, FontFamily -> font, FontSize -> size, FontColor -> muted, TextAlignment -> Center], {width, Automatic}, Alignment -> Center];
 framed[g_] := Framed[g, FrameStyle -> hair, RoundingRadius -> 6, FrameMargins -> 6, Background -> White];
 tileSize = {360, 236};
@@ -35,10 +39,10 @@ tile[label_, text_, drawing_] := Column[{framed[drawing], styled[label, 14, ink,
 	Pane[styled[text, 10.5, muted], {First[tileSize] + 12, Automatic}]}, Alignment -> Left, Spacings -> 0.35];
 board[tiles_List, columns_Integer] := Grid[Partition[tiles, UpTo[columns]], Spacings -> {1.8, 1.5}, Alignment -> {Left, Top}];
 (* a raster drawn at two pixels per point, the export resolution *)
-halfSize[image_] := Image[image, ImageSize -> ImageDimensions[image]/2];
+halfSize[image_] := Image[image, ImageSize -> ImageDimensions[image] / 2];
 (* another drawing, scaled to fit a box *)
 fit[expr_, {w_, h_}] := Module[{image = ImageCrop[Rasterize[expr, LightDark -> "Light", ImageResolution -> 288, Background -> White]], scale},
-	scale = Min[2 w/First[ImageDimensions[image]], 2 h/Last[ImageDimensions[image]]];
+	scale = Min[2 w / First[ImageDimensions[image]], 2 h / Last[ImageDimensions[image]]];
 	Pane[halfSize[ImageResize[image, Scaled[scale]]], {w, h}, Alignment -> Center]
 ];
 tickStyle = Directive[FontFamily -> font, FontSize -> 8.5, FontColor -> muted];
@@ -58,9 +62,15 @@ family[e_] := Switch[Head[e], Rec | Iter | CoRec | WhileLoop, "Loop", Ifz | Let 
 treeLayout[expr_, width_] := Module[{nodes = {}, edges = {}, measure, place},
 	measure[e_] := measure[e] = Max[width[e], Total[measure /@ children[e]]];
 	place[e_, left_, depth_] := Module[{kids = children[e], offset, points, x},
-		offset = left + (measure[e] - Total[measure /@ kids])/2;
-		points = Table[With[{p = place[kid, offset, depth + 1]}, offset += measure[kid]; p], {kid, kids}];
-		x = If[kids === {}, left + measure[e]/2, (points[[1, 1]] + points[[-1, 1]])/2];
+		offset = left + (measure[e] - Total[measure /@ kids]) / 2;
+		points = Table[
+			With[{p = place[kid, offset, depth + 1]},
+				offset += measure[kid];
+				p
+			],
+			{kid, kids}
+		];
+		x = If[kids === {}, left + measure[e] / 2, (points[[1, 1]] + points[[-1, 1]]) / 2];
 		AppendTo[nodes, {{x, -depth}, e}];
 		Scan[AppendTo[edges, {{x, -depth}, #}] &, points];
 		{x, -depth}
@@ -74,15 +84,16 @@ treeBox[expr_, size_] := Pane[fit[RecursorProgramTree[expr], size - {12, 12}], s
 
 (* The same tree as dots, for many programs side by side. *)
 glyphTree[expr_, {w_, h_}] := Module[{layout = treeLayout[expr, 1 &], sx, sy, r, x0, y0, point},
-	sx = Min[9, (w - 6)/layout["Width"]];
+	sx = Min[9, (w - 6) / layout["Width"]];
 	r = Min[3.2, 0.4 sx];
-	sy = If[layout["Depth"] == 0, 0, Min[11.5, (h - 2 r - 2)/layout["Depth"]]];
-	x0 = (w - sx layout["Width"])/2;
-	y0 = h - r - 1 - (h - 2 r - 2 - sy layout["Depth"])/2;
+	sy = If[layout["Depth"] == 0, 0, Min[11.5, (h - 2 r - 2) / layout["Depth"]]];
+	x0 = (w - sx layout["Width"]) / 2;
+	y0 = h - r - 1 - (h - 2 r - 2 - sy layout["Depth"]) / 2;
 	point[{x_, y_}] := {x0 + sx x, y0 + sy y};
 	Graphics[{
 		{GrayLevel[0.62], AbsoluteThickness[0.6], Line[point /@ #] & /@ layout["Edges"]},
-		{EdgeForm[Directive[White, AbsoluteThickness[0.4]]], {families[family[#[[2]]]], Disk[point[#[[1]]], r]} & /@ layout["Nodes"]}},
+		{EdgeForm[Directive[White, AbsoluteThickness[0.4]]], {families[family[#[[2]]]], Disk[point[#[[1]]], r]} & /@ layout["Nodes"]}
+	},
 		PlotRange -> {{0, w}, {0, h}}, ImageSize -> {w, h}, PlotRangePadding -> None, ImagePadding -> None]
 ];
 
@@ -115,13 +126,16 @@ evaluationPlot[size_] := Module[{values = Table[EvaluateRecursor[RecursorExample
 ];
 
 (* One seeded evolution run and the ancestors of the first program that matches every example. *)
-evolution[] := evolution[] = Module[{examples = Table[{n, n (n + 1)/2}, {n, 0, 7}], result, records, best, seen = {}, frontier},
+evolution[] := evolution[] = Module[{examples = Table[{n, n (n + 1) / 2}, {n, 0, 7}], result, records, best, seen = {}, frontier},
 	result = EvolveRecursor[examples, "RandomSeed" -> 6, "IncludeWhile" -> False];
 	If[! TrueQ[result["Solved"]], fail["the evolution run did not solve its target"]];
 	records = Association[#ID -> # & /@ result["Genealogy"]];
 	best = First[SortBy[Select[result["Genealogy"], #Score === result["Fitness"] &], {#Generation, #ID} &]];
 	frontier = {best["ID"]};
-	While[frontier =!= {}, seen = Union[seen, frontier]; frontier = Complement[Union @@ (records[#]["Parents"] & /@ frontier), seen]];
+	While[frontier =!= {},
+		seen = Union[seen, frontier];
+		frontier = Complement[Union @@ (records[#]["Parents"] & /@ frontier), seen]
+	];
 	<|"Result" -> result, "Best" -> best, "Ancestors" -> (records /@ seen), "Records" -> records, "Examples" -> Length[examples]|>
 ];
 lineage[{w_, h_}] := Module[{run = evolution[], nodes, last, childrenOf, byGeneration, y = <||>, ordered, dx, dy, point, ramp, base = 20},
@@ -132,18 +146,19 @@ lineage[{w_, h_}] := Module[{run = evolution[], nodes, last, childrenOf, byGener
 	y[run["Best"]["ID"]] = 0.;
 	(* later generations first: a program sits near the mean of its descendants *)
 	Do[ordered = SortBy[Lookup[byGeneration, g, {}], {Mean[Lookup[y, Lookup[childrenOf, #ID, {}], 0.]], #ID} &];
-		MapIndexed[(y[#1["ID"]] = First[#2] - (Length[ordered] + 1)/2.) &, ordered], {g, last - 1, 0, -1}];
-	dx = (w - 36)/last;
-	dy = Min[(h - base - 16)/(Max[Length /@ byGeneration] + 1), 12];
-	point[id_] := {18 + dx run["Records"][id]["Generation"], base + (h - base)/2 + dy y[id]};
-	ramp[score_] := Blend[{RGBColor["#cde2fb"], RGBColor["#2a78d6"], RGBColor["#0d366b"]}, score/run["Examples"]];
+		MapIndexed[(y[#1["ID"]] = First[#2] - (Length[ordered] + 1) / 2.) &, ordered], {g, last - 1, 0, -1}];
+	dx = (w - 36) / last;
+	dy = Min[(h - base - 16) / (Max[Length /@ byGeneration] + 1), 12];
+	point[id_] := {18 + dx run["Records"][id]["Generation"], base + (h - base) / 2 + dy y[id]};
+	ramp[score_] := Blend[{RGBColor["#cde2fb"], RGBColor["#2a78d6"], RGBColor["#0d366b"]}, score / run["Examples"]];
 	Graphics[{
 		{GrayLevel[0.55], Opacity[0.55], AbsoluteThickness[0.7], Function[r, Line[{point[#], point[r["ID"]]}] & /@ r["Parents"]] /@ nodes},
 		{EdgeForm[Directive[White, AbsoluteThickness[0.8]]], {ramp[#Score], Disk[point[#ID], 3.5]} & /@ SortBy[nodes, #Score &]},
 		{GrayLevel[0.75], AbsoluteThickness[1], Line[{{8, base - 4}, {w - 8, base - 4}}]},
 		Text[styled["generation 0", 8.5, muted], {18, base - 12}, {-0.6, 0}], Text[styled[ToString[last], 8.5, muted], {w - 18, base - 12}],
 		{GrayLevel[0.6], AbsoluteThickness[0.7], Line[{point[run["Best"]["ID"]] + {0, 6}, point[run["Best"]["ID"]] + {0, 40}}]},
-		Text[styled[FormatRecursor[run["Best"]["Program"]], 9.5], point[run["Best"]["ID"]] + {4, 48}, {1, 0}]},
+		Text[styled[FormatRecursor[run["Best"]["Program"]], 9.5], point[run["Best"]["ID"]] + {4, 48}, {1, 0}]
+	},
 		PlotRange -> {{0, w}, {0, h}}, ImageSize -> {w, h}, PlotRangePadding -> None, ImagePadding -> None]
 ];
 
@@ -158,7 +173,8 @@ swatch[color_, text_, count_, size_ : 12] := Row[{Graphics[{color, Rectangle[{0,
 mapLegend[size_ : 12] := Row[Riffle[{
 	swatch[RGBColor["#184f95"], "a program reproduces twenty terms and every later one", grouped[validated], size],
 	swatch[RGBColor["#86b6ef"], "a program reproduces the first twenty terms", grouped[represented - validated] <> " more", size],
-	swatch[RGBColor["#e7e6e1"], "no program found", grouped[data["Eligible"] - represented], size]}, Spacer[26]]];
+	swatch[RGBColor["#e7e6e1"], "no program found", grouped[data["Eligible"] - represented], size]
+}, Spacer[26]]];
 
 (* ==================== the five designs ==================== *)
 
@@ -184,24 +200,37 @@ design[1] := Module[{catalan = RecursorExamples["Catalan"], digitSum = RecursorE
 famous = {{"A000040", "Primes"}, {"A000045", "Fibonacci numbers"}, {"A000108", "Catalan numbers"},
 	{"A000005", "Number of divisors"}, {"A010060", "Thue\[Dash]Morse sequence"}, {"A000166", "Derangements"}};
 termsLine[terms_List, limit_Integer] := Module[{line = ""},
-	Do[If[StringLength[line] + StringLength[term] + 2 > limit, Break[]]; line = line <> term <> ", ", {term, terms}];
-	line <> "\[Ellipsis]"];
+	Do[
+		If[StringLength[line] + StringLength[term] + 2 > limit, Break[]];
+		line = line <> term <> ", ",
+		{term, terms}
+	];
+	line <> "\[Ellipsis]"
+];
 sequenceTile[{id_, title_}] := framed[Column[{
 	Row[{styled[title, 13.5, ink, Bold], styled["   " <> id, 10, muted]}],
 	styled[termsLine[gallery[id]["Terms"], 56], 10.5, muted],
-	treeBox[program[id], {First[tileSize], 258}]}, Alignment -> Left, Spacings -> 0.3]];
+	treeBox[program[id], {First[tileSize], 258}]
+}, Alignment -> Left, Spacings -> 0.3]];
 design[2] := (
 	If[! AllTrue[famous[[All, 1]], gallery[#]["Track"] === "p20" &], fail["a shown program is not from the twenty-term protocol"]];
 	Column[{board[sequenceTile /@ famous, 3], legend[],
 		note["Each program was found by search from the first twenty terms of its OEIS sequence and reproduces every later recorded term.", 900]},
-		Alignment -> Center, Spacings -> 1.1]);
+		Alignment -> Center, Spacings -> 1.1]
+);
 
 (* 3. The whole experiment in one picture. *)
 design[3] := Column[{
 	halfSize[ImageResize[mapImage, Scaled[3], Resampling -> "Nearest"]],
 	mapLegend[],
-	note["Each cell is one of the " <> grouped[data["Eligible"]] <> " eligible OEIS sequences, placed in A-number order along a space-filling curve. " <>
-		"Programs were found by search from the first twenty terms.", 900]},
+	note[
+		StringJoin[
+			"Each cell is one of the " <> grouped[data["Eligible"]] <> " eligible OEIS sequences, placed in A-number order along a space-filling curve. ",
+			"Programs were found by search from the first twenty terms."
+		],
+		900
+	]
+},
 	Alignment -> Center, Spacings -> 1.1];
 
 (* 4. One sequence through the paclet: terms, program, lambda term, further terms. *)
@@ -209,7 +238,9 @@ design[4] := Module[{found = synthesis[], size = {352, 250}, header, terms, arro
 	header[function_, text_] := Row[{styled[function, 12.5, ink, Bold], styled["  " <> text, 10.5, muted]}];
 	terms = Graphics[Table[With[{n = 4 r + c}, {
 			Text[styled[ToString[found["Given"][[n + 1]]], 32], {c, -r + 0.12}],
-			Text[styled[IntegerString[n, 2, 4], 9.5, muted], {c, -r - 0.33}]}], {r, 0, 3}, {c, 0, 3}],
+			Text[styled[IntegerString[n, 2, 4], 9.5, muted], {c, -r - 0.33}]
+	}
+	], {r, 0, 3}, {c, 0, 3}],
 		PlotRange -> {{-0.75, 3.75}, {-3.62, 0.62}}, ImageSize -> size, AspectRatio -> Full, PlotRangePadding -> None, ImagePadding -> None];
 	arrow = Graphics[{GrayLevel[0.55], AbsoluteThickness[1.6], Arrowheads[0.4], Arrow[{{0, 0}, {1, 0}}]}, ImageSize -> {30, 16}, PlotRange -> {{-0.1, 1.1}, {-0.3, 0.3}}];
 	Column[{
@@ -218,10 +249,12 @@ design[4] := Module[{found = synthesis[], size = {352, 250}, header, terms, arro
 				header["SynthesizeRecursor", "finds a " <> ToString[RecursorNodeCount[found["Program"]]] <> "-node program"], "",
 				header["CompileRecursor", "gives a closed lambda term"]},
 			{framed[terms], arrow, framed[treeBox[found["Program"], size]], arrow,
-				framed[Pane[fit[LambdaDiagram[CompileRecursor[found["Program"]]], size - {20, 20}], size, Alignment -> Center]]}},
+				framed[Pane[fit[LambdaDiagram[CompileRecursor[found["Program"]]], size - {20, 20}], size, Alignment -> Center]]}
+		},
 			Alignment -> {Left, Center}, Spacings -> {0.7, 0.5}],
 		Column[{header["EvaluateRecursor", "continues the sequence: 240 further terms, each equal to the true count"],
-			framed[predictionPlot[{3 First[size] + 2 44 + 37, 176}, 256, 3.4]]}, Alignment -> Left, Spacings -> 0.5]},
+			framed[predictionPlot[{3 First[size] + 2 44 + 37, 176}, 256, 3.4]]}, Alignment -> Left, Spacings -> 0.5]
+	},
 		Alignment -> Left, Spacings -> 1.3]
 ];
 
@@ -248,10 +281,17 @@ design[5] := Module[{ids = Keys[gallery], columns = 13, rows = 5, cell, cells, m
 	If[Length[slots] < Length[ids], fail["the forest has too few cells"]];
 	grid = ConstantArray["", {rows, columns}];
 	MapThread[(grid[[Sequence @@ #1]] = cell[#2]) &, {Take[slots, Length[ids]], Sort[ids]}];
-	grid[[3, 6]] = Item[mark, Alignment -> {Center, Center}]; grid[[3, 7]] = SpanFromLeft; grid[[3, 8]] = SpanFromLeft;
+	grid[[3, 6]] = Item[mark, Alignment -> {Center, Center}];
+	grid[[3, 7]] = SpanFromLeft;
+	grid[[3, 8]] = SpanFromLeft;
 	Column[{Grid[grid, Spacings -> {0.25, 1.1}, Alignment -> {Center, Top}], legend[True, 10.5],
-		note["The " <> ToString[Length[ids]] <> " core sequences of the OEIS snapshot with a program that reproduces every recorded term.\n" <>
-			"Each program was found by search from the first 8 or 20 terms; each dot is a node of its syntax tree.", 900]},
+		note[
+			StringJoin[
+				"The " <> ToString[Length[ids]] <> " core sequences of the OEIS snapshot with a program that reproduces every recorded term.\n",
+				"Each program was found by search from the first 8 or 20 terms; each dot is a node of its syntax tree."
+			],
+			900
+		]},
 		Alignment -> Center, Spacings -> 1.1]
 ];
 

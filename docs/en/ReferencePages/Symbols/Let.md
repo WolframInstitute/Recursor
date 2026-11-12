@@ -67,7 +67,7 @@ EvaluateRecursor[Rec[Var, Const[0], Add[Acc, Let[Idx, Mul[Var, Var]]]], 5]
 Add the divisor counts of the numbers below the input:
 
 ```wl
-ListLinePlot[Table[EvaluateRecursor[Rec[Var, Const[0], Add[Acc, Let[Idx, RecursorExamples["DivisorCount"]]]], n], {n, 0, 40}], DataRange -> {0, 40}, AxesLabel -> {"Input", "Sum of divisor counts"}]
+ListLinePlot[Table[EvaluateRecursor[Rec[Var, Const[0], Add[Acc, Let[Idx, RecursorExamples["DivisorCount"]]]], n], {n, 0, 40}], DataRange -> {0, 40}, Frame -> True, FrameLabel -> {"Input", "Sum of divisor counts"}]
 ```
 
 ---
@@ -75,7 +75,7 @@ ListLinePlot[Table[EvaluateRecursor[Rec[Var, Const[0], Add[Acc, Let[Idx, Recurso
 Search for primes by applying a divisor test to each candidate:
 
 ```wl
-ListPlot[Table[EvaluateRecursor[RecursorExamples["Prime"], n], {n, 0, 30}], DataRange -> {0, 30}, AxesLabel -> {"Input", "Prime"}]
+ListPlot[Table[EvaluateRecursor[RecursorExamples["Prime"], n], {n, 0, 30}], DataRange -> {0, 30}, Frame -> True, FrameLabel -> {"Input", "Prime"}]
 ```
 
 ## Properties and Relations

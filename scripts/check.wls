@@ -6,11 +6,21 @@ paclet = FileNameJoin[{repository, name}];
 context = "WolframInstitute`" <> name <> "`";
 SetDirectory[repository];
 PacletDirectoryLoad[paclet];
-loaded = Check[Needs[context]; True, False];
-If[! loaded || ! MemberQ[$Packages, context], Print["The paclet did not load cleanly."]; Exit[1]];
+loaded = Check[
+	Needs[context];
+	True,
+	False
+];
+If[! loaded || ! MemberQ[$Packages, context],
+	Print["The paclet did not load cleanly."];
+	Exit[1]
+];
 If[MemberQ[Rest[$ScriptCommandLine], "proofs"],
 	result = Symbol[context <> "CheckRecursorProofs"][];
-	If[! AssociationQ[result], Print[InputForm[result]]; Exit[1]];
+	If[! AssociationQ[result],
+		Print[InputForm[result]];
+		Exit[1]
+	];
 	If[! DirectoryQ["build"], CreateDirectory["build"]];
 	Put[result, "build/ProofReport.wl"];
 	CopyFile[FileNameJoin[{result["Directory"], "verification.log"}], "build/verification.log", OverwriteTarget -> True];
@@ -19,7 +29,15 @@ If[MemberQ[Rest[$ScriptCommandLine], "proofs"],
 	Exit[0]
 ];
 files = Join[FileNames["*.wl", FileNameJoin[{paclet, "Kernel"}], Infinity], FileNames["*.wlt", FileNameJoin[{paclet, "Tests"}], Infinity]];
-syntax = AllTrue[files, Function[file, Check[ReadList[file, Hold[Expression]]; True, Print["Syntax: ", file]; False]]];
+syntax = AllTrue[files, Function[file,
+	Check[
+		ReadList[file, Hold[Expression]];
+		True,
+
+		Print["Syntax: ", file];
+		False
+	]
+]];
 symbols = Select[
 	If[StringContainsQ[#, "`"], #, context <> #] & /@ Names[context <> "*"],
 	StringCount[#, "`"] === StringCount[context, "`"] &
@@ -27,7 +45,8 @@ symbols = Select[
 documented = AllTrue[symbols, Function[symbol,
 	With[{short = Last[StringSplit[symbol, "`"]]},
 		If[FileExistsQ[FileNameJoin[{repository, "docs", "en", "ReferencePages", "Symbols", short <> ".md"}]], True,
-			Print["Missing reference page: ", short]; False
+			Print["Missing reference page: ", short];
+			False
 		]
 	]
 ]];

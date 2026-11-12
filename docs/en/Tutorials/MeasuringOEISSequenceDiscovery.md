@@ -68,7 +68,7 @@ tail while failing on the training prefix.
 Compare the fractions of runs meeting these two criteria:
 
 ```wl
-BarChart[Table[100 {Count[Lookup[group, "TrainingExact"], True], Count[Map[#1["TrainingExact"] && #1["TestExact"] &, group], True]}/Length[group], {group, Values[groups]}], ChartLabels -> {Keys[groups], None}, ChartLegends -> {"Training fit", "Training and test fit"}, AxesLabel -> {None, "Runs (%)"}]
+BarChart[Table[100 {Count[Lookup[group, "TrainingExact"], True], Count[Map[#1["TrainingExact"] && #1["TestExact"] &, group], True]}/Length[group], {group, Values[groups]}], ChartLabels -> {Keys[groups], None}, ChartLegends -> {"Training fit", "Training and test fit"}, Frame -> True, FrameLabel -> {None, "Runs (%)"}]
 ```
 
 The recorded results are finite observations under this search budget. Exact
@@ -92,7 +92,7 @@ trainingLoss = Map[1 - Mean[Lookup[#, "FitnessHistory"]]/8 &, groups];
 Plot all 20 generations, including the initial population at generation zero:
 
 ```wl
-ListLinePlot[Values[trainingLoss], DataRange -> {0, 20}, PlotLegends -> Keys[trainingLoss], AxesLabel -> {"Generation", "Training mismatch fraction"}, PlotRange -> {0, 1}]
+ListLinePlot[Values[trainingLoss], DataRange -> {0, 20}, PlotLegends -> Keys[trainingLoss], Frame -> True, FrameLabel -> {"Generation", "Training mismatch fraction"}, PlotRange -> {0, 1}]
 ```
 
 Each run has population 24, two elites, tournament size 3, crossover
@@ -119,7 +119,7 @@ Compare the distributions of the final programs' test agreement, normalizing
 within cohorts of different sizes:
 
 ```wl
-Histogram[Map[Lookup[#, "TestMatches"]/12 &, Values[groups]], {-1/24, 25/24, 1/12}, "Probability", ChartLegends -> Keys[groups], AxesLabel -> {"Held-out agreement fraction", "Fraction of runs"}]
+Histogram[Map[Lookup[#, "TestMatches"]/12 &, Values[groups]], {-1/24, 25/24, 1/12}, "Probability", ChartLegends -> Keys[groups], Frame -> True, FrameLabel -> {"Held-out agreement fraction", "Fraction of runs"}]
 ```
 
 Every test evaluation retains its input, expected term, returned integer or
@@ -135,7 +135,7 @@ testStatuses = Counts[Lookup[Flatten[Lookup[recorded["Trials"], "TestChecks"], 1
 Show those diagnostic counts:
 
 ```wl
-BarChart[Values[testStatuses], ChartLabels -> Keys[testStatuses], AxesLabel -> {None, "Test evaluations"}]
+BarChart[Values[testStatuses], ChartLabels -> Keys[testStatuses], Frame -> True, FrameLabel -> {None, "Test evaluations"}]
 ```
 
 For a structural illustration, select the recorded run with the most training
@@ -199,18 +199,20 @@ runTrial[entry_, seed_] := Module[{examples, measurement, result, training, held
 		timing = AbsoluteTiming[EvolveRecursor[Take[examples, protocol["TrainingTerms"]], Sequence @@ searchOptions, "RandomSeed" -> seed]]
 	}, messages = ToString[#, InputForm] & /@ $MessageList; timing]];
 	result = Last[measurement];
-	If[! AssociationQ[result], Return[<|"ID" -> entry["ID"], "Seed" -> seed, "Status" -> "SearchFailure", "Result" -> ToString[result, InputForm]|>]];
-	training = checkExamples[result["Program"], Take[examples, protocol["TrainingTerms"]]];
-	heldout = checkExamples[result["Program"], Drop[examples, protocol["TrainingTerms"]]];
-	programs = Lookup[result["Genealogy"], "Program"];
-	<|"ID" -> entry["ID"], "Cohort" -> entry["Cohort"], "Seed" -> seed, "Status" -> "Completed",
-		"Program" -> FormatRecursor[result["Program"]], "Nodes" -> RecursorNodeCount[result["Program"]],
-		"SearchSeconds" -> First[measurement], "CandidateProposals" -> Length[programs],
-		"DistinctCandidates" -> Length[DeleteDuplicates[programs]], "Generations" -> result["Generations"],
-		"FitnessHistory" -> result["FitnessHistory"], "SearchFitness" -> result["Fitness"], "Messages" -> messages,
-		"TrainingMatches" -> Count[Lookup[training, "Match"], True], "TestMatches" -> Count[Lookup[heldout, "Match"], True],
-		"TrainingExact" -> AllTrue[training, TrueQ[#["Match"]] &], "TestExact" -> AllTrue[heldout, TrueQ[#["Match"]] &],
-		"TrainingChecks" -> training, "TestChecks" -> heldout|>
+	If[! AssociationQ[result],
+		<|"ID" -> entry["ID"], "Seed" -> seed, "Status" -> "SearchFailure", "Result" -> ToString[result, InputForm]|>,
+		training = checkExamples[result["Program"], Take[examples, protocol["TrainingTerms"]]];
+		heldout = checkExamples[result["Program"], Drop[examples, protocol["TrainingTerms"]]];
+		programs = Lookup[result["Genealogy"], "Program"];
+		<|"ID" -> entry["ID"], "Cohort" -> entry["Cohort"], "Seed" -> seed, "Status" -> "Completed",
+			"Program" -> FormatRecursor[result["Program"]], "Nodes" -> RecursorNodeCount[result["Program"]],
+			"SearchSeconds" -> First[measurement], "CandidateProposals" -> Length[programs],
+			"DistinctCandidates" -> Length[DeleteDuplicates[programs]], "Generations" -> result["Generations"],
+			"FitnessHistory" -> result["FitnessHistory"], "SearchFitness" -> result["Fitness"], "Messages" -> messages,
+			"TrainingMatches" -> Count[Lookup[training, "Match"], True], "TestMatches" -> Count[Lookup[heldout, "Match"], True],
+			"TrainingExact" -> AllTrue[training, TrueQ[#["Match"]] &], "TestExact" -> AllTrue[heldout, TrueQ[#["Match"]] &],
+			"TrainingChecks" -> training, "TestChecks" -> heldout|>
+	]
 ]
 ```
 

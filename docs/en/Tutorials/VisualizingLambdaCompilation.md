@@ -62,7 +62,7 @@ visits or its call-by-need machine transitions.
 Plot expression size throughout the trajectory:
 
 ```wl
-ListLinePlot[LeafCount /@ reductionPath, DataRange -> {0, Length[reductionPath] - 1}, AxesLabel -> {"Beta reduction", "Term leaves"}, PlotRange -> All]
+ListLinePlot[LeafCount /@ reductionPath, DataRange -> {0, Length[reductionPath] - 1}, Frame -> True, FrameLabel -> {"Beta reduction", "Term leaves"}, PlotRange -> All]
 ```
 
 The term can grow or shrink as substitution copies or removes subexpressions.

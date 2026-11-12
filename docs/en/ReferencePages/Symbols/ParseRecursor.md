@@ -67,5 +67,5 @@ RecursorProgramTree[ParseRecursor["WhileLoop[Var,Acc,Pred[Acc]]"]]
 Compute behavior directly from source text:
 
 ```wl
-ListLinePlot[Table[EvaluateRecursor[ParseRecursor["Rem[Var,Const[5]]"], n], {n, 0, 24}], DataRange -> {0, 24}, AxesLabel -> {"Input", "Output"}, PlotRange -> All ]
+ListLinePlot[Table[EvaluateRecursor[ParseRecursor["Rem[Var,Const[5]]"], n], {n, 0, 24}], DataRange -> {0, 24}, Frame -> True, FrameLabel -> {"Input", "Output"}, PlotRange -> All ]
 ```

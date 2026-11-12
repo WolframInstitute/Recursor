@@ -1,10 +1,18 @@
 WOLFRAMSCRIPT ?= wolframscript
 
 .DEFAULT_GOAL := check
-.PHONY: check check-proofs test notebooks hero check-publish publish all
+.PHONY: check check-proofs test notebooks hero check-publish publish style style-fix all
 
 check:
 	$(WOLFRAMSCRIPT) -file scripts/check.wls
+	$(WOLFRAMSCRIPT) -file scripts/style.wls check
+
+# Check the code against docs/coding-guides, or FILES="..."; style-fix applies the mechanical fixes.
+style:
+	$(WOLFRAMSCRIPT) -file scripts/style.wls check $(FILES)
+
+style-fix:
+	$(WOLFRAMSCRIPT) -file scripts/style.wls fix $(FILES)
 
 check-proofs:
 	$(WOLFRAMSCRIPT) -file scripts/check.wls proofs

@@ -34,7 +34,7 @@ RecursorProgramTree[Last[mutants = NestList[MutateRecursor[#, 2, "IncludeWhile" 
 Plot syntax size along the mutation trajectory:
 
 ```wl
-ListLinePlot[RecursorNodeCount /@ mutants, DataRange->{0,20}, AxesLabel->{"Mutation","Syntax nodes"}, PlotRange->All]
+ListLinePlot[RecursorNodeCount /@ mutants, DataRange->{0,20}, Frame->True, FrameLabel->{"Mutation","Syntax nodes"}, PlotRange->All]
 ```
 
 For inputs zero through six, show log(1+output). An unfinished evaluation is
@@ -54,13 +54,13 @@ StopOnSolve is disabled so every fitness trajectory spans the same window.
 Compute the six runs, using seeds 101 through 106, and compare final best scores:
 
 ```wl
-BarChart[Lookup[runs = Table[EvolveRecursor[Table[{n, n^2}, {n, 0, 4}], "PopulationSize" -> 12, "MaxGenerations" -> 8, "MaxNodes" -> 30, "InitialDepth" -> 2, "MutationDepth" -> 2, "IncludeWhile" -> False, "MaxSteps" -> 2000, "TimeLimit" -> 1, "StopOnSolve" -> False, "RandomSeed" -> seed], {seed, 101, 106}], "Fitness"], ChartLabels -> Range[101, 106], AxesLabel -> {"Seed", "Exact matches"}]
+BarChart[Lookup[runs = Table[EvolveRecursor[Table[{n, n^2}, {n, 0, 4}], "PopulationSize" -> 12, "MaxGenerations" -> 8, "MaxNodes" -> 30, "InitialDepth" -> 2, "MutationDepth" -> 2, "IncludeWhile" -> False, "MaxSteps" -> 2000, "TimeLimit" -> 1, "StopOnSolve" -> False, "RandomSeed" -> seed], {seed, 101, 106}], "Fitness"], ChartLabels -> Range[101, 106], Frame -> True, FrameLabel -> {"Seed", "Exact matches"}]
 ```
 
 Compare best fitness on a shared scale:
 
 ```wl
-ListLinePlot[Lookup[runs,"FitnessHistory"], DataRange->{0,8}, PlotRange->{0,5}, PlotLegends->Range[101,106], AxesLabel->{"Generation","Exact matches"}]
+ListLinePlot[Lookup[runs,"FitnessHistory"], DataRange->{0,8}, PlotRange->{0,5}, PlotLegends->Range[101,106], Frame->True, FrameLabel->{"Generation","Exact matches"}]
 ```
 
 Equal scores need not mean equal programs. Inspect the best syntax tree from
@@ -91,7 +91,7 @@ Evolve the Lucas numbers from eight terms with each method and the same seed:
 
 ```wl
 searches = AssociationMap[EvolveRecursor[Table[{n, LucasL[n]}, {n, 0, 7}], Method -> #, "StopOnSolve" -> False, "RandomSeed" -> 5] &, {"Tournament", "Guided"}];
-ListStepPlot[Lookup[Values[searches], "FitnessHistory"], DataRange -> {0, 30}, PlotLegends -> Keys[searches], AxesLabel -> {"Generation", "Exact matches"}]
+ListStepPlot[Lookup[Values[searches], "FitnessHistory"], DataRange -> {0, 30}, PlotLegends -> Keys[searches], Frame -> True, FrameLabel -> {"Generation", "Exact matches"}]
 ```
 
 The guided search returns a recurrence with its two initial terms:

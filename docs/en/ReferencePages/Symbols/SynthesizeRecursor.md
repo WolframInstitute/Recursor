@@ -65,7 +65,7 @@ FormatRecursor[SynthesizeRecursor[Fibonacci[Range[0, 19]]]["Program"]]
 Compare predicted later terms with factorials:
 
 ```wl
-ListLogPlot[{Table[EvaluateRecursor[SynthesizeRecursor[Range[0, 9]!]["Program"], n], {n, 0, 14}], Range[0, 14]!}, DataRange -> {0, 14}, PlotLegends -> {"Program", "Factorial"}, AxesLabel -> {"Input", "Output"}]
+ListLogPlot[{Table[EvaluateRecursor[SynthesizeRecursor[Range[0, 9]!]["Program"], n], {n, 0, 14}], Range[0, 14]!}, DataRange -> {0, 14}, PlotLegends -> {"Program", "Factorial"}, Frame -> True, FrameLabel -> {"Input", "Output"}]
 ```
 
 ## Scope
@@ -189,7 +189,7 @@ RecursorProgramTree[SynthesizeRecursor[DigitCount[Range[0, 15], 2, 1]]["Program"
 See the evidence grow with the number of terms:
 
 ```wl
-ListLinePlot[Table[{k, SynthesizeRecursor[DigitCount[Range[0, k - 1], 2, 1]]["Evidence"]}, {k, 16, 64, 8}], GridLines -> {None, {24}}, AxesLabel -> {"Terms", "Evidence"}]
+ListLinePlot[Table[{k, SynthesizeRecursor[DigitCount[Range[0, k - 1], 2, 1]]["Evidence"]}, {k, 16, 64, 8}], GridLines -> {None, {24}}, Frame -> True, FrameLabel -> {"Terms", "Evidence"}]
 ```
 
 ## Properties and Relations

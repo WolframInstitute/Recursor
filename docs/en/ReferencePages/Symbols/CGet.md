@@ -48,7 +48,7 @@ RecursorProgramTree[CoRec[Var,Ifz[Idx,Const[0],Succ[CGet[Pred[Idx]]]]]]
 Reuse two earlier Fibonacci values:
 
 ```wl
-ListLinePlot[Table[EvaluateRecursor[RecursorExamples["Fibonacci"], n], {n, 0, 12}], DataRange -> {0, 12}, AxesLabel -> {"Input", "Output"}, PlotRange -> All ]
+ListLinePlot[Table[EvaluateRecursor[RecursorExamples["Fibonacci"], n], {n, 0, 12}], DataRange -> {0, 12}, Frame -> True, FrameLabel -> {"Input", "Output"}, PlotRange -> All ]
 ```
 
 ---

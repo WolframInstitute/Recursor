@@ -48,13 +48,13 @@ training = Table[{n, n + 1}, {n, 0, 4}]
 Compare the three training scores:
 
 ```wl
-BarChart[Values[ScoreRecursor[#, training] & /@ candidates], ChartLabels -> Keys[candidates], AxesLabel -> {None, "Exact matches"}]
+BarChart[Values[ScoreRecursor[#, training] & /@ candidates], ChartLabels -> Keys[candidates], Frame -> True, FrameLabel -> {None, "Exact matches"}]
 ```
 
 All three fit this sample. Evaluate the same proposals through input nine:
 
 ```wl
-ListLinePlot[Table[EvaluateRecursor[p, n], {p, Values[candidates]}, {n, 0, 9}], DataRange -> {0, 9}, PlotLegends -> Keys[candidates], AxesLabel -> {"Input", "Output"}]
+ListLinePlot[Table[EvaluateRecursor[p, n], {p, Values[candidates]}, {n, 0, 9}], DataRange -> {0, 9}, PlotLegends -> Keys[candidates], Frame -> True, FrameLabel -> {"Input", "Output"}]
 ```
 
 The guarded program returns zero after the training range. An evolutionary
@@ -107,7 +107,7 @@ Compare the direct and lambda evaluators on inputs zero through five.
 Agreement places each point on the diagonal:
 
 ```wl
-ListPlot[Table[{EvaluateRecursor[candidates["Successor"], n], EvaluateRecursor[candidates["Successor"], n, Method -> "Lambda"]}, {n, 0, 5}], AxesLabel -> {"Direct result", "Lambda result"}]
+ListPlot[Table[{EvaluateRecursor[candidates["Successor"], n], EvaluateRecursor[candidates["Successor"], n, Method -> "Lambda"]}, {n, 0, 5}], Frame -> True, FrameLabel -> {"Direct result", "Lambda result"}]
 ```
 
 This comparison is a regression check. A compiler-correctness theorem must

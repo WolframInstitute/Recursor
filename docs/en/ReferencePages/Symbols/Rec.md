@@ -48,7 +48,7 @@ RecursorProgramTree[Rec[Var,Const[1],Mul[Succ[Idx],Acc]]]
 Compute factorials:
 
 ```wl
-ListLinePlot[{Table[EvaluateRecursor[RecursorExamples["Factorial"], n], {n, 0, 6}], Factorial[Range[0,6]]}, DataRange -> {0, 6}, PlotLegends -> {"Recursor", "Reference"}, AxesLabel -> {"Input", "Output"}, PlotRange -> All ]
+ListLinePlot[{Table[EvaluateRecursor[RecursorExamples["Factorial"], n], {n, 0, 6}], Factorial[Range[0,6]]}, DataRange -> {0, 6}, PlotLegends -> {"Recursor", "Reference"}, Frame -> True, FrameLabel -> {"Input", "Output"}, PlotRange -> All ]
 ```
 
 ---
@@ -56,5 +56,5 @@ ListLinePlot[{Table[EvaluateRecursor[RecursorExamples["Factorial"], n], {n, 0, 6
 Count multiples to express integer division:
 
 ```wl
-ListLinePlot[Table[EvaluateRecursor[Rec[Var,Const[0],Ifz[Rem[Succ[Idx],Const[3]],Succ[Acc],Acc]], n], {n, 0, 24}], DataRange -> {0, 24}, AxesLabel -> {"Input", "Output"}, PlotRange -> All ]
+ListLinePlot[Table[EvaluateRecursor[Rec[Var,Const[0],Ifz[Rem[Succ[Idx],Const[3]],Succ[Acc],Acc]], n], {n, 0, 24}], DataRange -> {0, 24}, Frame -> True, FrameLabel -> {"Input", "Output"}, PlotRange -> All ]
 ```

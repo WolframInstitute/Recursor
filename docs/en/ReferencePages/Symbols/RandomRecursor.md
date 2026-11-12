@@ -74,7 +74,7 @@ SeedRandom[42]
 Measure sizes in a fixed sample of bounded programs:
 
 ```wl
-Histogram[Table[RecursorNodeCount[RandomRecursor[3,"IncludeWhile"->False]],{40}], AxesLabel->{"Nodes","Programs"} ]
+Histogram[Table[RecursorNodeCount[RandomRecursor[3,"IncludeWhile"->False]],{40}], Frame->True, FrameLabel->{"Nodes","Programs"} ]
 ```
 
 ---
