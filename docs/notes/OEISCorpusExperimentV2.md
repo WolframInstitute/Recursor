@@ -19,7 +19,6 @@ sequences.
 
 The first row is the v1 criterion. Corpus v2 passes it for 7.03% of the corpus,
 22.7 times the v1 count and 14.9 times the straight-line baseline of 1,341.
-The figures are in [the results notebook](../../notebooks/Results-02.nb).
 
 ## What changed
 

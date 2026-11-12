@@ -102,10 +102,10 @@ Run [`CheckRecursorProofs[]`](https://www.wolframcloud.com/obj/wolframinstitute/
 - [Halting and budgets](https://www.wolframcloud.com/obj/wolframinstitute/Recursor/#tutorial/HaltingAndBudgets) — trajectories and finite observation.
 - [Lambda reductions](https://www.wolframcloud.com/obj/wolframinstitute/Recursor/#tutorial/VisualizingLambdaCompilation) — compiled terms and reduction graphs.
 - [Evolutionary experiments](https://www.wolframcloud.com/obj/wolframinstitute/Recursor/#tutorial/EvolutionaryExperiments) — mutation, search and ancestry.
-- [Synthesizing sequence programs](docs/en/Tutorials/SynthesizingSequences.md) — enumeration, recurrences, exact solving and composed loops from terms, tested on terms kept aside. A [working notebook](notebooks/Synthesis-01.nb) runs it on OEIS sequences.
+- [Synthesizing sequence programs](docs/en/Tutorials/SynthesizingSequences.md) — enumeration, recurrences, exact solving and composed loops from terms, tested on terms kept aside.
 - [OEIS benchmark](docs/en/Tutorials/MeasuringOEISSequenceDiscovery.md) — measured fits, training curves and held-out predictions using WolframInstitute/OEIS data.
-- [OEIS corpus experiment v2](docs/notes/OEISCorpusExperimentV2.md) — synthesis over 283,167 sequences, with a [results notebook](notebooks/Results-02.nb).
-- [Synthesis and evolution on OEIS sequences](docs/notes/OEISSynthesisAndEvolution.md) — `SynthesizeRecursor` measured on sequences it was not tuned on, beside evolutionary searches on the same terms. A [working notebook](notebooks/Evolution-01.nb) runs the searches. A [results notebook](notebooks/Results-03.nb) draws the search curves of twelve sequences.
+- [OEIS corpus experiment v2](docs/notes/OEISCorpusExperimentV2.md) — synthesis over 283,167 sequences.
+- [Synthesis and evolution on OEIS sequences](docs/notes/OEISSynthesisAndEvolution.md) — `SynthesizeRecursor` measured on sequences it was not tuned on, beside evolutionary searches on the same terms.
 
 ## Development
 

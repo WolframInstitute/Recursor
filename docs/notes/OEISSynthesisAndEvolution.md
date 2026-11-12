@@ -22,8 +22,6 @@ when the program also reproduces the next twelve. From twenty terms, 248 of
 the 252 programs that `SynthesizeRecursor` solved on 3,000 other sequences
 reproduce every later term on record. Guided evolution is in the paclet as
 `EvolveRecursor[examples, Method -> "Guided"]`.
-[A notebook](../../notebooks/Evolution-01.nb) runs the searches and draws the
-figures; [another](../../notebooks/Synthesis-01.nb) runs the synthesizer.
 
 ## What was asked
 

@@ -2,7 +2,7 @@
 
 **Checkpoint: 6 November 2026, 10:26:05 EAT (07:26:05 UTC).** The workers continued while this fixed interim report was prepared.
 
-[Mathematica notebook](../../notebooks/RecursorOEISMeasurements-01.nb) · [All programs, sequences and WL functions](data/OEISMeasurements9110.json.gz) · [Numerical results](data/OEISMeasurements9110-metrics.json) · [Reproduction archive](data/OEISMeasurements9110-reproduction.zip)
+[All programs, sequences and WL functions](data/OEISMeasurements9110.json.gz) · [Numerical results](data/OEISMeasurements9110-metrics.json) · [Reproduction archive](data/OEISMeasurements9110-reproduction.zip)
 
 ## Results
 
