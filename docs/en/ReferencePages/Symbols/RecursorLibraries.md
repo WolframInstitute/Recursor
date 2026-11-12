@@ -56,8 +56,8 @@ Grid[Prepend[KeyValueMap[{#1, #2["Description"], #2["Status"]} &, RecursorLibrar
 
 ## Possible Issues
 
-An unknown name gives a Failure:
+An unknown name gives a Failure, with the message RecursorLibraries::args:
 
 ```wl
-RecursorLibraries["Unknown"]
+Quiet[RecursorLibraries["Unknown"]]
 ```

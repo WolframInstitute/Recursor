@@ -54,8 +54,8 @@ InstallRecursorLibraries[{"Lambda"}]
 
 ## Possible Issues
 
-Unknown libraries give a Failure:
+Unknown libraries give a Failure, with the message InstallRecursorLibraries::args:
 
 ```wl
-InstallRecursorLibraries[{"Unknown"}]
+Quiet[InstallRecursorLibraries[{"Unknown"}]]
 ```
