@@ -52,25 +52,72 @@ the workflow; the documentation script does not download missing tools.
 
 ## Repository secrets
 
-Configure these repository secrets before pushing the workflow. The commands
-prompt for values; do not place credentials in source files:
+The Wolfram job takes its license from one of two secrets, and publication
+needs the cloud account. The commands prompt for values or read a file git
+ignores; do not place credentials in source files.
+
+### License: a mathpass
+
+`WOLFRAM_MATHPASS_B64` holds a mathpass: a license line for one machine, which
+the kernel knows by its MathID. With it the kernel runs offline, uses no
+service credits and has no shared kernel slots to run out of. In a Linux
+container the MathID comes from the machine-id and the host name, so CI fixes
+both: the machine-id in `.github/actions/setup-recursor` and the host name
+`recursor-ci` in the container options of `ci.yml` and `release.yml`.
+Changing either changes the MathID, and the line then needs a new password.
+To set the license up:
+
+1. Start CI by hand and read the step *Install the license and start a
+   kernel*. It prints the machine name and the MathID of the container, also
+   when no license works yet:
+
+   ```sh
+   gh workflow run ci.yml --ref main
+   ```
+
+2. Have a password issued for that MathID and your activation key. Depending
+   on the license, it comes from user.wolfram.com or from Wolfram's licensing
+   team.
+3. Write the line to `.mathpass`, which git ignores, with tabs between its
+   four parts. Store it base64-encoded, so that the tabs survive:
+
+   ```sh
+   printf 'recursor-ci\t%s\t%s\t%s\n' '<MathID>' '<activation key>' '<password>' > .mathpass
+   base64 < .mathpass | tr -d '\n' | gh secret set WOLFRAM_MATHPASS_B64 --repo WolframInstitute/Recursor
+   ```
+
+4. Run CI again. The same step prints the license type, its expiry and the
+   MathID it runs under.
+
+### License: an on-demand entitlement
+
+Without that secret the job uses the entitlement in
+`WOLFRAMSCRIPT_ENTITLEMENTID`, which is charged to the account's service
+credits:
 
 ```sh
 gh secret set WOLFRAMSCRIPT_ENTITLEMENTID --repo WolframInstitute/Recursor
+```
+
+Use a dedicated Recursor entitlement to keep its kernel allowance separate
+from other projects. If a fresh kernel reports "No valid password found",
+check the entitlement's expiry, active kernel count and service-credit
+balance. Occupied license slots can outlive a stopped runner until their
+leases expire. Repeated CI runs can consume the remaining slots; wait for
+capacity rather than repeatedly retrying. When both secrets are set, the
+mathpass is used and the entitlement is left out.
+
+### Cloud account
+
+```sh
 gh secret set WOLFRAM_CLOUD_USER --repo WolframInstitute/Recursor
 gh secret set WOLFRAM_CLOUD_PASSWORD --repo WolframInstitute/Recursor
 ```
 
-Use a dedicated Recursor entitlement to keep its kernel allowance separate
-from other projects. The entitlement licenses fresh Wolfram kernels. Cloud
-credentials belong to the account authorized to publish the resource. No separate GitHub environment
-is required. Pull requests use read-only tokens and no secrets. Cloud
-credentials are exposed only to the final publishing step.
-
-If a fresh kernel reports "No valid password found", check the entitlement's
-expiry, active kernel count and service-credit balance. Occupied license slots
-can outlive a stopped runner until their leases expire. Repeated CI runs can
-consume the remaining slots; wait for capacity rather than repeatedly retrying.
+Cloud credentials belong to the account authorized to publish the resource.
+No separate GitHub environment is required. Pull requests use read-only
+tokens and no secrets. Cloud credentials are exposed only to the final
+publishing step.
 
 ## Release and publish
 

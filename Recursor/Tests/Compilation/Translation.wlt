@@ -102,3 +102,15 @@ VerificationTest[
 	{TranslateRecursor::args},
 	TestID -> "translaterecursor-invalid-arguments"
 ]
+
+VerificationTest[
+	TranslateRecursor[Rem[Const[3], Half[Rec[Var, Const[1], Acc]]]],
+	Function[n, 3],
+	TestID -> "a-divisor-rewritten-to-zero-gives-no-message"
+]
+
+VerificationTest[
+	Map[TranslateRecursor[Let[Add[CoRec[Var, Idx], Var], Let[Rem[Const[2], Var], CoRec[Const[3], Var]]], Method -> "Literal"], Range[0, 5]],
+	Map[EvaluateRecursor[Let[Add[CoRec[Var, Idx], Var], Let[Rem[Const[2], Var], CoRec[Const[3], Var]]], #] &, Range[0, 5]],
+	TestID -> "a-bound-value-with-a-loop-is-not-captured"
+]

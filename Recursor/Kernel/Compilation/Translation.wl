@@ -42,6 +42,9 @@ key of environment that counts the symbols in use. With no symbol left, it throw
 
 deeper::usage = "deeper[environment, kind] gives environment with one more symbol of the kind in use."
 
+reserving::usage = "reserving[environment, value] gives environment with the accumulators, indices and remembered functions that value \
+uses counted as in use, so that a loop translated later takes other symbols.";
+
 knowing::usage = "knowing[environment, fact] gives environment with fact added to what is known of its symbols."
 
 provedQ::usage = "provedQ[statement, environment] gives True when Simplify proves statement from the facts of environment within a short time, \
@@ -142,6 +145,18 @@ freshSymbol[environment_Association, kind_String, names : {__Rule}] :=
 
 deeper[environment_Association, kind_String] := Append[environment, kind -> environment[kind] + 1]
 
+(* The value of a Let is written wherever its body reads the input, which can be inside a loop of the body. A loop
+   of the value that used a symbol of that loop would be captured there: the pattern of a remembered function
+   inside another with the same index is the clearest case. So the body takes its symbols after those of the value. *)
+reserving[environment_Association, value_?formulaQ] :=
+	Fold[
+		Function[{reserved, kind},
+			Append[reserved, First[kind] -> Max[reserved[First[kind]], Flatten[Position[Keys[Last[kind]], _?(Function[name, !FreeQ[value, name]]), {1}, Heads -> False]]]]
+		],
+		environment,
+		{"Accumulators" -> $accumulatorNames, "Indices" -> $indexNames, "Histories" -> $historyNames}
+	]
+
 knowing[environment_Association, fact_?formulaQ] := Append[environment, "Facts" -> Append[environment["Facts"], fact]]
 
 (* Simplify warns of facts that contradict each other, as they do in a branch that cannot be taken. *)
@@ -176,7 +191,11 @@ translate[Mul[left_, right_], environment_Association] := translate[left, enviro
 translate[Monus[left_, right_], environment_Association] := monusForm[translate[left, environment], translate[right, environment], environment]
 translate[Rem[left_, right_], environment_Association] := remainderForm[translate[left, environment], translate[right, environment], environment]
 translate[Quot[left_, right_], environment_Association] := quotientForm[translate[left, environment], translate[right, environment], environment]
-translate[Let[value_, body_], environment_Association] := translate[body, Append[environment, "Input" -> translate[value, environment]]]
+translate[Let[value_, body_], environment_Association] :=
+	Module[{bound},
+		bound = translate[value, environment];
+		translate[body, reserving[Append[environment, "Input" -> bound], bound]]
+	]
 
 translate[Ifz[condition_, zero_, positive_], environment_Association] :=
 	Module[{test},
@@ -290,6 +309,9 @@ $idioms = {
 	Inactive[Nest][
 		Inactive[Function][accumulator_, step_], start_, times_
 	] /; step =!= 0 && freeOf[Cancel[step / accumulator], accumulator] :> powerForm[start, Cancel[step / accumulator], times],
+	(* a test that a rewrite has decided keeps one branch; the other may hold a division by zero *)
+	Inactive[If][True, kept_, _] :> kept,
+	Inactive[If][False, _, kept_] :> kept,
 	Inactive[Sum][0, _] :> 0,
 	Inactive[Product][1, _] :> 1,
 	(* a term that is zero at index zero starts the sum at one *)
@@ -428,7 +450,12 @@ closedForm[expression_?formulaQ] := Quiet[
 	{Mod::indet, Quotient::indet, Quotient::infy, Power::infy, Power::indet, Infinity::indet}
 ]
 
-rewriteAll[expression_?formulaQ, rules_List] := FixedPoint[Replace[#, rules, {0, Infinity}] &, expression, 12]
+(* A rewrite can turn a divisor into zero inside a branch whose test then fails; that branch is dropped by the
+   rules for If, and the messages of its division are not the caller's. *)
+rewriteAll[expression_?formulaQ, rules_List] := Quiet[
+	FixedPoint[Replace[#, rules, {0, Infinity}] &, expression, 12],
+	{Mod::indet, Quotient::indet, Quotient::infy, Power::infy, Power::indet, Infinity::indet}
+]
 
 (* One-argument functions without inner functions are written with slots. *)
 slotForm[expression_?formulaQ] :=

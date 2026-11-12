@@ -37,7 +37,9 @@ jobs:
     runs-on: ubuntu-24.04
     container:
       image: wolframresearch/wolframengine:15.0@sha256:3ac08d6aaa33e6dccdda38d14cf8a7e5c22cc84d037a1a7562900914a487ef65
-      options: --user root --init
+      # The host name and the machine-id in .github/actions/setup-recursor give the
+      # container the MathID that the mathpass is issued for.
+      options: --user root --init --hostname recursor-ci
     env:
       QT_QPA_PLATFORM: offscreen
     timeout-minutes: 180
@@ -56,7 +58,9 @@ jobs:
       - uses: ./.github/actions/setup-recursor
         with:
           documentation: 'true'
-          entitlement: ${{ secrets.WOLFRAMSCRIPT_ENTITLEMENTID }}
+          mathpass: ${{ secrets.WOLFRAM_MATHPASS_B64 }}
+          # With a mathpass the kernel is licensed offline, and the entitlement is left out.
+          entitlement: ${{ secrets.WOLFRAM_MATHPASS_B64 == '' && secrets.WOLFRAMSCRIPT_ENTITLEMENTID || '' }}
 
       - name: Check sources and run all Wolfram tests
         run: |

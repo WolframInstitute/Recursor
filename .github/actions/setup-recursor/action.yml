@@ -4,37 +4,83 @@ inputs:
   documentation:
     description: Require the pinned PacletPage builder and a working front end.
     default: 'false'
+  mathpass:
+    description: >-
+      A license line (mathpass) for the job container, base64-encoded so that its tabs survive.
+      Empty means the on-demand entitlement.
+    required: false
+    default: ''
   entitlement:
-    description: On-demand license entitlement for the fresh hosted runner.
-    required: true
+    description: On-demand license entitlement, used when no mathpass is given.
+    required: false
+    default: ''
 runs:
   using: composite
   steps:
-    - name: Require the hosted-runner entitlement
+    - name: Check container tools
       shell: bash
-      env:
-        RECURSOR_ENTITLEMENT: ${{ inputs.entitlement }}
-      run: |
-        test -n "$RECURSOR_ENTITLEMENT" || { echo '::error::Set the WOLFRAMSCRIPT_ENTITLEMENTID repository secret; see docs/workflows.md.'; exit 1; }
-        [[ "$RECURSOR_ENTITLEMENT" != *$'\n'* && "$RECURSOR_ENTITLEMENT" != *$'\r'* ]] || { echo '::error::The entitlement ID must be one line.'; exit 1; }
-
-    - name: Check container tools and Wolfram license
-      shell: bash
-      env:
-        RECURSOR_ENTITLEMENT: ${{ inputs.entitlement }}
       run: |
         for tool in git make python3 wolframscript; do
           command -v "$tool" >/dev/null || { echo "::error::Required runner tool is missing: $tool"; exit 1; }
         done
         python3 -c 'import sys; assert sys.version_info >= (3, 12), "Python 3.12 or later is required"'
-        export WOLFRAMSCRIPT_ENTITLEMENTID="$RECURSOR_ENTITLEMENT"
-        printf 'WOLFRAMSCRIPT_ENTITLEMENTID=%s\n' "$WOLFRAMSCRIPT_ENTITLEMENTID" >> "$GITHUB_ENV"
-        echo 'Using the configured on-demand entitlement.'
+
+    - name: Install the license and start a kernel
+      shell: bash
+      env:
+        WOLFRAM_MATHPASS_B64: ${{ inputs.mathpass }}
+        RECURSOR_ENTITLEMENT: ${{ inputs.entitlement }}
+        # A mathpass licenses one machine, which the kernel knows by its MathID. In a Linux
+        # container the MathID comes from the machine-id and the host name, so both are fixed:
+        # the machine-id here and the host name in the job's container options. Changing
+        # either changes the MathID, and the mathpass then needs a new password.
+        WOLFRAM_MACHINE_ID: 311c97ac42db54ecf0c6e2f5a8a4f488
+      run: |
+        # Without a license the kernel names the machine in its activation prompt, which it
+        # prints only to a terminal. The empty lines answer the prompt's questions.
+        show_identity() {
+          prompt="$(printf '\n\n\n\n' | timeout 60 script -qec WolframKernel /dev/null 2>&1 | tr -d '\r' || true)"
+          echo "Machine identity of this container, for a mathpass:"
+          if ! printf '%s\n' "$prompt" | grep -oE '(Machine name|MathID):[[:space:]]*[^[:space:]]+'; then
+            echo "The kernel did not print it. Its output was:"
+            printf '%s\n' "$prompt" | head -n 25
+          fi
+        }
+
+        printf '%s\n' "$WOLFRAM_MACHINE_ID" > /etc/machine-id
+        mkdir -p /var/lib/dbus
+        cp /etc/machine-id /var/lib/dbus/machine-id
+
+        if [ -n "$WOLFRAM_MATHPASS_B64" ]; then
+          installation="$(ls -d /usr/local/Wolfram/*/*/ 2>/dev/null | head -n 1 || true)"
+          if [ -z "$installation" ]; then
+            echo "::error title=Wolfram license::No Wolfram installation under /usr/local/Wolfram to put the mathpass in."
+            exit 1
+          fi
+          mkdir -p "${installation}Configuration/Licensing"
+          printf '%s' "$WOLFRAM_MATHPASS_B64" | base64 -d > "${installation}Configuration/Licensing/mathpass"
+          echo "License: mathpass in ${installation}Configuration/Licensing"
+        elif [ -n "$RECURSOR_ENTITLEMENT" ]; then
+          [[ "$RECURSOR_ENTITLEMENT" != *$'\n'* && "$RECURSOR_ENTITLEMENT" != *$'\r'* ]] || { echo '::error::The entitlement ID must be one line.'; exit 1; }
+          export WOLFRAMSCRIPT_ENTITLEMENTID="$RECURSOR_ENTITLEMENT"
+          printf 'WOLFRAMSCRIPT_ENTITLEMENTID=%s\n' "$WOLFRAMSCRIPT_ENTITLEMENTID" >> "$GITHUB_ENV"
+          echo "License: on-demand entitlement"
+        else
+          echo "::error title=Missing Wolfram license::Neither WOLFRAM_MATHPASS_B64 nor WOLFRAMSCRIPT_ENTITLEMENTID is set. Add one as a repository secret; see docs/workflows.md."
+          show_identity
+          exit 1
+        fi
+
         # Wolfram symbols must reach the kernel literally.
         # shellcheck disable=SC2016
-        wolframscript -code '
+        if ! wolframscript -code '
           If[! TrueQ[15 <= $VersionNumber < 16] || $SystemID =!= "Linux-x86-64", Print[{$Version, $SystemID}]; Exit[1]];
-          Print[$Version, " | ", $SystemID];'
+          Print["Wolfram Engine ", $Version, " | ", $SystemID, " | license type: ", $LicenseType, " | expires: ", $LicenseExpirationDate,
+            " | machine name: ", $MachineName, " | MathID: ", $MachineID];'; then
+          echo "::error title=Wolfram license refused::The kernel did not start. With a mathpass, check that it is in date and issued for the machine name and MathID printed below. With an entitlement, check its expiry, kernel count and service credits."
+          show_identity
+          exit 1
+        fi
 
     - name: Install the verified MathlibLink release
       shell: bash
