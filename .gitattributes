@@ -1,2 +1,7 @@
 # Keep Wolfram's native notebook formatting.
 *.nb -whitespace
+
+# The coding guides are kept as received.
+docs/coding-guides/WOLFRAMCODINGGUIDE.md -whitespace
+docs/coding-guides/WOLFRAMVISUALIZATION.md -whitespace
+docs/coding-guides/MANIPULATEFUNCTIONCREATION.md -whitespace
