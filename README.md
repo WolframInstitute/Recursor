@@ -90,20 +90,9 @@ for setup details.
 
 Run [`CheckRecursorProofs[]`](https://www.wolframcloud.com/obj/wolframinstitute/Recursor/#ref/CheckRecursorProofs) to build and check the packaged Lean proofs.
 
-## Documentation
+## Notes and measurements
 
-- [Guides and function reference](https://www.wolframcloud.com/obj/wolframinstitute/Recursor/#guide/Recursor).
 - [Computational walkthrough](notebooks/RecursorWalkthrough-01.nb) — runnable Input cells with saved results.
-- [Language semantics](https://www.wolframcloud.com/obj/wolframinstitute/Recursor/#tutorial/LanguageSemantics) — syntax, scope and evaluation.
-- [Formal verification](https://www.wolframcloud.com/obj/wolframinstitute/Recursor/#tutorial/FormalVerification) — checked statements and their scope.
-- [Evolving lambda expressions](https://www.wolframcloud.com/obj/wolframinstitute/Recursor/#tutorial/EvolvingLambdaExpressions) — candidate programs, finite fitness and portable lambda terms.
-- [Universal computation](https://www.wolframcloud.com/obj/wolframinstitute/Recursor/#tutorial/UniversalComputation) — counter machines and the checked universality theorem.
-- [Arithmetic patterns](https://www.wolframcloud.com/obj/wolframinstitute/Recursor/#tutorial/ArithmeticPatterns) — recurrences, binary digits and residues.
-- [Halting and budgets](https://www.wolframcloud.com/obj/wolframinstitute/Recursor/#tutorial/HaltingAndBudgets) — trajectories and finite observation.
-- [Lambda reductions](https://www.wolframcloud.com/obj/wolframinstitute/Recursor/#tutorial/VisualizingLambdaCompilation) — compiled terms and reduction graphs.
-- [Evolutionary experiments](https://www.wolframcloud.com/obj/wolframinstitute/Recursor/#tutorial/EvolutionaryExperiments) — mutation, search and ancestry.
-- [Synthesizing sequence programs](docs/en/Tutorials/SynthesizingSequences.md) — enumeration, recurrences, exact solving and composed loops from terms, tested on terms kept aside.
-- [OEIS benchmark](docs/en/Tutorials/MeasuringOEISSequenceDiscovery.md) — measured fits, training curves and held-out predictions using WolframInstitute/OEIS data.
 - [OEIS corpus experiment v2](docs/notes/OEISCorpusExperimentV2.md) — synthesis over 283,167 sequences.
 - [Synthesis and evolution on OEIS sequences](docs/notes/OEISSynthesisAndEvolution.md) — `SynthesizeRecursor` measured on sequences it was not tuned on, beside evolutionary searches on the same terms.
 
